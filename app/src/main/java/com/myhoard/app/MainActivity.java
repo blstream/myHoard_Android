@@ -21,6 +21,7 @@ import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
@@ -95,5 +96,6 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
     @Override
     public void OnFragmentClick() {
         CollectionsListFragment.fillGridView();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 }
