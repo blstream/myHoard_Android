@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MyHoard</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="noentries">Add a new collection in the upper right corner</string>
+    <string name="collection_name">Collection name:</string>
+    <string name="collection_avatar">Avatar:</string>
+    <string name="collection_description">Description:</string>
+    <string name="collection_add">ADD COLLECTION</string>
+    <string name="action_new_collection">New Collection</string>
+    <string name="required_name_collection">Required collection name</string>
+    <string name="menu_delete">Delete</string>
+    <string name="menu_edit">Edit</string>
+
+</resources>
