@@ -15,6 +15,7 @@
 
 package com.myhoard.app.fragments;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -49,6 +50,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
     private ImageButton ibCollectionAvatar;
     private Button bCollectionAdd;
     private static int RESULT_LOAD_IMAGE = 1;
+    OnFragmentClickListener mListener;
 
     public CollectionFragment(Context context){
         this.context = context;
@@ -90,6 +92,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                     getActivity().getContentResolver()
                             .insert(DataStorage.Collections.CONTENT_URI, values);
 
+                    mListener.OnFragmentClick();
                     getFragmentManager().popBackStackImmediate();
                 }
                 break;
@@ -131,4 +134,15 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
 
         }
     }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentClickListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement listeners!");
+        }
+    }
+
 }

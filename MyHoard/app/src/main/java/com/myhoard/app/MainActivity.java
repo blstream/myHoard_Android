@@ -24,8 +24,9 @@ import android.view.View;
 
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
+import com.myhoard.app.fragments.OnFragmentClickListener;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements OnFragmentClickListener {
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int EDIT_ID = Menu.FIRST + 2;
 
@@ -91,5 +92,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-
+    @Override
+    public void OnFragmentClick() {
+        CollectionsListFragment.fillGridView();
+    }
 }

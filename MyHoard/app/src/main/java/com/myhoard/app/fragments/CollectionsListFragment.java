@@ -31,8 +31,8 @@ import com.myhoard.app.images.ImageAdapter;
  * Created by Rafał Soudani on 20/02/2014
  */
 public class CollectionsListFragment extends Fragment {
-    private GridView gridView;
-    private Context context;
+    private static GridView gridView;
+    private static Context context;
 
     public CollectionsListFragment(Context context) {
         this.context = context;
@@ -60,7 +60,7 @@ public class CollectionsListFragment extends Fragment {
         fillGridView();
     }
 
-    public void fillGridView() {
+    public static void fillGridView() {
         gridView.setAdapter(new ImageAdapter(context));
     }
 }
