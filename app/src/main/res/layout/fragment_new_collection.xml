@@ -91,12 +91,17 @@
         </LinearLayout>
     </ScrollView>
 
-    <Button
-        android:id="@+id/bCollectionAdd"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/collection_add"
-        android:padding="5dp"
-        android:layout_margin="15dp"
-        android:layout_gravity="center|top" />
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dp"
+        android:background="#f0f0f0">
+
+        <Button
+            android:id="@+id/bCollectionAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/collection_add" />
+    </FrameLayout>
 </FrameLayout>

@@ -16,6 +16,8 @@
 package com.myhoard.app;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -27,6 +29,8 @@ import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.OnFragmentClickListener;
 
+import java.util.List;
+
 public class MainActivity extends ActionBarActivity implements OnFragmentClickListener {
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int EDIT_ID = Menu.FIRST + 2;
@@ -36,12 +40,24 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        FragmentManager fm = getSupportFragmentManager();
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new CollectionsListFragment(this), "Main")
+            fm.beginTransaction()
+                    .add(R.id.container, new CollectionsListFragment(), "Main")
                     .commit();
-        } //TODO: orientation change
+        } else {
+            fm.beginTransaction()
+                    .replace(R.id.container,
+                            fm.findFragmentByTag(savedInstanceState.getString("fragment")))
+                    .commit();
+        }
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("fragment", getVisibleFragmentTag());
     }
 
     @Override
@@ -59,11 +75,12 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_new_collection:
+                if (!getVisibleFragmentTag().equals("NewCollection")){
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.container, new CollectionFragment(this), "NewCollection")
+                        .replace(R.id.container, new CollectionFragment(), "NewCollection")
                         .addToBackStack("NewCollection")
                         .commit();
-
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -75,8 +92,8 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0, DELETE_ID, 0, R.string.menu_delete);
-        menu.add(0, EDIT_ID, 1, R.string.menu_edit);
+        menu.add(0, EDIT_ID, 0, R.string.menu_edit);
+        menu.add(0, DELETE_ID, 1, R.string.menu_delete);
     }
 
     @Override
@@ -97,5 +114,15 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
     public void OnFragmentClick() {
         CollectionsListFragment.fillGridView();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    }
+
+    public String getVisibleFragmentTag(){
+        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
+        List<Fragment> fragments = fragmentManager.getFragments();
+        for(Fragment fragment : fragments){
+            if(fragment != null && fragment.isVisible())
+                return fragment.getTag();
+        }
+        throw new IllegalStateException("There is no active fragment");
     }
 }

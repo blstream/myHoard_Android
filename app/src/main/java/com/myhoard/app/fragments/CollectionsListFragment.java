@@ -34,13 +34,10 @@ public class CollectionsListFragment extends Fragment {
     private static GridView gridView;
     private static Context context;
 
-    public CollectionsListFragment(Context context) {
-        this.context = context;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        context = getActivity();
         return inflater.inflate(R.layout.fragment_collections_list, container, false);
     }
 
@@ -63,4 +60,6 @@ public class CollectionsListFragment extends Fragment {
     public static void fillGridView() {
         gridView.setAdapter(new ImageAdapter(context));
     }
+
+
 }

@@ -52,13 +52,10 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
     private static int RESULT_LOAD_IMAGE = 1;
     OnFragmentClickListener mListener;
 
-    public CollectionFragment(Context context){
-        this.context = context;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+        context = getActivity();
         final View v = inflater.inflate(R.layout.fragment_new_collection, container, false);
 
         etCollectionName = (EditText) v.findViewById(R.id.etCollectionName);
@@ -67,6 +64,12 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
         ibCollectionAvatar = (ImageButton) v.findViewById(R.id.ibCollectionAvatar);
         bCollectionAdd.setOnClickListener(this);
         ibCollectionAvatar.setOnClickListener(this);
+
+        if (savedInstanceState!=null){
+            mImgPath = savedInstanceState.getString("imgPath");
+            BitmapWorkerTask task = new BitmapWorkerTask(ibCollectionAvatar, context);
+            task.execute(mImgPath);
+        }
 
         if (this.getTag().equals("EditCollection")){
             //TODO: edit collection
@@ -145,4 +148,9 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("imgPath", mImgPath);
+    }
 }
