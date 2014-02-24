@@ -16,16 +16,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <provider
-            android:authorities="com.myhoard.app.provider"
             android:name="com.myhoard.app.provider.DataProvider"
+            android:authorities="com.myhoard.app.provider"
             android:exported="false"
-            android:multiprocess="true">
+            android:multiprocess="true" >
         </provider>
 
-        </application>
+        <activity
+            android:name="com.myhoard.app.LoginActivity"
+            android:label="@string/title_activity_login" >
+        </activity>
+        <activity
+            android:name="com.myhoard.app.RegisterActivity"
+            android:label="@string/title_activity_register" >
+        </activity>
+    </application>
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-
 
 </manifest>

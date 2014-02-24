@@ -13,5 +13,14 @@
     <string name="required_name_collection">Required collection name</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_edit">Edit</string>
-
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="Login">Login</string>
+    <string name="Email">Email</string>
+    <string name="Password">Password</string>
+    <string name="Register">Register</string>
+    <string name="title_activity_register">RegisterActivity</string>
+    <string name="Registration_form">Registration form</string>
+    <string name="terms_of_use">terms of use</string>
+    <string name="Accept_of_terms">I read and accept terms of use</string>
+    <string name="blabla">blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla</string>
 </resources>

@@ -14,4 +14,13 @@
         android:icon="@drawable/ic_action_new"
         android:orderInCategory="50"
         app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_login"
+        android:title="Login"
+        android:icon="@drawable/ic_action_phone"
+        android:orderInCategory="10"
+        app:showAsAction="ifRoom|withText" />
+
+
+
 </menu>
