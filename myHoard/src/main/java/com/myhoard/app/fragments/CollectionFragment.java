@@ -24,6 +24,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,124 +39,138 @@ import com.myhoard.app.R;
 import com.myhoard.app.images.BitmapWorkerTask;
 import com.myhoard.app.provider.DataStorage;
 
-import java.util.Calendar;
-
 /**
  * Created by Rafał Soudani on 20.02.2014
  */
-public class CollectionFragment extends Fragment implements View.OnClickListener {
+public class CollectionFragment extends Fragment implements View.OnClickListener,
+        LoaderManager.LoaderCallbacks<Cursor>{
 
-	private Context context;
+    private Context context;
 
-	private String mName, mImgPath, mDescription;
+    private String mImgPath;
 
-	private EditText etCollectionName, etCollectionDescription;
-	private ImageButton ibCollectionAvatar;
-	private Button bCollectionAdd;
-	private static int RESULT_LOAD_IMAGE = 1;
-	OnFragmentClickListener mListener;
+    private EditText etCollectionName, etCollectionDescription;
+    private ImageButton ibCollectionAvatar;
+    private static int RESULT_LOAD_IMAGE = 1;
+    OnFragmentClickListener mListener;
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		context = getActivity();
-		final View v = inflater.inflate(R.layout.fragment_new_collection, container, false);
+        context = getActivity();
+        final View v = inflater.inflate(R.layout.fragment_new_collection, container, false);
 
-		etCollectionName = (EditText) v.findViewById(R.id.etCollectionName);
-		etCollectionDescription = (EditText) v.findViewById(R.id.etCollectionDescription);
-		bCollectionAdd = (Button) v.findViewById(R.id.bCollectionAdd);
-		ibCollectionAvatar = (ImageButton) v.findViewById(R.id.ibCollectionAvatar);
-		bCollectionAdd.setOnClickListener(this);
-		ibCollectionAvatar.setOnClickListener(this);
+        etCollectionName = (EditText) v.findViewById(R.id.etCollectionName);
+        etCollectionDescription = (EditText) v.findViewById(R.id.etCollectionDescription);
+        Button mBCollectionAdd = (Button) v.findViewById(R.id.bCollectionAdd);
+        ibCollectionAvatar = (ImageButton) v.findViewById(R.id.ibCollectionAvatar);
+        mBCollectionAdd.setOnClickListener(this);
+        ibCollectionAvatar.setOnClickListener(this);
 
-		if (savedInstanceState != null) {
-			mImgPath = savedInstanceState.getString("imgPath");
-			BitmapWorkerTask task = new BitmapWorkerTask(ibCollectionAvatar, context);
-			task.execute(mImgPath);
-		}
+        if (savedInstanceState != null) {
+            mImgPath = savedInstanceState.getString("imgPath");
+            BitmapWorkerTask task = new BitmapWorkerTask(ibCollectionAvatar, context);
+            task.execute(mImgPath);
+        }
 
-		if (this.getTag().equals("EditCollection")) {
-			//TODO: edit collection
-		}
+        //noinspection StatementWithEmptyBody
+        if (this.getTag().equals("EditCollection")) {
+            //TODO: edit collection
+        }
 
-		return v;
-	}
+        return v;
+    }
 
-	@Override
-	public void onClick(View view) {
-		switch (view.getId()) {
-		case R.id.bCollectionAdd:
-			if (TextUtils.isEmpty(etCollectionName.getText())) {
-				Toast.makeText(getActivity(), getString(R.string.required_name_collection),
-						Toast.LENGTH_SHORT).show();
-			} else {
-				mName = etCollectionName.getText().toString();
-				mDescription = etCollectionDescription.getText().toString();
-				ContentValues values = new ContentValues();
-				values.put(DataStorage.Collections.NAME, mName);
-				values.put(DataStorage.Collections.DESCRIPTION, mDescription);
-				values.put(DataStorage.Collections.AVATAR_FILE_NAME, mImgPath);
-                values.put(DataStorage.Collections.CREATED_DATE, Calendar.getInstance().getTime().getTime());
-				getActivity().getContentResolver()
-						.insert(DataStorage.Collections.CONTENT_URI, values);
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.bCollectionAdd:
+                if (TextUtils.isEmpty(etCollectionName.getText())) {
+                    Toast.makeText(getActivity(), getString(R.string.required_name_collection),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    String mName;
+                    mName = etCollectionName.getText().toString();
+                    String mDescription;
+                    mDescription = etCollectionDescription.getText().toString();
+                    ContentValues values = new ContentValues();
+                    values.put(DataStorage.Collections.NAME, mName);
+                    values.put(DataStorage.Collections.DESCRIPTION, mDescription);
+                    values.put(DataStorage.Collections.AVATAR_FILE_NAME, mImgPath);
+                    getActivity().getContentResolver()
+                            .insert(DataStorage.Collections.CONTENT_URI, values);
 
-				mListener.OnFragmentClick();
-				getFragmentManager().popBackStackImmediate();
-			}
-			break;
+                    mListener.OnFragmentClick();
+                    getFragmentManager().popBackStackImmediate();
+                }
+                break;
 
-		case R.id.ibCollectionAvatar:
-			Intent i = new Intent(
-					Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-			startActivityForResult(i, RESULT_LOAD_IMAGE);
-			break;
+            case R.id.ibCollectionAvatar:
+                Intent i = new Intent(
+                        Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i, RESULT_LOAD_IMAGE);
+                break;
 
-		}
-	}
+        }
+    }
 
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == RESULT_LOAD_IMAGE && resultCode == getActivity().RESULT_OK && data != null) {
-			Uri selectedImage = data.getData();
-			String[] filePathColumn = {MediaStore.Images.Media.DATA};
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RESULT_LOAD_IMAGE && resultCode == getActivity().RESULT_OK && data != null) {
+            Uri uri = data.getData();
+            String[] projection = {MediaStore.Images.Media.DATA};
 
-	        /* FIXME nie pobieramy danych w wątku głównym, trzeba skorzystać z mechanizmu LoaderCallbacks http://developer.android.com/training/load-data-background/setup-loader.html#Extend */
-			Cursor cursor = getActivity().getContentResolver().query(selectedImage,
-					filePathColumn, null, null, null);
-			cursor.moveToFirst();
+            Bundle args = new Bundle();
+            args.putString("Uri", uri.toString());
+            args.putStringArray("Projection", projection);
 
-			int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-			mImgPath = cursor.getString(columnIndex);
+            getLoaderManager().restartLoader(0, args, this);
 
-			String[] imgPathColumn = {MediaStore.Images.Media.DATA};
-			cursor = getActivity().getContentResolver().query(selectedImage,
-					imgPathColumn, null, null, null);
-			cursor.moveToFirst();
+        }
+    }
 
-			int imgColumnIndex = cursor.getColumnIndex(filePathColumn[0]);
-			mImgPath = cursor.getString(imgColumnIndex);
-			cursor.close();
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentClickListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement listeners!");
+        }
+    }
 
-			BitmapWorkerTask task = new BitmapWorkerTask(ibCollectionAvatar, context);
-			task.execute(mImgPath);
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("imgPath", mImgPath);
+    }
 
-		}
-	}
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		try {
-			mListener = (OnFragmentClickListener) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString() + " must implement listeners!");
-		}
-	}
+        Uri uri = Uri.parse(args.getString("Uri"));
+        String[] projection = args.getStringArray("Projection");
 
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putString("imgPath", mImgPath);
-	}
+        return new CursorLoader(context, uri, projection, null, null, null);
+
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+
+        cursor.moveToFirst();
+
+        int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+        mImgPath = cursor.getString(columnIndex);
+
+        BitmapWorkerTask task = new BitmapWorkerTask(ibCollectionAvatar, context);
+        task.execute(mImgPath);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
 }
