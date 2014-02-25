@@ -5,8 +5,8 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
-
-import com.myhoard.app.provider.DataStorage.*;
+import com.myhoard.app.provider.DataStorage.Collections;
+import com.myhoard.app.provider.DataStorage.Elements;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +15,7 @@ public class DataProvider extends ContentProvider {
 
 	// Constants used by the Uri matcher to choose an action based on the pattern of the incoming URI
 	public static final int COLLECTIONS = 1;
-    public static final int ELEMENTS = 2;
+	public static final int ELEMENTS = 2;
 
 	private List<DatabaseTable> tables;
 
@@ -31,14 +31,14 @@ public class DataProvider extends ContentProvider {
 		// Creates and initializes the URI matcher
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI(DataStorage.AUTHORITY, Collections.TABLE_NAME, COLLECTIONS);
-        uriMatcher.addURI(DataStorage.AUTHORITY, Elements.TABLE_NAME, ELEMENTS);
+		uriMatcher.addURI(DataStorage.AUTHORITY, Elements.TABLE_NAME, ELEMENTS);
 	}
 
 	@Override
 	public boolean onCreate() {
-		tables = new LinkedList<DatabaseTable>();
+		tables = new LinkedList<>();
 		tables.add(new CollectionsTable(getContext(), COLLECTIONS));
-        tables.add(new ElementsTable(getContext(), ELEMENTS));
+		tables.add(new ElementsTable(getContext(), ELEMENTS));
 
 		// Creates a new helper object. Note that the database itself isn't opened until
 		// something tries to access it, and it's only created if it doesn't already exist.

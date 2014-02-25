@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.myhoard.app.images;
+package com.myhoard.app.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

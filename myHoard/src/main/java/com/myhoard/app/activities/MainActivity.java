@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.myhoard.app;
+package com.myhoard.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,8 +25,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
+import com.myhoard.app.R;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.OnFragmentClickListener;

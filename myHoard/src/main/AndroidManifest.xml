@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.myhoard.app.MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,11 +25,11 @@
         </provider>
 
         <activity
-            android:name="com.myhoard.app.LoginActivity"
+            android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login" >
         </activity>
         <activity
-            android:name="com.myhoard.app.RegisterActivity"
+            android:name=".activities.RegisterActivity"
             android:label="@string/title_activity_register" >
         </activity>
     </application>

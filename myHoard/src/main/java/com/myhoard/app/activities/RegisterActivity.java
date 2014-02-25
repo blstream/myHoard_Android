@@ -1,4 +1,4 @@
-package com.myhoard.app;
+package com.myhoard.app.activities;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.myhoard.app.R;
 import com.myhoard.app.fragments.TermsFragment;
 
 public class RegisterActivity extends ActionBarActivity {
