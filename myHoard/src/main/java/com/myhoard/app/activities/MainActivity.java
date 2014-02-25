@@ -35,8 +35,7 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements OnFragmentClickListener {
     private static final int DELETE_ID = Menu.FIRST + 1;
-   private static final int EDIT_ID = Menu.FIRST + 2;
-    private static final int LOGIN_ID= Menu.FIRST + 3;
+    private static final int EDIT_ID = Menu.FIRST + 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,18 +83,15 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
                         .addToBackStack("NewCollection")
                         .commit();
                 }
-
+            break;
             case R.id.action_login:
                 Intent intent = new Intent(MainActivity.this,LoginActivity.class);
                 startActivity(intent);
-
-
-
-        return true;
+            break;
         default:
         return super.onOptionsItemSelected(item);
         }
-
+        return true;
     }
 
     @Override
@@ -104,7 +100,6 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add(0, EDIT_ID, 0, R.string.menu_edit);
         menu.add(0, DELETE_ID, 1, R.string.menu_delete);
-        menu.add(0,LOGIN_ID,1,"Login");
     }
 
     @Override
@@ -116,8 +111,6 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
             case EDIT_ID:
                 //TODO: Edit collection
                 return true;
-
-
         }
         return super.onContextItemSelected(item);
     }
