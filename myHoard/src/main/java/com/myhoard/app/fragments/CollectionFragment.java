@@ -36,6 +36,8 @@ import com.myhoard.app.R;
 import com.myhoard.app.images.BitmapWorkerTask;
 import com.myhoard.app.provider.DataStorage;
 
+import java.util.Calendar;
+
 /**
  * Created by Rafał Soudani on 20.02.2014
  */
@@ -91,6 +93,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
 				values.put(DataStorage.Collections.NAME, mName);
 				values.put(DataStorage.Collections.DESCRIPTION, mDescription);
 				values.put(DataStorage.Collections.AVATAR_FILE_NAME, mImgPath);
+                values.put(DataStorage.Collections.CREATED_DATE, Calendar.getInstance().getTime().getTime());
 				getActivity().getContentResolver()
 						.insert(DataStorage.Collections.CONTENT_URI, values);
 

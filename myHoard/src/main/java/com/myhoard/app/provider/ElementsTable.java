@@ -33,6 +33,8 @@ public class ElementsTable extends DatabaseTable {
                 .append(Elements.DESCRIPTION + " TEXT, ")
                 .append(Elements.AVATAR_FILE_NAME + " TEXT, ")
                 .append(Elements.TAGS + " TEXT, ")
+                .append(Elements.CREATED_DATE + " NUMERIC, ")
+                .append(Elements.MODIFIED_DATE + " NUMERIC, ")
                 .append("FOREIGN KEY(" + Elements.COLLECTION_ID + ") REFERENCES " + Collections.TABLE_NAME + "(" + Collections._ID + "))");
         db.execSQL(sql.toString());
     }

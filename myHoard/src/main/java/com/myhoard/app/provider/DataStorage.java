@@ -46,6 +46,18 @@ public final class DataStorage {
          * <p>Type: TEXT</p>
          */
         public static final String TAGS = "tags";
+
+        /**
+         * Created date. Column name.
+         * <p>Type: TEXT</p>
+         */
+        public static final String CREATED_DATE = "createdDate";
+
+        /**
+         * Modified date. Column name.
+         * <p>Type: NUMERIC</p>
+         */
+        public static final String MODIFIED_DATE = "modifiedDate";
 	}
 
 	public static final class Collections implements BaseColumns, CollectionsColumns {
@@ -56,7 +68,9 @@ public final class DataStorage {
 				NAME,
 				DESCRIPTION,
 				AVATAR_FILE_NAME,
-                TAGS
+                TAGS,
+                CREATED_DATE,
+                MODIFIED_DATE
 		};
 
 		/**
@@ -101,6 +115,12 @@ public final class DataStorage {
         * <p>Type: TEXT</p>
         */
         public static final String CREATED_DATE = "createdDate";
+
+        /**
+         * Modified date. Column name.
+         * <p>Type: NUMERIC</p>
+         */
+        public static final String MODIFIED_DATE = "modifiedDate";
     }
 
     public static final class Elements implements BaseColumns, ElementsColumns {
@@ -112,7 +132,8 @@ public final class DataStorage {
                 DESCRIPTION,
                 AVATAR_FILE_NAME,
                 TAGS,
-                CREATED_DATE
+                CREATED_DATE,
+                MODIFIED_DATE
         };
     }
 }
