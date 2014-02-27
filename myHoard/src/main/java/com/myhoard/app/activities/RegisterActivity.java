@@ -1,5 +1,6 @@
 package com.myhoard.app.activities;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -24,15 +25,15 @@ import java.util.regex.Pattern;
 
 public class RegisterActivity extends ActionBarActivity {
 
-    private TextView terms;
+
     private EditText email_registry;
     private EditText password_registry;
     private Pattern pattern;
-    private Button registry_button;
     private Matcher matcher;
     private CheckBox checkBox_registry;
+    private static final String password_pattern = "^(?=.[a-z])(?=.[A-Z])(?=.\\d)(?=.[$@$!%?&])[A-Za-z\\d$@$!%?&]{5,}";
 
-    private static final String password_pattern = "( (?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{5,10} )";
+    // "( (?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{5,10} )";
 
             //
 
@@ -42,19 +43,12 @@ public class RegisterActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        terms = (TextView)findViewById(R.id.text_term);
+        TextView terms = (TextView)findViewById(R.id.text_term);
         email_registry = (EditText)findViewById(R.id.email_register);
         password_registry = (EditText)findViewById(R.id.password_register);
-        registry_button = (Button)findViewById(R.id.reg_button);
+        Button registry_button = (Button)findViewById(R.id.reg_button);
         checkBox_registry = (CheckBox)findViewById(R.id.checkBox_reg);
         pattern = pattern.compile(password_pattern);
-
-
-
-
-
-
-
 
         registry_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,11 +57,6 @@ public class RegisterActivity extends ActionBarActivity {
             validation();
             }
         });
-
-
-
-
-
 
         terms.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,28 +69,6 @@ public class RegisterActivity extends ActionBarActivity {
 
     }
 
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.register, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     public void validation()
     {
         matcher = pattern.matcher(password_registry.getText().toString());
@@ -109,23 +76,37 @@ public class RegisterActivity extends ActionBarActivity {
         if (matcher.matches() == true && email_registry.length() > 0 && checkBox_registry.isChecked() )
         {
 
-            Toast.makeText(getApplicationContext(),"z" + matcher.matches() ,Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),getString(R.string.registration_succesfully),Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this,LoginActivity.class);
+            startActivity(intent);
         }
         else if (email_registry.length() == 0 && password_registry.length() == 0 )
         {
-            Toast.makeText(getApplicationContext(), "You cannot registry without login and password" ,Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.email_and_password_registration_empty) ,Toast.LENGTH_SHORT).show();
+        }
+        else if (email_registry.length() == 0 && !checkBox_registry.isChecked())
+        {
+            Toast.makeText(getApplicationContext(), getString(R.string.email_and_checkbox_registration_empty) ,Toast.LENGTH_SHORT).show();
+        }
+        else if (password_registry.length() == 0 && !checkBox_registry.isChecked())
+        {
+            Toast.makeText(getApplicationContext(), getString(R.string.password_and_checkbox_registration_empty) ,Toast.LENGTH_SHORT).show();
         }
         else if (email_registry.length() == 0 )
         {
-            Toast.makeText(getApplicationContext(), "Please write your email" ,Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.email_registration_empty) ,Toast.LENGTH_SHORT).show();
         }
         else if (password_registry.length() == 0)
         {
-            Toast.makeText(getApplicationContext(), "Please write your password" ,Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.password_registration_empty) ,Toast.LENGTH_SHORT).show();
         }
         else if (!checkBox_registry.isChecked())
         {
-            Toast.makeText(getApplicationContext(), "You have to accept the terms of use",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.checkbox_not_check_registration),Toast.LENGTH_SHORT).show();
+        }
+        if(!matcher.matches())
+        {
+            Toast.makeText(getApplicationContext(),getString(R.string.read_info_password),Toast.LENGTH_SHORT).show();
         }
 
 

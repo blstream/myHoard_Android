@@ -11,7 +11,8 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            android:weightSum="1">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -77,6 +78,13 @@
                 android:text="@string/Register"
                 android:id="@+id/reg_button"
                 android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/password_information"
+                android:id="@+id/textView4" />
 
         </LinearLayout>
     </RelativeLayout>

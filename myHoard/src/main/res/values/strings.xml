@@ -1,30 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">MyHoard</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="action_new_collection">New Collection</string>
     <string name="action_settings">Settings</string>
-    <string name="noentries">Add a new collection in the upper right corner</string>
-    <string name="collection_name">Collection name:</string>
+    <string name="Accept_of_terms">I read and accept terms of use</string>
+    <string name="app_name">MyHoard</string>
+    <string name="blabla">blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla</string>
+    <string name="checkbox_not_check_registration">You have to accept the terms of use</string>
+    <string name="collection_add">ADD COLLECTION</string>
     <string name="collection_avatar">Avatar:</string>
     <string name="collection_description">Description:</string>
-    <string name="collection_add">ADD COLLECTION</string>
-    <string name="action_new_collection">New Collection</string>
-    <string name="required_name_collection">Required collection name</string>
+    <string name="collection_name">Collection name:</string>
+    <string name="Email">Email</string>
+    <string name="email_and_checkbox_registration_empty">Please write your email and accept terms of use</string>
+    <string name="email_and_password_registration_empty">You cannot registry without login and password</string>
+    <string name="email_registration_empty">Please write your email</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="Login">Login</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_edit">Edit</string>
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="Login">Login</string>
-    <string name="Email">Email</string>
+    <string name="noentries">Add a new collection in the upper right corner</string>
     <string name="Password">Password</string>
+    <string name="password_and_checkbox_registration_empty">Please write you password and accept terms of use</string>
+    <string name="password_information">Password must contain at least 5 characters, least 1 number,both lower and uppercase letters and special characters</string>
+    <string name="password_registration_empty">Please write your password</string>
+    <string name="read_info_password">Please read information about creating password</string>
     <string name="Register">Register</string>
-    <string name="title_activity_register">RegisterActivity</string>
     <string name="Registration_form">Registration form</string>
-    <string name="terms_of_use">terms of use</string>
-    <string name="Accept_of_terms">I read and accept terms of use</string>
-    <string name="blabla">blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla</string>
-    <string name="title_activity_log">Log</string>
     <string name="Registration_link">New to myHoard? Register here</string>
+    <string name="registration_succesfully">Registration succesfully</string>
     <string name="Remember_me">Remember me</string>
+    <string name="required_name_collection">Required collection name</string>
+    <string name="terms_of_use">terms of use</string>
+    <string name="title_activity_log">Log</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
+
+
 
 </resources>

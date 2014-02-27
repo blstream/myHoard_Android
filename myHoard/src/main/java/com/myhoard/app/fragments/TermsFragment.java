@@ -21,7 +21,7 @@ public class TermsFragment extends DialogFragment {
 
 
 
-        getDialog().setTitle("terms of use");
+        getDialog().setTitle(getString(R.string.terms_of_use));
         View v = inflater.inflate(R.layout.terms_fragment_activity,container,false);
         text = (TextView)v.findViewById(R.id.text_term_fragment);
 
