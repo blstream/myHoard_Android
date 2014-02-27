@@ -9,7 +9,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	public static final String DB_NAME = "mh.db";
-	private static final int DB_VERSION = 3;
+	private static final int DB_VERSION = 4;
 
 	private List<DatabaseTable> tables;
 

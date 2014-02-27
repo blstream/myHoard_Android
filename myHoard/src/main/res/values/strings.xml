@@ -23,4 +23,8 @@
     <string name="terms_of_use">terms of use</string>
     <string name="Accept_of_terms">I read and accept terms of use</string>
     <string name="blabla">blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla</string>
+    <string name="title_activity_log">Log</string>
+    <string name="Registration_link">New to myHoard? Register here</string>
+    <string name="Remember_me">Remember me</string>
+
 </resources>
