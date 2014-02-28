@@ -18,7 +18,10 @@ package com.myhoard.app.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -33,6 +36,8 @@ import com.myhoard.app.images.ImageAdapter;
 public class CollectionsListFragment extends Fragment {
     private static GridView gridView;
     private static Context context;
+    private static final int DELETE_ID = Menu.FIRST + 1;
+    private static final int EDIT_ID = Menu.FIRST + 2;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -59,6 +64,37 @@ public class CollectionsListFragment extends Fragment {
 
     public static void fillGridView() {
         gridView.setAdapter(new ImageAdapter(context));
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0, EDIT_ID, 0, R.string.menu_edit);
+        //menu.add(0, DELETE_ID, 1, R.string.menu_delete);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case DELETE_ID:
+                //TODO: Delete collection
+                return true;
+            case EDIT_ID:
+                //TODO: Edit collection
+                AdapterView.AdapterContextMenuInfo info =
+                        (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                Bundle args = new Bundle();
+                if (info != null) {
+                    args.putLong("id", info.id);
+                }
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, new CollectionFragment(args), "EditCollection")
+                        .addToBackStack("EditCollection")
+                        .commit();
+                return true;
+        }
+        return super.onContextItemSelected(item);
     }
 
 

@@ -20,10 +20,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.myhoard.app.R;
@@ -34,8 +32,6 @@ import com.myhoard.app.fragments.OnFragmentClickListener;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements OnFragmentClickListener {
-    private static final int DELETE_ID = Menu.FIRST + 1;
-    private static final int EDIT_ID = Menu.FIRST + 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,28 +89,6 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
         }
         return true;
     }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0, EDIT_ID, 0, R.string.menu_edit);
-        menu.add(0, DELETE_ID, 1, R.string.menu_delete);
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case DELETE_ID:
-                //TODO: Delete collection
-                return true;
-            case EDIT_ID:
-                //TODO: Edit collection
-                return true;
-        }
-        return super.onContextItemSelected(item);
-    }
-
 
     @Override
     public void OnFragmentClick() {

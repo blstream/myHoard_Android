@@ -62,8 +62,10 @@ public class ImageAdapter extends BaseAdapter {
                     d = resizeImage(d);
                 }
                 String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
-                cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME));
-                items.add(new Item(name, d));
+                Long id = cursor.getLong(cursor.getColumnIndex(DataStorage.Collections._ID));
+                /*cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME));*/
+
+                items.add(new Item(name, d, id));
 
             } while (cursor.moveToNext());
         }
@@ -91,7 +93,7 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int i) {
-        return 0;
+        return items.get(i).getId();
     }
 
     @Override
@@ -127,12 +129,18 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     private class Item {
-        final String name;
-        final Drawable drawableId;
+        private final String name;
+        private final Drawable drawableId;
+        private final Long id;
 
-        Item(String name, Drawable drawableId) {
+        Item(String name, Drawable drawableId, Long id) {
             this.name = name;
             this.drawableId = drawableId;
+            this.id = id;
+        }
+
+        public Long getId(){
+            return id;
         }
     }
 }
