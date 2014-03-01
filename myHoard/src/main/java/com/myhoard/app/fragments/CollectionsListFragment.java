@@ -18,6 +18,7 @@ package com.myhoard.app.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -54,7 +55,27 @@ public class CollectionsListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 //TODO: show items in collection
+                /* Testing for collection element - author Sebastian Peryt
+                // Create new fragment and transaction
+                Fragment newFragment = new ElementFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
+                // Add arguments to opened fragment element
+                Bundle b = new Bundle();
+                // put name
+                b.putString("name","NAME");
+                // put description
+                b.putString("description","DESCRIPTION");
+                newFragment.setArguments(b);
+
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack
+                transaction.replace(R.id.container, newFragment);
+                transaction.addToBackStack(null);
+
+                // Commit the transaction
+                transaction.commit();
+                */
             }
         });
         registerForContextMenu(gridView);

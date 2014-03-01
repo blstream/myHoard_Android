@@ -37,6 +37,13 @@
     <string name="title_activity_register">RegisterActivity</string>
     <string name="collection_edit">EDIT COLLECTION</string>
     <string name="collection_edited">COLLECTION EDITED</string>
+    <string name="camera_picker">Camera</string>
+    <string name="gallery_picker">Gallery</string>
+    <string name="element_name">Name:</string>
+    <string name="element_description">Description:</string>
+    <string name="element_photo">Photo:</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
 
 
 </resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="actions_on_picker">
+        <item>@string/camera_picker</item>
+        <item>@string/gallery_picker</item>
+    </string-array>
+
+</resources>
