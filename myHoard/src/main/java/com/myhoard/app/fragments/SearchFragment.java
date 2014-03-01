@@ -37,6 +37,9 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_search,container,false);
         mContext = getActivity();
+        mSearchList = (ListView) v.findViewById(R.id.listViewSearch);
+        ImageButton imButtonSearch = (ImageButton) v.findViewById(R.id.imageButtonSearch);
+        imButtonSearch.setOnClickListener(this);
         assert v != null;
         mSearchText = (EditText) v.findViewById(R.id.editTextSearch);
         //Use text changed listener by mSearchTest EditText object to find elements in real time of search
@@ -58,6 +61,11 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
                     //Restart to load data when user query is changed
                     getLoaderManager().restartLoader(0,args,SearchFragment.this);
                 }
+                else{
+                    mCollectionElementName.clear();
+                    mCollectionElementAvatar.clear();
+                    mSearchList.setAdapter(new ImageAdapterList(mContext,mCollectionElementName,mCollectionElementAvatar));
+                }
             }
 
             @Override
@@ -65,9 +73,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
 
             }
         });
-        mSearchList = (ListView) v.findViewById(R.id.listViewSearch);
-        ImageButton imButtonSearch = (ImageButton) v.findViewById(R.id.imageButtonSearch);
-        imButtonSearch.setOnClickListener(this);
         //addElement();
         return v;
     }
@@ -76,8 +81,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
         for(int i=0;i<5;i++){
             ContentValues values = new ContentValues();
             values.put(DataStorage.Elements.COLLECTION_ID, "2");
-            values.put(DataStorage.Elements.NAME, "piotr"+i);
-            values.put(DataStorage.Elements.DESCRIPTION, "piotr "+i);
+            values.put(DataStorage.Elements.NAME, "PIOTR"+i);
+            values.put(DataStorage.Elements.DESCRIPTION, "XXX "+i);
             getActivity().getContentResolver().insert(DataStorage.Elements.CONTENT_URI, values);
         }
     }
