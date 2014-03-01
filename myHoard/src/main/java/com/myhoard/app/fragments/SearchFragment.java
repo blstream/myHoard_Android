@@ -37,10 +37,10 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_search,container,false);
         mContext = getActivity();
+        assert v != null;
         mSearchList = (ListView) v.findViewById(R.id.listViewSearch);
         ImageButton imButtonSearch = (ImageButton) v.findViewById(R.id.imageButtonSearch);
         imButtonSearch.setOnClickListener(this);
-        assert v != null;
         mSearchText = (EditText) v.findViewById(R.id.editTextSearch);
         //Use text changed listener by mSearchTest EditText object to find elements in real time of search
         mSearchText.addTextChangedListener(new TextWatcher() {
@@ -53,6 +53,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
                 assert mSearchText.getText() != null;
                 String collectionElementText = mSearchText.getText().toString();
                 collectionElementText = collectionElementText.trim();
+                collectionElementText = collectionElementText.toLowerCase();
                 //Search element when text to search have more than two characters
                 if(collectionElementText.length()>=2){
                     Bundle args = new Bundle();
