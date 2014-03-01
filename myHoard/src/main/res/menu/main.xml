@@ -21,6 +21,11 @@
         android:orderInCategory="10"
         app:showAsAction="ifRoom|withText" />
 
-
+    <item
+        android:id="@+id/action_search"
+        android:title="@string/action_search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:orderInCategory="5"
+        app:showAsAction="ifRoom|withText"/>
 
 </menu>
