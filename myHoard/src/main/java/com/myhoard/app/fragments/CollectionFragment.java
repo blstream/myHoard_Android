@@ -172,7 +172,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("imgPath", mImgPath);
-        outState.putLong("editId", mEditId);
+        if (mEditId!=null) outState.putLong("editId", mEditId);
     }
 
     @Override
