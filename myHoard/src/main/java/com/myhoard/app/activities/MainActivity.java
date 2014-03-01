@@ -28,6 +28,7 @@ import com.myhoard.app.R;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.OnFragmentClickListener;
+import com.myhoard.app.fragments.SearchFragment;
 
 import java.util.List;
 
@@ -83,6 +84,14 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
             case R.id.action_login:
                 Intent intent = new Intent(MainActivity.this,LoginActivity.class);
                 startActivity(intent);
+            break;
+            case R.id.action_search:
+                if (!getVisibleFragmentTag().equals("Search")){
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, new SearchFragment(), "Search")
+                            .addToBackStack("Search")
+                            .commit();
+                }
             break;
         default:
         return super.onOptionsItemSelected(item);
