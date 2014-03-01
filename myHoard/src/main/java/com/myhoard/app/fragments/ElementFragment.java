@@ -2,6 +2,7 @@ package com.myhoard.app.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +21,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.myhoard.app.R;
+import com.myhoard.app.provider.DataStorage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,15 +42,24 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
     private static final boolean D = false;
     // END - Debug mode variables
 
-    static final int REQUEST_IMAGE_CAPTURE = 2;
-    static final int SELECT_PICTURE = 1;
+    public static final String ID = "elementId";
+    public static final String NAME = "elementName";
+    public static final String DESCRIPTION = "elementDescription";
+    public static final String COLLECTION_ID = "elementCollectionId";
+    public static final String CREATED_DATE = "elementCreatedDate";
+    public static final String MODIFIED_DATE = "elementModifiedDate";
+    public static final String TAGS = "elementTags";
+
+    private static final int REQUEST_IMAGE_CAPTURE = 2;
+    private static final int SELECT_PICTURE = 1;
 
     private TextView tvElementName, tvElementDescription;
     private EditText etElementName, etElementDescription;
     private String sCurrentPhotoPath;
+    private String sImagePath;
     private ImageView ivElementPhoto;
     private Button btSave, btCancel;
-    private int id;
+    private int elementId;
 
     private Context context;
 
@@ -68,7 +81,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
         btSave.setOnClickListener(this);
         btCancel.setOnClickListener(this);
 
-        id = -1;
+        elementId = -1;
 
         Bundle b = getArguments();
         if(b!=null) {
@@ -76,9 +89,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
             etElementDescription.setVisibility(View.INVISIBLE);
             tvElementName.setVisibility(View.VISIBLE);
             tvElementDescription.setVisibility(View.VISIBLE);
-            tvElementName.setText(b.getString("name"));
-            tvElementDescription.setText(b.getString("description"));
-            //id = b.getInt("id");
+            tvElementName.setText(b.getString(ElementFragment.NAME));
+            tvElementDescription.setText(b.getString(ElementFragment.DESCRIPTION));
+            //elementId = b.getInt(ElementFragment.ID);
             ivElementPhoto.setOnClickListener(this);
         } else {
             ivElementPhoto.setOnClickListener(this);
@@ -91,8 +104,40 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.saveBtn:
-                //TODO Zapis
-                getFragmentManager().popBackStackImmediate();
+                // TODO in some production
+                if (TextUtils.isEmpty(etElementName.getText()) && tvElementName.getText() == null) {
+                    Toast.makeText(getActivity(), getString(R.string.required_name_element),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    String sName = "", sDescription = "";
+                    if (etElementName.getText() != null) {
+                        sName = etElementName.getText().toString();
+                    }
+                    if (etElementDescription.getText() != null) {
+                        sDescription = etElementDescription.getText().toString();
+                    }
+                    ContentValues values = new ContentValues();
+                    values.put(DataStorage.Elements.NAME, sName);
+                    values.put(DataStorage.Elements.DESCRIPTION, sDescription);
+                    values.put(DataStorage.Elements.AVATAR_FILE_NAME, sImagePath);
+                    // TODO fix after explanation
+                    //values.put(DataStorage.Elements.COLLECTION_ID);
+                    //values.put(DataStorage.Elements.CREATED_DATE);
+                    //values.put(DataStorage.Elements.MODIFIED_DATE);
+                    //values.put(DataStorage.Elements.TAGS);
+                    if (elementId!=-1) {
+                        Toast.makeText(getActivity(),context.getString(R.string
+                                .element_edited), Toast.LENGTH_SHORT).show();
+                        getActivity().getContentResolver()
+                                .update(DataStorage.Elements.CONTENT_URI, values,
+                                        DataStorage.Elements._ID + " = " + elementId, null);
+                    } else {
+                        getActivity().getContentResolver()
+                                .insert(DataStorage.Elements.CONTENT_URI, values);
+
+                    }
+                    getFragmentManager().popBackStackImmediate();
+                }
                 break;
             case R.id.cancelBtn:
                 getFragmentManager().popBackStackImmediate();
@@ -109,18 +154,17 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
         {
             Bitmap bitmap = null;
             Uri imgUri = null;
-            String imagePath;
             switch(requestCode)
             {
                 case REQUEST_IMAGE_CAPTURE:
                     // if image was added by photo
                     imgUri = galleryAddPic();
-                    imagePath = imgUri.getPath();
+                    sImagePath = imgUri.getPath();
                     break;
                 case SELECT_PICTURE:
                     // if image was added from gallery
                     imgUri = data.getData();
-                    imagePath = imgUri.getPath();
+                    sImagePath = imgUri.getPath();
                     break;
                 default:
                     return;
@@ -135,7 +179,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
                 e.printStackTrace();
             }
             ivElementPhoto.setImageBitmap(bitmap);
-            //tvElementName.setText(imagePath);
         } else {
             // Response is wrong - visible only in debug mode
             if(D) Log.d(TAG,"Response != " + Activity.RESULT_OK);

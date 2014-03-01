@@ -55,18 +55,21 @@ public class CollectionsListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 //TODO: show items in collection
-                /* Testing for collection element - author Sebastian Peryt
+                /*
+                //Testing for collection element - author Sebastian Peryt
                 // Create new fragment and transaction
                 Fragment newFragment = new ElementFragment();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
+                // DO NOT USE - Testing
                 // Add arguments to opened fragment element
                 Bundle b = new Bundle();
                 // put name
-                b.putString("name","NAME");
+                b.putString(ElementFragment.NAME,"NAME");
                 // put description
-                b.putString("description","DESCRIPTION");
+                b.putString(ElementFragment.DESCRIPTION,"DESCRIPTION");
                 newFragment.setArguments(b);
+                // FROM THIS POINT -> USE
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack
