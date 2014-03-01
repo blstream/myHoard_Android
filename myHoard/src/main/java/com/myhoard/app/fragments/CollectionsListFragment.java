@@ -15,10 +15,11 @@
 
 package com.myhoard.app.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,6 +31,7 @@ import android.widget.GridView;
 
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapter;
+import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Rafał Soudani on 20/02/2014
@@ -95,19 +97,34 @@ public class CollectionsListFragment extends Fragment {
                                     ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add(0, EDIT_ID, 0, R.string.menu_edit);
-        //menu.add(0, DELETE_ID, 1, R.string.menu_delete);
+        menu.add(0, DELETE_ID, 1, R.string.menu_delete);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        final AdapterView.AdapterContextMenuInfo info =
+                (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case DELETE_ID:
-                //TODO: Delete collection
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("DELETE COLLECTION")
+                        .setMessage("Are you sure you want do delete collection?")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (info != null) {
+                                    getActivity().getContentResolver().delete(
+                                            DataStorage.Collections.CONTENT_URI,
+                                            DataStorage.Collections._ID + " = " + info.id, null);
+                                    fillGridView();
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Do nothing.
+                    }
+                }).show();
                 return true;
             case EDIT_ID:
-                //TODO: Edit collection
-                AdapterView.AdapterContextMenuInfo info =
-                        (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
                 Bundle args = new Bundle();
                 if (info != null) {
                     args.putLong("id", info.id);
