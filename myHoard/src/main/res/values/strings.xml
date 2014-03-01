@@ -46,6 +46,7 @@
     <string name="cancel">Cancel</string>
     <string name="element_edited">ELEMENT EDITED</string>
     <string name="required_name_element">Required element name</string>
+    <string name="name_already_exist">NAME ALREADY EXIST</string>
 
 
 </resources>
