@@ -1,6 +1,5 @@
 package com.myhoard.app.fragments;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -74,18 +73,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
 
             }
         });
-        //addElement();
         return v;
-    }
-
-    public void addElement(){
-        for(int i=0;i<5;i++){
-            ContentValues values = new ContentValues();
-            values.put(DataStorage.Elements.COLLECTION_ID, "2");
-            values.put(DataStorage.Elements.NAME, "PIOTR"+i);
-            values.put(DataStorage.Elements.DESCRIPTION, "XXX "+i);
-            getActivity().getContentResolver().insert(DataStorage.Elements.CONTENT_URI, values);
-        }
     }
 
     @Override
@@ -96,6 +84,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
                 assert mSearchText.getText() != null;
                 String collectionElementText = mSearchText.getText().toString();
                 collectionElementText = collectionElementText.trim();
+                collectionElementText = collectionElementText.toLowerCase();
                 //Search element when text to search have more than two characters
                 if(collectionElementText.length()>=2){
                     Bundle args = new Bundle();
