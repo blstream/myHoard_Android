@@ -103,6 +103,8 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
 
     @Override
     public void OnFragmentClick() {
+        getSupportFragmentManager().beginTransaction().replace(R.id.container,
+                collectionsListFragment, "Main").addToBackStack("Main").commit();
         collectionsListFragment.fillGridView();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
