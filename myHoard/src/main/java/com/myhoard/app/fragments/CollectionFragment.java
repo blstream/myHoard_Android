@@ -139,8 +139,8 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                                 .insert(DataStorage.Collections.CONTENT_URI, values);
 
                     }
-                    mListener.OnFragmentClick();
                     getFragmentManager().popBackStackImmediate();
+                    mListener.OnFragmentClick();
                 }
                 break;
 

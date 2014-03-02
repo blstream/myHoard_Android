@@ -33,16 +33,18 @@ import com.myhoard.app.fragments.SearchFragment;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements OnFragmentClickListener {
+    CollectionsListFragment collectionsListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        collectionsListFragment = new CollectionsListFragment();
         FragmentManager fm = getSupportFragmentManager();
         if (savedInstanceState == null) {
             fm.beginTransaction()
-                    .add(R.id.container, new CollectionsListFragment(), "Main")
+                    .add(R.id.container, collectionsListFragment, "Main")
                     .commit();
         } else {
             fm.beginTransaction()
@@ -101,7 +103,7 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
 
     @Override
     public void OnFragmentClick() {
-        CollectionsListFragment.fillGridView();
+        collectionsListFragment.fillGridView();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 

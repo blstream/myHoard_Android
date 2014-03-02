@@ -15,7 +15,6 @@
 
 package com.myhoard.app.images;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -43,14 +42,10 @@ public class ImageAdapter extends BaseAdapter {
     private List<Item> items = new ArrayList<>();
     private LayoutInflater inflater;
 
-    public ImageAdapter(Context c) {
+    public ImageAdapter(Context c, Cursor cursor) {
         context = c;
         inflater = LayoutInflater.from(c);
 
-        final ContentResolver resolver = c.getContentResolver();
-        final String[] projection = DataStorage.Collections.TABLE_COLUMNS;
-        Cursor cursor = resolver.query(DataStorage.Collections.CONTENT_URI, projection, null, null,
-                DataStorage.Collections.NAME);
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
@@ -63,7 +58,6 @@ public class ImageAdapter extends BaseAdapter {
                 }
                 String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
                 Long id = cursor.getLong(cursor.getColumnIndex(DataStorage.Collections._ID));
-                /*cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME));*/
 
                 items.add(new Item(name, d, id));
 

@@ -18,8 +18,12 @@ package com.myhoard.app.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,9 +40,11 @@ import com.myhoard.app.provider.DataStorage;
 /**
  * Created by Rafał Soudani on 20/02/2014
  */
-public class CollectionsListFragment extends Fragment {
-    private static GridView gridView;
-    private static Context context;
+public class CollectionsListFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>{
+
+    private  GridView gridView;
+    private  Context context;
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int EDIT_ID = Menu.FIRST + 2;
 
@@ -88,8 +94,8 @@ public class CollectionsListFragment extends Fragment {
         fillGridView();
     }
 
-    public static void fillGridView() {
-        gridView.setAdapter(new ImageAdapter(context));
+    public void fillGridView() {
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -139,4 +145,20 @@ public class CollectionsListFragment extends Fragment {
     }
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        final String[] projection = DataStorage.Collections.TABLE_COLUMNS;
+        return new CursorLoader(context, DataStorage.Collections.CONTENT_URI,
+                projection, null, null, DataStorage.Collections.NAME);
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Cursor cursor) {
+        gridView.setAdapter(new ImageAdapter(context, cursor));
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+
+    }
 }
