@@ -69,6 +69,7 @@ public class RegisterActivity extends ActionBarActivity {
 
     }
 
+	// FIXME zamiast Toast popatrz na metodę EditText.setError()
     public void validation()
     {
         matcher = pattern.matcher(password_registry.getText().toString());

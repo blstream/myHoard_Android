@@ -365,6 +365,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                             continue; //can edit if name not changed
                         }
                     }
+	            // FIXME tu jest błąd! zanim odczytasz wartość z cursora to sprawdź czy nie jest isAfterLast(), poza tym spróbuj zamienić pętlę do while na while
                     mNamesList.add(cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME)));
                 }
                 while (cursor.moveToNext());

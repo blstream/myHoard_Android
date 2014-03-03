@@ -154,11 +154,12 @@ public class CollectionsListFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(Loader loader, Cursor cursor) {
+	    // FIXME powinno być adapter.swapCursor(...)
         gridView.setAdapter(new ImageAdapter(context, cursor));
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
-
+// FIXME powinno być adapter.swapCursor(null)
     }
 }

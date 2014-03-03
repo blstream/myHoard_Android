@@ -73,6 +73,7 @@ public class LoginActivity extends ActionBarActivity {
                     startActivity(intent);
 
                 } else {
+	                // FIXME popatrz na metodę EditText.setError()
                     Toast.makeText(getApplicationContext(), "Wrong login or password", Toast.LENGTH_SHORT).show();
                 }
             }

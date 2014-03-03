@@ -36,6 +36,37 @@ import java.util.List;
 /**
  * Created by Rafał Soudani on 20.02.2014
  */
+
+// FIXME adapter powinien być dziedziczony po CursorAdapter
+/* FIXME na przykład tak powinno to wyglądać:
+  public class MyAdapter extends CursorAdapter {
+
+		public MyAdapter(Context context, Cursor c, int flags) {
+			super(context, c, flags);
+		}
+
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			LayoutInflater i = LayoutInflater.from(context);
+			View v = i.inflate(R.layout.my_row, null);
+			bindView(v, context, cursor);
+			return v;
+		}
+
+		@Override
+		public void bindView(View view, final Context context, final Cursor cursor) {
+			if (cursor.isClosed()) return;
+
+			TextView date = (TextView) view.findViewById(R.id.date);
+			ImageView image = (ImageView) view.findViewById(R.id.image);
+
+			MyCalendar cal = new MyCalendar();
+			cal.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(DatabaseHelper.KEY_DATE)));
+			date.setText(cal.formatDate(getActivity()));
+			...
+		}
+	}
+ */
 public class ImageAdapter extends BaseAdapter {
 
     Context context;
