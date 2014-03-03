@@ -117,9 +117,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
                         sDescription = etElementDescription.getText().toString();
                     }
                     ContentValues values = new ContentValues();
-                    values.put(DataStorage.Elements.NAME, sName);
-                    values.put(DataStorage.Elements.DESCRIPTION, sDescription);
-                    values.put(DataStorage.Elements.AVATAR_FILE_NAME, sImagePath);
+                    values.put(DataStorage.Items.NAME, sName);
+                    values.put(DataStorage.Items.DESCRIPTION, sDescription);
+                    //values.put(DataStorage.Items.AVATAR_FILE_NAME, sImagePath);
                     // TODO fix after explanation
                     //values.put(DataStorage.Elements.COLLECTION_ID);
                     //values.put(DataStorage.Elements.CREATED_DATE);
@@ -129,11 +129,11 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
                         Toast.makeText(getActivity(),context.getString(R.string
                                 .element_edited), Toast.LENGTH_SHORT).show();
                         getActivity().getContentResolver()
-                                .update(DataStorage.Elements.CONTENT_URI, values,
-                                        DataStorage.Elements._ID + " = " + elementId, null);
+                                .update(DataStorage.Items.CONTENT_URI, values,
+                                        DataStorage.Items._ID + " = " + elementId, null);
                     } else {
                         getActivity().getContentResolver()
-                                .insert(DataStorage.Elements.CONTENT_URI, values);
+                                .insert(DataStorage.Items.CONTENT_URI, values);
 
                     }
                     getFragmentManager().popBackStackImmediate();

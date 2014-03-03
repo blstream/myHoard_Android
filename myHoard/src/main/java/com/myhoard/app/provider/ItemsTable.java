@@ -15,27 +15,27 @@ import com.myhoard.app.provider.DataStorage.*;
 /**
  * Created by gohilukk on 19.02.14.
  */
-public class ElementsTable extends DatabaseTable {
+public class ItemsTable extends DatabaseTable {
 
     private static final String DEFAULT_SORT_ORDER = Collections.NAME + " DESC";
 
-    public ElementsTable (Context context, int code) {
-        super(context, code, Elements.TABLE_NAME);
+    public ItemsTable (Context context, int code) {
+        super(context, code, Items.TABLE_NAME);
     }
 
     @Override
     public void createTable(SQLiteDatabase db) {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE " + tableName + " (")
-                .append(Elements._ID + " INTEGER PRIMARY KEY, ")
-                .append(Elements.COLLECTION_ID + " INTEGER, ")
-                .append(Elements.NAME + " TEXT, ")
-                .append(Elements.DESCRIPTION + " TEXT, ")
-                .append(Elements.AVATAR_FILE_NAME + " TEXT, ")
-                .append(Elements.TAGS + " TEXT, ")
-                .append(Elements.CREATED_DATE + " NUMERIC, ")
-                .append(Elements.MODIFIED_DATE + " NUMERIC, ")
-                .append("FOREIGN KEY(" + Elements.COLLECTION_ID + ") REFERENCES " + Collections.TABLE_NAME + "(" + Collections._ID + "))");
+                .append(Items._ID + " INTEGER PRIMARY KEY, ")
+                .append(Items.ID_COLLECTION + " INTEGER, ")
+                .append(Items.NAME + " TEXT, ")
+                .append(Items.DESCRIPTION + " TEXT, ")
+                .append(Items.LOCATION_LAT + " REAL, ")
+                .append(Items.LOCATION_LNG + " REAL, ")
+                .append(Items.CREATED_DATE + " NUMERIC, ")
+                .append(Items.MODIFIED_DATE + " NUMERIC, ")
+                .append("FOREIGN KEY(" + Items.ID_COLLECTION + ") REFERENCES " + Collections.TABLE_NAME + "(" + Collections._ID + "))");
         db.execSQL(sql.toString());
     }
 
@@ -75,7 +75,7 @@ public class ElementsTable extends DatabaseTable {
         );
 
         // Tells the Cursor what URI to watch, so it knows when its source data changes
-        c.setNotificationUri(getContext().getContentResolver(), Elements.CONTENT_URI);
+        c.setNotificationUri(getContext().getContentResolver(), Items.CONTENT_URI);
         return c;
     }
 
@@ -102,7 +102,7 @@ public class ElementsTable extends DatabaseTable {
         // If the insert succeeded, the row ID exists.
         if (rowId > 0) {
             // Creates a URI with the note ID pattern and the new row ID appended to it.
-            Uri uri = ContentUris.withAppendedId(Elements.CONTENT_URI, rowId);
+            Uri uri = ContentUris.withAppendedId(Items.CONTENT_URI, rowId);
 
             // Notifies observers registered against this provider that the data changed.
             getContext().getContentResolver().notifyChange(uri, null);
@@ -110,6 +110,6 @@ public class ElementsTable extends DatabaseTable {
         }
 
         // If the insert didn't succeed, then the rowID is <= 0. Throws an exception.
-        throw new SQLException("Failed to insert row into " + Elements.CONTENT_URI);
+        throw new SQLException("Failed to insert row into " + Items.CONTENT_URI);
     }
 }

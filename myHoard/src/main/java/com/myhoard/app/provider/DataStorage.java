@@ -58,6 +58,13 @@ public final class DataStorage {
          * <p>Type: NUMERIC</p>
          */
         public static final String MODIFIED_DATE = "modifiedDate";
+
+        /**
+         * URL to server. Column name.
+         * <p>Type: TEXT</p>
+         */
+        public static final String SERVERS = "servers";
+
 	}
 
 	public static final class Collections implements BaseColumns, CollectionsColumns {
@@ -70,7 +77,8 @@ public final class DataStorage {
 				AVATAR_FILE_NAME,
                 TAGS,
                 CREATED_DATE,
-                MODIFIED_DATE
+                MODIFIED_DATE,
+                SERVERS
 		};
 
 		/**
@@ -79,12 +87,12 @@ public final class DataStorage {
 		private Collections() {}
 	}
 
-    protected interface ElementsColumns {
+    protected interface ItemsColumns {
        /**
         * Collection id to which the element belongs. Column name.
         * <p>Type: INTEGER</p>
         */
-        public static final String COLLECTION_ID = "collectionId";
+        public static final String ID_COLLECTION = "idCollection";
 
         /**
          * Name. Column name.
@@ -99,20 +107,20 @@ public final class DataStorage {
         public static final String DESCRIPTION = "description";
 
         /**
-         * Item picture filename. Column name.
-         * <p>Type: TEXT</p>
+         * Location latitude. Column name.
+         * <p>Type: REAL</p>
          */
-        public static final String AVATAR_FILE_NAME = "avatarFileName";
+        public static final String LOCATION_LAT = "locationLat";
 
         /**
-         * Tags. Column name.
-         * <p>Type: TEXT</p>
+         * Location longitude. Column name.
+         * <p>Type: REAL</p>
          */
-        public static final String TAGS = "tags";
+        public static final String LOCATION_LNG = "locationLng";
 
         /**
         * Created date. Column name.
-        * <p>Type: TEXT</p>
+        * <p>Type: NUMERIC</p>
         */
         public static final String CREATED_DATE = "createdDate";
 
@@ -123,17 +131,56 @@ public final class DataStorage {
         public static final String MODIFIED_DATE = "modifiedDate";
     }
 
-    public static final class Elements implements BaseColumns, ElementsColumns {
-        public static final String TABLE_NAME = "elements";
+    public static final class Items implements BaseColumns, ItemsColumns {
+        public static final String TABLE_NAME = "items";
         public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
         public static final String[] TABLE_COLUMNS = new String[] {
-                COLLECTION_ID,
+                _ID,
+                ID_COLLECTION,
                 NAME,
                 DESCRIPTION,
-                AVATAR_FILE_NAME,
-                TAGS,
+                LOCATION_LAT,
+                LOCATION_LNG,
                 CREATED_DATE,
                 MODIFIED_DATE
+        };
+    }
+
+    protected interface MediaColumns {
+        /**
+         * Item id to which the media belongs. Column name.
+         * <p>Type: INTEGER</p>
+         */
+        public static final String ID_ITEM = "idItem";
+
+        /**
+         * Name. Column name.
+         * <p>Type: BOOLEAN</p>
+         */
+        public static final String AVATAR = "avatar";
+
+        /**
+         * Media picture filename with full path. Column name.
+         * <p>Type: TEXT</p>
+         */
+        public static final String FILE_NAME = "fileName";
+
+        /**
+         * Created date of media. Column name.
+         * <p>Type: NUMERIC</p>
+         */
+        public static final String CREATED_DATE = "createdDate";
+    }
+
+    public static final class Media implements BaseColumns, MediaColumns {
+        public static final String TABLE_NAME = "media";
+        public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
+        public static final String[] TABLE_COLUMNS = new String[] {
+                _ID,
+                ID_ITEM,
+                AVATAR,
+                FILE_NAME,
+                CREATED_DATE,
         };
     }
 }

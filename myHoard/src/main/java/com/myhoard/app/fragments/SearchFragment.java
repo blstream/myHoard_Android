@@ -105,9 +105,11 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
         //Get text to search from args object
         String collectionElementText = args.getString("fragmentElement");
         //CursorLoader used to get data from user query
-        return new CursorLoader(mContext,DataStorage.Elements.CONTENT_URI,
-                new String [] {DataStorage.Elements.NAME,DataStorage.Elements.AVATAR_FILE_NAME},
-                DataStorage.Elements.DESCRIPTION+" LIKE '%"+collectionElementText+"%' OR "+DataStorage.Elements.NAME+" = '"+collectionElementText+"'",null,null);
+        //TODO fix after Database upload
+        /*return new CursorLoader(mContext,DataStorage.Items.CONTENT_URI,
+                new String [] {DataStorage.Items.NAME,DataStorage.Items.AVATAR_FILE_NAME},
+                DataStorage.Items.DESCRIPTION+" LIKE '%"+collectionElementText+"%' OR "+DataStorage.Items.NAME+" = '"+collectionElementText+"'",null,null);*/
+        return null;
     }
 
     @Override

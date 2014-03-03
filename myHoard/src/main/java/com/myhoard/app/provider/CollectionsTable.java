@@ -30,7 +30,8 @@ public class CollectionsTable extends DatabaseTable {
 				.append(Collections.AVATAR_FILE_NAME + " TEXT, ")
                 .append(Collections.TAGS + " TEXT, ")
                 .append(Collections.CREATED_DATE + " NUMERIC, ")
-                .append(Collections.MODIFIED_DATE + " NUMERIC)");
+                .append(Collections.MODIFIED_DATE + " NUMERIC, ")
+                .append(Collections.SERVERS + " TEXT)");
 		db.execSQL(sql.toString());
 	}
 
