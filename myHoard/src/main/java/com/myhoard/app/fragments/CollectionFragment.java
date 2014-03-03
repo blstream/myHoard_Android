@@ -16,6 +16,8 @@
 package com.myhoard.app.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -32,9 +34,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
@@ -42,6 +49,8 @@ import com.myhoard.app.images.BitmapWorkerTask;
 import com.myhoard.app.provider.DataStorage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Rafał Soudani on 20.02.2014
@@ -53,14 +62,20 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
     private static final int LOAD_IMAGE = 10;
     private static final int LOAD_DATA_FOR_EDIT = 20;
     private static final int LOAD_NAMES = 30;
+    private static final int RESULT_LOAD_IMAGE = 1;
 
     private Long mEditId;
+    private LinearLayout tagsLayout;
     private String mImgPath, mName, mDescription;
     private ArrayList<String> mNamesList = new ArrayList<>();
+    private List<String> mTagsAvaible = new ArrayList<>();
+    private String mTags = "";
+
 
     private EditText etCollectionName, etCollectionDescription;
     private ImageButton ibCollectionAvatar;
-    private static int RESULT_LOAD_IMAGE = 1;
+    private Button bAddTag, bDeleteTag;
+
     OnFragmentClickListener mListener;
 
     public CollectionFragment() {
@@ -81,23 +96,34 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
         getLoaderManager().initLoader(LOAD_NAMES, null, this);
 
         if (v != null) {
+            tagsLayout = (LinearLayout) v.findViewById(R.id.layoutCollectionTags);
             etCollectionName = (EditText) v.findViewById(R.id.etCollectionName);
             etCollectionDescription = (EditText) v.findViewById(R.id.etCollectionDescription);
             Button mBCollectionAdd = (Button) v.findViewById(R.id.bCollectionAdd);
             ibCollectionAvatar = (ImageButton) v.findViewById(R.id.ibCollectionAvatar);
             mBCollectionAdd.setOnClickListener(this);
             ibCollectionAvatar.setOnClickListener(this);
+            bAddTag = (Button) v.findViewById(R.id.bCollectionTagAdd);
+            bAddTag.setOnClickListener(this);
+            bDeleteTag = (Button) v.findViewById(R.id.bCollectionTagDelete);
+            bDeleteTag.setOnClickListener(this);
+
+            fillTags();
+
 
             if (this.getTag().equals("EditCollection")) {
                 mBCollectionAdd.setText(context.getString(R.string.collection_edit));
             }
             if (savedInstanceState != null) {
                 mEditId = savedInstanceState.getLong("editId");
+                mTags = savedInstanceState.getString("tags");
+                getTags();
                 mImgPath = savedInstanceState.getString("imgPath");
                 BitmapWorkerTask task = new BitmapWorkerTask(ibCollectionAvatar, context);
                 task.execute(mImgPath);
             } else if (this.getTag().equals("EditCollection")) {
                 getLoaderManager().restartLoader(LOAD_DATA_FOR_EDIT, null, this);
+
             }
 
         }
@@ -105,41 +131,68 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
         return v;
     }
 
+    private void getTags() {
+        if (mTags != null) {
+            List<String> tags = Arrays.asList(mTags.split("\\s*,\\s*"));
+            for (String s : tags) {
+                if (!s.isEmpty()) {
+                    TextView tvTag = new TextView(context);
+                    tvTag.setText(s);
+                    tvTag.setPadding(10, 10, 10, 10);
+                    tagsLayout.addView(tvTag);
+                    mTagsAvaible.remove(s);
+                    bDeleteTag.setVisibility(View.VISIBLE);
+                }
+            }
+            if (mTagsAvaible.isEmpty()) bAddTag.setVisibility(View.GONE);
+
+        }
+    }
+
+    private void fillTags() {
+        mTagsAvaible.add("Zamki");
+        mTagsAvaible.add("Kapsle");
+        mTagsAvaible.add("Ludzie");
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bCollectionAdd:
-                if (TextUtils.isEmpty(etCollectionName.getText())) {
-                    Toast.makeText(getActivity(), getString(R.string.required_name_collection),
-                            Toast.LENGTH_SHORT).show();
-                } else if (mNamesList.contains(etCollectionName.getText().toString())) {
-                    Toast toast = Toast.makeText(getActivity(), getString(R.string.name_already_exist),
-                            Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
-                    toast.show();
-                } else {
-                    if (etCollectionName.getText() != null) {
-                        mName = etCollectionName.getText().toString();
-                    }
-                    if (etCollectionDescription.getText() != null) {
-                        mDescription = etCollectionDescription.getText().toString();
-                    }
-                    ContentValues values = new ContentValues();
-                    values.put(DataStorage.Collections.NAME, mName);
-                    values.put(DataStorage.Collections.DESCRIPTION, mDescription);
-                    values.put(DataStorage.Collections.AVATAR_FILE_NAME, mImgPath);
-                    if (this.getTag().equals("EditCollection")) {
-                        Toast.makeText(getActivity(), context.getString(R.string
-                                .collection_edited), Toast.LENGTH_LONG).show();
-                        getActivity().getContentResolver()
-                                .update(DataStorage.Collections.CONTENT_URI, values,
-                                        DataStorage.Collections._ID + " = " + mEditId, null);
+                if (etCollectionName.getText() != null) {
+                    if (TextUtils.isEmpty(etCollectionName.getText())) {
+                        Toast.makeText(getActivity(), getString(R.string.required_name_collection),
+                                Toast.LENGTH_SHORT).show();
+                    } else if (mNamesList.contains(etCollectionName.getText().toString())) {
+                        Toast toast = Toast.makeText(getActivity(), getString(R.string.name_already_exist),
+                                Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+                        toast.show();
                     } else {
-                        getActivity().getContentResolver()
-                                .insert(DataStorage.Collections.CONTENT_URI, values);
+                        if (etCollectionName.getText() != null) {
+                            mName = etCollectionName.getText().toString();
+                        }
+                        if (etCollectionDescription.getText() != null) {
+                            mDescription = etCollectionDescription.getText().toString();
+                        }
+                        ContentValues values = new ContentValues();
+                        values.put(DataStorage.Collections.NAME, mName);
+                        values.put(DataStorage.Collections.DESCRIPTION, mDescription);
+                        values.put(DataStorage.Collections.AVATAR_FILE_NAME, mImgPath);
+                        values.put(DataStorage.Collections.TAGS, mTags);
+                        if (this.getTag().equals("EditCollection")) {
+                            Toast.makeText(getActivity(), context.getString(R.string
+                                    .collection_edited), Toast.LENGTH_LONG).show();
+                            getActivity().getContentResolver()
+                                    .update(DataStorage.Collections.CONTENT_URI, values,
+                                            DataStorage.Collections._ID + " = " + mEditId, null);
+                        } else {
+                            getActivity().getContentResolver()
+                                    .insert(DataStorage.Collections.CONTENT_URI, values);
 
+                        }
+                        mListener.OnFragmentClick();
                     }
-                    mListener.OnFragmentClick();
                 }
                 break;
 
@@ -148,6 +201,68 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                         Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_IMAGE);
                 break;
+            case R.id.bCollectionTagAdd: {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle(context.getString(R.string.select_tag_to_add));
+
+                final ListView modeList = new ListView(context);
+                builder.setView(modeList);
+                final Dialog dialog = builder.create();
+                ArrayAdapter<String> modeAdapter = new ArrayAdapter<>(context,
+                        android.R.layout.simple_list_item_1, android.R.id.text1, mTagsAvaible);
+                modeList.setAdapter(modeAdapter);
+                modeList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View v, int i, long l) {
+                        TextView tvTag = new TextView(context);
+                        //noinspection ConstantConditions
+                        String item = ((TextView) v).getText().toString();
+                        tvTag.setText(item);
+                        tvTag.setPadding(10, 10, 10, 10);
+                        tagsLayout.addView(tvTag);
+                        mTagsAvaible.remove(item);
+                        mTags += item + ",";
+                        bDeleteTag.setVisibility(View.VISIBLE);
+                        if (mTagsAvaible.isEmpty()) bAddTag.setVisibility(View.GONE);
+                        dialog.dismiss();
+                    }
+                });
+
+                dialog.show();
+            }
+            break;
+
+            case R.id.bCollectionTagDelete:
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle(context.getString(R.string.select_tag_to_delete));
+
+                final ListView modeList = new ListView(context);
+                builder.setView(modeList);
+                final Dialog dialog = builder.create();
+                final List<String> tags = Arrays.asList(mTags.split("\\s*,\\s*"));
+                ArrayAdapter<String> modeAdapter = new ArrayAdapter<>(context,
+                        android.R.layout.simple_list_item_1, android.R.id.text1, tags);
+                modeList.setAdapter(modeAdapter);
+                modeList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View v, int i, long l) {
+                        //noinspection ConstantConditions
+                        String item = ((TextView) v).getText().toString();
+                        mTagsAvaible.add(item);
+                        mTags = "";
+                        for (String s : tags) {
+                            if (!s.equals(item)) mTags += s + " , ";
+                        }
+                        if (mTags.isEmpty()) bDeleteTag.setVisibility(View.GONE);
+                        bAddTag.setVisibility(View.VISIBLE);
+                        tagsLayout.removeAllViews();
+                        getTags();
+                        dialog.dismiss();
+                    }
+                });
+
+                dialog.show();
+
 
         }
     }
@@ -185,6 +300,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
         super.onSaveInstanceState(outState);
         outState.putString("imgPath", mImgPath);
         if (mEditId != null) outState.putLong("editId", mEditId);
+        outState.putString("tags", mTags);
     }
 
     @Override
@@ -226,6 +342,13 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                 etCollectionName.setText(mName);
                 mDescription = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.DESCRIPTION));
                 etCollectionDescription.setText(mDescription);
+                if (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TAGS)) != null) {
+                    mTags = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TAGS));
+                    getTags();
+                }
+                etCollectionDescription.setText(mDescription);
+
+
                 mImgPath = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME));
                 if (mImgPath != null) {
                     if (!mImgPath.isEmpty()) {
@@ -238,7 +361,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                 do {
                     if (mEditId != null) {
                         if (cursor.getLong(cursor.getColumnIndex(
-                                DataStorage.Collections._ID)) == mEditId){
+                                DataStorage.Collections._ID)) == mEditId) {
                             continue; //can edit if name not changed
                         }
                     }

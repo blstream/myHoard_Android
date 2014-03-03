@@ -95,7 +95,7 @@ public class CollectionsListFragment extends Fragment implements
     }
 
     public void fillGridView() {
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override
@@ -113,8 +113,8 @@ public class CollectionsListFragment extends Fragment implements
         switch (item.getItemId()) {
             case DELETE_ID:
                 new AlertDialog.Builder(getActivity())
-                        .setTitle("DELETE COLLECTION")
-                        .setMessage("Are you sure you want do delete collection?")
+                        .setTitle(context.getString(R.string.delete_colection_dialog_title))
+                        .setMessage(context.getString(R.string.delete_colection_dialog_message))
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (info != null) {
