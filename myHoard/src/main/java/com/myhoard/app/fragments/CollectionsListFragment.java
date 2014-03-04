@@ -45,6 +45,7 @@ public class CollectionsListFragment extends Fragment implements
 
     private  GridView gridView;
     private  Context context;
+    private ImageAdapter adapter;
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int EDIT_ID = Menu.FIRST + 2;
 
@@ -91,6 +92,7 @@ public class CollectionsListFragment extends Fragment implements
         });
         registerForContextMenu(gridView);
         gridView.setEmptyView(view.findViewById(R.id.tvEmpty));
+        adapter = new ImageAdapter(context, null);
         fillGridView();
     }
 
@@ -155,11 +157,14 @@ public class CollectionsListFragment extends Fragment implements
     @Override
     public void onLoadFinished(Loader loader, Cursor cursor) {
 	    // FIXME powinno być adapter.swapCursor(...)
-        gridView.setAdapter(new ImageAdapter(context, cursor));
+        //gridView.setAdapter(new ImageAdapter(context, cursor));
+        adapter.swapCursor(cursor);
+
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
 // FIXME powinno być adapter.swapCursor(null)
+        adapter.swapCursor(null);
     }
 }

@@ -23,7 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -67,40 +67,23 @@ import java.util.List;
 		}
 	}
  */
-public class ImageAdapter extends BaseAdapter {
+public class ImageAdapter extends CursorAdapter {
 
     Context context;
     private List<Item> items = new ArrayList<>();
     private LayoutInflater inflater;
 
-    public ImageAdapter(Context c, Cursor cursor) {
-        context = c;
-        inflater = LayoutInflater.from(c);
-
-
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                Drawable d;
-                if (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)) == null) {
-                    d = c.getResources().getDrawable(R.drawable.nophoto);
-                } else {
-                    d = new BitmapDrawable(c.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
-                    d = resizeImage(d);
-                }
-                String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
-                Long id = cursor.getLong(cursor.getColumnIndex(DataStorage.Collections._ID));
-
-                items.add(new Item(name, d, id));
-
-            } while (cursor.moveToNext());
-        }
-
+    public ImageAdapter(Context context, Cursor cursor) {
+        super(context, cursor, false);
+        this.context = context;
+        inflater = LayoutInflater.from(context);
     }
+
 
     //TODO: resizeImage() correctly
     private Drawable resizeImage(Drawable d) {
 
-        Bitmap bitmap = ((BitmapDrawable)d).getBitmap();
+        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
         Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
         return new BitmapDrawable(context.getResources(), bitmapResized);
 
@@ -153,6 +136,49 @@ public class ImageAdapter extends BaseAdapter {
         return v;
     }
 
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+        View v = inflater.inflate(R.layout.collection_griditem, viewGroup, false);
+        bindView(v, context, cursor);
+        return v;
+    }
+
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+        if (cursor.isClosed()) return;
+
+        Drawable d;
+        if (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)) == null) {
+            d = context.getResources().getDrawable(R.drawable.nophoto);
+        } else {
+            d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
+            d = resizeImage(d);
+        }
+        String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
+        /*Long id = cursor.getLong(cursor.getColumnIndex(DataStorage.Collections._ID));
+
+        items.add(new Item(name, d, id));*/
+
+
+        ImageView ivPicture = (ImageView) view.getTag(R.id.picture);
+        TextView tvName = (TextView) view.getTag(R.id.text);
+
+
+        ivPicture.setImageDrawable(d);
+        tvName.setText(name);
+
+
+/*        Item item = (Item) getItem(i);
+
+        if (ivPicture != null) {
+            ivPicture.setImageDrawable(item.drawableId);
+        }
+        if (name != null) {
+            tvName.setText(item.name);
+        }*/
+
+    }
+
     private class Item {
         private final String name;
         private final Drawable drawableId;
@@ -164,7 +190,7 @@ public class ImageAdapter extends BaseAdapter {
             this.id = id;
         }
 
-        public Long getId(){
+        public Long getId() {
             return id;
         }
     }
