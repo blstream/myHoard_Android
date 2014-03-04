@@ -50,6 +50,7 @@ import com.myhoard.app.provider.DataStorage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -180,6 +181,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                         values.put(DataStorage.Collections.DESCRIPTION, mDescription);
                         values.put(DataStorage.Collections.AVATAR_FILE_NAME, mImgPath);
                         values.put(DataStorage.Collections.TAGS, mTags);
+                        values.put(DataStorage.Collections.MODIFIED_DATE, Calendar.getInstance().getTime().getTime());
                         if (this.getTag().equals("EditCollection")) {
                             Toast.makeText(getActivity(), context.getString(R.string
                                     .collection_edited), Toast.LENGTH_LONG).show();
@@ -187,6 +189,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                                     .update(DataStorage.Collections.CONTENT_URI, values,
                                             DataStorage.Collections._ID + " = " + mEditId, null);
                         } else {
+                            values.put(DataStorage.Collections.CREATED_DATE, Calendar.getInstance().getTime().getTime());
                             getActivity().getContentResolver()
                                     .insert(DataStorage.Collections.CONTENT_URI, values);
 
@@ -358,17 +361,16 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                 }
                 break;
             case LOAD_NAMES:
-                do {
+                while (!cursor.isAfterLast()) {
                     if (mEditId != null) {
                         if (cursor.getLong(cursor.getColumnIndex(
                                 DataStorage.Collections._ID)) == mEditId) {
                             continue; //can edit if name not changed
                         }
                     }
-	            // FIXME tu jest błąd! zanim odczytasz wartość z cursora to sprawdź czy nie jest isAfterLast(), poza tym spróbuj zamienić pętlę do while na while
                     mNamesList.add(cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME)));
+                    cursor.moveToNext();
                 }
-                while (cursor.moveToNext());
 
         }
     }
