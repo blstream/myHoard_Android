@@ -92,7 +92,8 @@ public class CollectionsListFragment extends Fragment implements
         });
         registerForContextMenu(gridView);
         gridView.setEmptyView(view.findViewById(R.id.tvEmpty));
-        adapter = new ImageAdapter(context, null);
+        adapter = new ImageAdapter(context, null, 0);
+	    gridView.setAdapter(adapter);
         fillGridView();
     }
 

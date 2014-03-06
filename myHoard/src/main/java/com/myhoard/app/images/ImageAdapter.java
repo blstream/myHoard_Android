@@ -20,18 +20,14 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.myhoard.app.R;
 import com.myhoard.app.provider.DataStorage;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Rafał Soudani on 20.02.2014
@@ -69,103 +65,50 @@ import java.util.List;
  */
 public class ImageAdapter extends CursorAdapter {
 
-    Context context;
-    private List<Item> items = new ArrayList<>();
-    private LayoutInflater inflater;
+	public ImageAdapter(Context context, Cursor c, int flags) {
+		super(context, c, flags);
+	}
 
-    public ImageAdapter(Context context, Cursor cursor) {
-        super(context, cursor, false);
-        this.context = context;
-        inflater = LayoutInflater.from(context);
-    }
+	//TODO: resizeImage() correctly
+	private Drawable resizeImage(Context c, Drawable d) {
 
+		Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+		Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
+		return new BitmapDrawable(c.getResources(), bitmapResized);
 
-    //TODO: resizeImage() correctly
-    private Drawable resizeImage(Drawable d) {
+	}
 
-        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-        Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
-        return new BitmapDrawable(context.getResources(), bitmapResized);
+	@Override
+	public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+		LayoutInflater inflater = LayoutInflater.from(context);
+		View v = inflater.inflate(R.layout.collection_griditem, viewGroup, false);
+		bindView(v, context, cursor);
+		return v;
+	}
 
-    }
+	@Override
+	public void bindView(View view, Context context, Cursor cursor) {
+		if (cursor.isClosed()) return;
 
-    @Override
-    public int getCount() {
-        return items.size();
-    }
-
-    @Override
-    public Object getItem(int i) {
-        return items.get(i);
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return items.get(i).getId();
-    }
-
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        View v = view;
-        ImageView picture;
-        TextView name;
-
-        if (v == null) {
-            v = inflater.inflate(R.layout.collection_griditem, viewGroup, false);
-            if (v != null) {
-                v.setTag(R.id.picture, v.findViewById(R.id.picture));
-                v.setTag(R.id.text, v.findViewById(R.id.text));
-            }
-        }
-
-        if (v != null) {
-            picture = (ImageView) v.getTag(R.id.picture);
-            name = (TextView) v.getTag(R.id.text);
-
-            Item item = (Item) getItem(i);
-
-            if (picture != null) {
-                picture.setImageDrawable(item.drawableId);
-            }
-            if (name != null) {
-                name.setText(item.name);
-            }
-        }
-
-
-        return v;
-    }
-
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        View v = inflater.inflate(R.layout.collection_griditem, viewGroup, false);
-        bindView(v, context, cursor);
-        return v;
-    }
-
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        if (cursor.isClosed()) return;
-
-        Drawable d;
-        if (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)) == null) {
-            d = context.getResources().getDrawable(R.drawable.nophoto);
-        } else {
-            d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
-            d = resizeImage(d);
-        }
-        String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
-        /*Long id = cursor.getLong(cursor.getColumnIndex(DataStorage.Collections._ID));
+		Drawable d;
+		if (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)) == null) {
+			d = context.getResources().getDrawable(R.drawable.nophoto);
+		} else {
+			d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
+			d = resizeImage(context, d);
+		}
+		String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
+	/*Long id = cursor.getLong(cursor.getColumnIndex(DataStorage.Collections._ID));
 
         items.add(new Item(name, d, id));*/
 
 
-        ImageView ivPicture = (ImageView) view.getTag(R.id.picture);
-        TextView tvName = (TextView) view.getTag(R.id.text);
+		ImageView ivPicture = (ImageView) view.getTag(R.id.picture);
+		TextView tvName = (TextView) view.getTag(R.id.text);
 
-
-        ivPicture.setImageDrawable(d);
-        tvName.setText(name);
+//FIXME  leci NPE
+//		ivPicture.setImageDrawable(d);
+//		tvName.setText(name);
 
 
 /*        Item item = (Item) getItem(i);
@@ -177,21 +120,7 @@ public class ImageAdapter extends CursorAdapter {
             tvName.setText(item.name);
         }*/
 
-    }
+	}
 
-    private class Item {
-        private final String name;
-        private final Drawable drawableId;
-        private final Long id;
 
-        Item(String name, Drawable drawableId, Long id) {
-            this.name = name;
-            this.drawableId = drawableId;
-            this.id = id;
-        }
-
-        public Long getId() {
-            return id;
-        }
-    }
 }
