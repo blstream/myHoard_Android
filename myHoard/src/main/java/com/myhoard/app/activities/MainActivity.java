@@ -22,7 +22,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.WindowManager;
 
 import com.myhoard.app.R;
 import com.myhoard.app.fragments.CollectionFragment;
@@ -105,8 +104,6 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
     public void OnFragmentClick() {
         getSupportFragmentManager().beginTransaction().replace(R.id.container,
                 collectionsListFragment, "Main").addToBackStack("Main").commit();
-        collectionsListFragment.fillGridView();
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
     public String getVisibleFragmentTag(){

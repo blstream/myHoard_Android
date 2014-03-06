@@ -60,6 +60,13 @@ public class CollectionsListFragment extends Fragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         gridView = (GridView) view.findViewById(R.id.gridview);
+        gridView.setEmptyView(view.findViewById(R.id.tvEmpty));
+
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -91,10 +98,8 @@ public class CollectionsListFragment extends Fragment implements
             }
         });
         registerForContextMenu(gridView);
-        gridView.setEmptyView(view.findViewById(R.id.tvEmpty));
         adapter = new ImageAdapter(context, null, 0);
-	    gridView.setAdapter(adapter);
-        fillGridView();
+        gridView.setAdapter(adapter);
     }
 
     public void fillGridView() {
@@ -157,15 +162,18 @@ public class CollectionsListFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(Loader loader, Cursor cursor) {
-	    // FIXME powinno być adapter.swapCursor(...)
-        //gridView.setAdapter(new ImageAdapter(context, cursor));
         adapter.swapCursor(cursor);
 
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
-// FIXME powinno być adapter.swapCursor(null)
         adapter.swapCursor(null);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fillGridView();
     }
 }

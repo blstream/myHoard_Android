@@ -33,36 +33,6 @@ import com.myhoard.app.provider.DataStorage;
  * Created by Rafał Soudani on 20.02.2014
  */
 
-// FIXME adapter powinien być dziedziczony po CursorAdapter
-/* FIXME na przykład tak powinno to wyglądać:
-  public class MyAdapter extends CursorAdapter {
-
-		public MyAdapter(Context context, Cursor c, int flags) {
-			super(context, c, flags);
-		}
-
-		@Override
-		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			LayoutInflater i = LayoutInflater.from(context);
-			View v = i.inflate(R.layout.my_row, null);
-			bindView(v, context, cursor);
-			return v;
-		}
-
-		@Override
-		public void bindView(View view, final Context context, final Cursor cursor) {
-			if (cursor.isClosed()) return;
-
-			TextView date = (TextView) view.findViewById(R.id.date);
-			ImageView image = (ImageView) view.findViewById(R.id.image);
-
-			MyCalendar cal = new MyCalendar();
-			cal.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(DatabaseHelper.KEY_DATE)));
-			date.setText(cal.formatDate(getActivity()));
-			...
-		}
-	}
- */
 public class ImageAdapter extends CursorAdapter {
 
 	public ImageAdapter(Context context, Cursor c, int flags) {
@@ -98,27 +68,12 @@ public class ImageAdapter extends CursorAdapter {
 			d = resizeImage(context, d);
 		}
 		String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
-	/*Long id = cursor.getLong(cursor.getColumnIndex(DataStorage.Collections._ID));
 
-        items.add(new Item(name, d, id));*/
+		ImageView ivPicture = (ImageView) view.findViewById(R.id.picture);
+		TextView tvName = (TextView) view.findViewById(R.id.text);
 
-
-		ImageView ivPicture = (ImageView) view.getTag(R.id.picture);
-		TextView tvName = (TextView) view.getTag(R.id.text);
-
-//FIXME  leci NPE
-//		ivPicture.setImageDrawable(d);
-//		tvName.setText(name);
-
-
-/*        Item item = (Item) getItem(i);
-
-        if (ivPicture != null) {
-            ivPicture.setImageDrawable(item.drawableId);
-        }
-        if (name != null) {
-            tvName.setText(item.name);
-        }*/
+		ivPicture.setImageDrawable(d);
+		tvName.setText(name);
 
 	}
 
