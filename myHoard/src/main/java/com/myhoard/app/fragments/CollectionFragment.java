@@ -365,6 +365,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                     if (mEditId != null) {
                         if (cursor.getLong(cursor.getColumnIndex(
                                 DataStorage.Collections._ID)) == mEditId) {
+                            cursor.moveToNext();
                             continue; //can edit if name not changed
                         }
                     }
