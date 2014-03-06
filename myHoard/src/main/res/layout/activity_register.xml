@@ -56,7 +56,7 @@
                 android:layout_margin="20dp"/>
 
             <CheckBox
-                android:layout_width="397dp"
+                android:layout_width="341dp"
                 android:layout_height="wrap_content"
                 android:text="@string/Accept_of_terms"
                 android:id="@+id/checkBox_reg"
@@ -78,13 +78,6 @@
                 android:text="@string/Register"
                 android:id="@+id/reg_button"
                 android:layout_gravity="center_horizontal" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="@string/password_information"
-                android:id="@+id/textView4" />
 
         </LinearLayout>
     </RelativeLayout>

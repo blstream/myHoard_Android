@@ -25,6 +25,7 @@ public class RegisterActivity extends ActionBarActivity {
     private EditText password_registry;
     private CheckBox checkBox_registry;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,10 +60,19 @@ public class RegisterActivity extends ActionBarActivity {
 
     public void validation() {
 
-        email_check();
-        password_check();
+
         boolean password_found = password_check();
         boolean email_found = email_check();
+        if (!email_found) {
+            email_registry.setError(getString(R.string.wrong_email_format));
+        }
+        if (!password_found) {
+            password_registry.setError(getString(R.string.password_information));
+        }
+        if (!checkBox_registry.isChecked()) {
+            checkBox_registry.setError(getString(R.string.checkbox_not_check_registration));
+        }
+
         Log.d("appka", "w" + password_found);
         Log.d("appka", "k" + email_found);
 
@@ -71,31 +81,17 @@ public class RegisterActivity extends ActionBarActivity {
 
             Toast.makeText(getBaseContext(), getString(R.string.registration_succesfully), Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, LoginActivity.class);
+           
             startActivity(intent);
-        } else if (email_found && password_found) {
-            Toast.makeText(getBaseContext(), getString(R.string.email_and_password_registration_empty), Toast.LENGTH_SHORT).show();
-        } else if (email_found && !checkBox_registry.isChecked()) {
-            Toast.makeText(getBaseContext(), getString(R.string.email_and_checkbox_registration_empty), Toast.LENGTH_SHORT).show();
-        } else if (password_found && !checkBox_registry.isChecked()) {
-            Toast.makeText(getBaseContext(), getString(R.string.password_and_checkbox_registration_empty), Toast.LENGTH_SHORT).show();
-        } else if (!email_found) {
-            Toast.makeText(getBaseContext(), getString(R.string.email_registration_empty), Toast.LENGTH_SHORT).show();
-        } else if (!password_found) {
-            Toast.makeText(getBaseContext(), getString(R.string.password_registration_empty), Toast.LENGTH_SHORT).show();
-        } else if (!checkBox_registry.isChecked()) {
-            Toast.makeText(getBaseContext(), getString(R.string.checkbox_not_check_registration), Toast.LENGTH_SHORT).show();
         }
-        if (!password_found) {
-            Toast.makeText(getBaseContext(), getString(R.string.read_info_password), Toast.LENGTH_SHORT).show();
-        }
-
-
     }
 
     /*
       *Email check with regexp
       */
     public boolean email_check() {
+
+
         String email_ch = String.valueOf(email_registry.getText());
         Pattern p = Pattern.compile((".+@.+\\.[a-z]+"));
         Matcher m = p.matcher(email_ch);

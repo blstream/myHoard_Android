@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.myhoard.app.R;
 
@@ -18,31 +17,28 @@ public class LoginActivity extends ActionBarActivity {
 
     private EditText email;
     private EditText password;
-    private Button login_button;
-    private TextView txt;
-    private String login_fix = "jan";
+
+    private String login_fix = "jan" ;
     private String password_fix = "aA12#";
     private CheckBox remember_check;
-    private String username, user_password;
-    private SharedPreferences loginPreferences;
     private SharedPreferences.Editor editor;
-    private Boolean saveLogin;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         email = (EditText) findViewById(R.id.login_email);
         password = (EditText) findViewById(R.id.login_password);
-        login_button = (Button) findViewById(R.id.button_login);
-        txt = (TextView) findViewById(R.id.registration_text);
+        Button login_button = (Button) findViewById(R.id.button_login);
+        TextView txt = (TextView) findViewById(R.id.registration_text);
         remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
-        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        SharedPreferences loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         editor = loginPreferences.edit();
-        saveLogin = loginPreferences.getBoolean("saveLogin", false);
-        if (saveLogin == true) {
+        Boolean saveLogin = loginPreferences.getBoolean("saveLogin", false);
+
+
+        if (saveLogin) {
             email.setText(loginPreferences.getString("username", ""));
             password.setText(loginPreferences.getString("password", ""));
         }
@@ -57,13 +53,15 @@ public class LoginActivity extends ActionBarActivity {
         login_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (email.getText().toString().equals(login_fix) && password.getText().toString().equals(password_fix)) {
+
+                String email_ch = String.valueOf(email.getText());
+                String password_ch = String.valueOf(password.getText());
+                if (email_ch.equals(login_fix) && password_ch.equals(password_fix)) {
                     if (remember_check.isChecked()) {
-                        username = email.getText().toString();
-                        user_password = password.getText().toString();
+
                         editor.putBoolean("saveLogin", true);
-                        editor.putString("username", username);
-                        editor.putString("password", user_password);
+                        editor.putString("username", email_ch);
+                        editor.putString("password", password_ch);
                         editor.commit();
                     } else {
                         editor.clear();
@@ -73,8 +71,13 @@ public class LoginActivity extends ActionBarActivity {
                     startActivity(intent);
 
                 } else {
-	                // FIXME popatrz na metodę EditText.setError()
-                    Toast.makeText(getApplicationContext(), "Wrong login or password", Toast.LENGTH_SHORT).show();
+                    if (!email_ch.equals(login_fix)) {
+                        email.setError(getString(R.string.incoreect_login));
+                    }
+                    if (!password_ch.equals(password_fix)) {
+                        password.setError(getString(R.string.wrong_password));
+                    }
+
                 }
             }
         });
