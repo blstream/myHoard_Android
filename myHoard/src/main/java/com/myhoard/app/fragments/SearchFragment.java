@@ -105,18 +105,16 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
         //Get text to search from args object
         String collectionElementText = args.getString("fragmentElement");
         //CursorLoader used to get data from user query
-        //TODO fix after Database upload
-        /*return new CursorLoader(mContext,DataStorage.Items.CONTENT_URI,
-                new String [] {DataStorage.Items.NAME,DataStorage.Items.AVATAR_FILE_NAME},
-                DataStorage.Items.DESCRIPTION+" LIKE '%"+collectionElementText+"%' OR "+DataStorage.Items.NAME+" = '"+collectionElementText+"'",null,null);*/
-        return null;
+        return new CursorLoader(mContext,DataStorage.Items.CONTENT_URI,
+                new String [] {DataStorage.Items.NAME,DataStorage.Media.AVATAR},
+                DataStorage.Items.DESCRIPTION+" LIKE '%"+collectionElementText+"%' OR "+DataStorage.Items.NAME+" = '"+collectionElementText+"'",null,null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         //Clear data when are not current
         mCollectionElementName.clear();
-        mCollectionElementName.clear();
+        mCollectionElementAvatar.clear();
         data.moveToFirst();
         if(!data.isAfterLast()){
             do{

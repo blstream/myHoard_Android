@@ -47,8 +47,8 @@ public class ItemsTable extends DatabaseTable {
     @Override
     public Cursor query(SQLiteDatabase db, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-
-        qb.setTables(tableName);
+        //JOIN tables to get element name with its specific avatar
+        qb.setTables(tableName + " LEFT OUTER JOIN " + Media.TABLE_NAME + " ON (" + Items.TABLE_NAME + "." + Items._ID + "=" + Media.TABLE_NAME + "." + Media.ID_ITEM + ")");
 
         String orderBy;
         // If no sort order is specified, uses the default
