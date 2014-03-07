@@ -19,6 +19,8 @@ import java.util.ArrayList;
  * Created by Piotr Brzozowski on 01.03.14.
  * ImageAdapterList class used to get list of element from data in SearchFragment
  */
+
+// FIXME Adapter w tym przypadku powinien być dziedziczony po CUrsorAdapter
 public class ImageAdapterList extends BaseAdapter {
     //Context object to get context of application
     private Context mContext;

@@ -112,6 +112,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+	    // FIXME skoro mamy zwrócony cursor to adapter powinien być dziedziczony po CursorAdapter a nie po BaseAdapter. Tytaj powinno
+	    // być w sytuacji idealnej tylko adapter.swapCursor(data)
         //Clear data when are not current
         mCollectionElementName.clear();
         mCollectionElementAvatar.clear();
