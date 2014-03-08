@@ -18,6 +18,7 @@ package com.myhoard.app.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -181,19 +182,24 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                         values.put(DataStorage.Collections.DESCRIPTION, mDescription);
                         values.put(DataStorage.Collections.AVATAR_FILE_NAME, mImgPath);
                         values.put(DataStorage.Collections.TAGS, mTags);
-                        values.put(DataStorage.Collections.MODIFIED_DATE, Calendar.getInstance().getTime().getTime());
+                        values.put(DataStorage.Collections.MODIFIED_DATE, Calendar.getInstance()
+                                .getTime().getTime());
                         if (this.getTag().equals("EditCollection")) {
                             Toast.makeText(getActivity(), context.getString(R.string
                                     .collection_edited), Toast.LENGTH_LONG).show();
-	                        // FIXME cały CRUD powinien odbywać się w AsyncTask lub AsyncLoader
-                            getActivity().getContentResolver()
-                                    .update(DataStorage.Collections.CONTENT_URI, values,
-                                            DataStorage.Collections._ID + " = " + mEditId, null);
+
+                            AsyncQueryHandler handler =
+                                    new AsyncQueryHandler(getActivity().getContentResolver()) {};
+                            handler.startUpdate(-1, null, DataStorage.Collections.CONTENT_URI, values,
+                                    DataStorage.Collections._ID + " = " + mEditId, null);
                         } else {
-                            values.put(DataStorage.Collections.CREATED_DATE, Calendar.getInstance().getTime().getTime());
-	                        // FIXME cały CRUD powinien odbywać się w AsyncTask lub AsyncLoader
-                            getActivity().getContentResolver()
-                                    .insert(DataStorage.Collections.CONTENT_URI, values);
+                            values.put(DataStorage.Collections.CREATED_DATE, Calendar.getInstance()
+                                    .getTime().getTime());
+
+                            AsyncQueryHandler handler =
+                                    new AsyncQueryHandler(getActivity().getContentResolver()) {};
+                            handler.startInsert(-1, null, DataStorage
+                                    .Collections.CONTENT_URI, values);
 
                         }
                         mListener.OnFragmentClick();
