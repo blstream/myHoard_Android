@@ -39,54 +39,71 @@ import com.myhoard.app.provider.DataStorage;
 public class ImageAdapter extends CursorAdapter {
     private int width = 200;
 
-	public ImageAdapter(Context context, Cursor c, int flags) {
-		super(context, c, flags);
+
+    public ImageAdapter(Context context, Cursor c, int flags) {
+        super(context, c, flags);
 
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         //noinspection deprecation
-        width = display.getWidth()/2;  // deprecated from api 13
-	}
+        width = display.getWidth() / 2;  // deprecated from api 13
+    }
 
 
-	private Drawable resizeImage(Context c, Drawable d, int width) {
+    private Drawable resizeImage(Context c, Drawable d, int width) {
 
-		Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
         //noinspection SuspiciousNameCombination
         Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, width, width, false);
-		return new BitmapDrawable(c.getResources(), bitmapResized);
+        return new BitmapDrawable(c.getResources(), bitmapResized);
 
-	}
+    }
 
-	@Override
-	public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-		LayoutInflater inflater = LayoutInflater.from(context);
-		View v = inflater.inflate(R.layout.collection_griditem, viewGroup, false);
-		bindView(v, context, cursor);
-		return v;
-	}
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View v = inflater.inflate(R.layout.collection_griditem, viewGroup, false);
 
-	@Override
-	public void bindView(View view, Context context, Cursor cursor) {
-		if (cursor.isClosed()) return;
+        ViewHolder holder = new ViewHolder();
+        if (v != null) {
+            holder.name = (TextView) v.findViewById(R.id.tvSquareName);
+            holder.img = (ImageView) v.findViewById(R.id.ivSquareAvatar);
+            holder.nameIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.NAME);
+            holder.imgIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.AVATAR_FILE_NAME);
+            v.setTag(holder);
+        }
 
-        ImageView ivPicture = (ImageView) view.findViewById(R.id.picture);
-        TextView tvName = (TextView) view.findViewById(R.id.text);
+        bindView(v, context, cursor);
+        return v;
+    }
 
-		Drawable d;
-		if (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)) == null) {
-			d = context.getResources().getDrawable(R.drawable.nophoto);
-		} else {
-			d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+        if (cursor.isClosed()) return;
+
+        ViewHolder holder = (ViewHolder) view.getTag();
+        holder.name.setText(cursor.getString(holder.nameIndex));
+
+
+        Drawable d;
+        if (cursor.getString(holder.imgIndex) == null) {
+            d = context.getResources().getDrawable(R.drawable.nophoto);
+        } else {
+            d = new BitmapDrawable(context.getResources(), cursor.getString(holder.imgIndex));
+            //d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
             //noinspection SuspiciousNameCombination
             d = resizeImage(context, d, width);
-		}
-		String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
+        }
+        holder.img.setImageDrawable(d);
 
-		ivPicture.setImageDrawable(d);
-		tvName.setText(name);
+    }
 
-	}
+    private static class ViewHolder {
+        int nameIndex;
+        int imgIndex;
+        TextView name;
+        ImageView img;
+    }
 
 
 }

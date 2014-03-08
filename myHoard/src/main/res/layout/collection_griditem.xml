@@ -20,13 +20,13 @@
     android:layout_height="match_parent">
 
     <com.myhoard.app.views.SquareImageView
-        android:id="@+id/picture"
+        android:id="@+id/ivSquareAvatar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
 
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/tvSquareName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
