@@ -19,25 +19,26 @@ import android.widget.Toast;
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapterList;
 import com.myhoard.app.provider.DataStorage;
-import java.util.ArrayList;
 
 /**
  * Created by Piotr Brzozowski on 01.03.14.
  * SearchFragment class used to search concrete sentence in table of elements
  */
 public class SearchFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
-    private ArrayList<String> mCollectionElementName = new ArrayList<>();
-    private ArrayList<String> mCollectionElementAvatar = new ArrayList<>();
     private EditText mSearchText;
-    private ListView mSearchList;
     private Context mContext;
+    private ImageAdapterList mImageAdapterList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_search,container,false);
         mContext = getActivity();
+        //Create adapter to adapt data to individual list row
+        mImageAdapterList = new ImageAdapterList(mContext,null,0);
         assert v != null;
-        mSearchList = (ListView) v.findViewById(R.id.listViewSearch);
+        ListView mSearchList = (ListView) v.findViewById(R.id.listViewSearch);
+        //Set adapter for ListView
+        mSearchList.setAdapter(mImageAdapterList);
         ImageButton imButtonSearch = (ImageButton) v.findViewById(R.id.imageButtonSearch);
         imButtonSearch.setOnClickListener(this);
         mSearchText = (EditText) v.findViewById(R.id.editTextSearch);
@@ -62,9 +63,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
                     getLoaderManager().restartLoader(0,args,SearchFragment.this);
                 }
                 else{
-                    mCollectionElementName.clear();
-                    mCollectionElementAvatar.clear();
-                    mSearchList.setAdapter(new ImageAdapterList(mContext,mCollectionElementName,mCollectionElementAvatar));
+                    //Clear screen
+                    mImageAdapterList.swapCursor(null);
                 }
             }
 
@@ -106,30 +106,18 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
         String collectionElementText = args.getString("fragmentElement");
         //CursorLoader used to get data from user query
         return new CursorLoader(mContext,DataStorage.Items.CONTENT_URI,
-                new String [] {DataStorage.Items.NAME,DataStorage.Media.AVATAR},
+                new String [] {DataStorage.Items.NAME,DataStorage.Media.AVATAR,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items._ID},
                 DataStorage.Items.DESCRIPTION+" LIKE '%"+collectionElementText+"%' OR "+DataStorage.Items.NAME+" = '"+collectionElementText+"'",null,null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        //Clear data when are not current
-        mCollectionElementName.clear();
-        mCollectionElementAvatar.clear();
-        data.moveToFirst();
-        if(!data.isAfterLast()){
-            do{
-                //Get data from cursor
-                mCollectionElementName.add(data.getString(0));
-                mCollectionElementAvatar.add(data.getString(1));
-            }while(data.moveToNext());
-        }
-        data.close();
-        //Set adapter for image and text in ListView
-        mSearchList.setAdapter(new ImageAdapterList(mContext, mCollectionElementName, mCollectionElementAvatar));
+        //Change cursor with data from database
+	    mImageAdapterList.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        mImageAdapterList.swapCursor(null);
     }
 }

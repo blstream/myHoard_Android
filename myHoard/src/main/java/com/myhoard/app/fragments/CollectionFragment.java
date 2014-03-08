@@ -185,11 +185,13 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                         if (this.getTag().equals("EditCollection")) {
                             Toast.makeText(getActivity(), context.getString(R.string
                                     .collection_edited), Toast.LENGTH_LONG).show();
+	                        // FIXME cały CRUD powinien odbywać się w AsyncTask lub AsyncLoader
                             getActivity().getContentResolver()
                                     .update(DataStorage.Collections.CONTENT_URI, values,
                                             DataStorage.Collections._ID + " = " + mEditId, null);
                         } else {
                             values.put(DataStorage.Collections.CREATED_DATE, Calendar.getInstance().getTime().getTime());
+	                        // FIXME cały CRUD powinien odbywać się w AsyncTask lub AsyncLoader
                             getActivity().getContentResolver()
                                     .insert(DataStorage.Collections.CONTENT_URI, values);
 

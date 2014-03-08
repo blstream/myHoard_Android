@@ -128,10 +128,12 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
                     if (elementId!=-1) {
                         Toast.makeText(getActivity(),context.getString(R.string
                                 .element_edited), Toast.LENGTH_SHORT).show();
+	                    // FIXME cały CRUD powinien odbywać się w AsyncTask lub AsyncLoader
                         getActivity().getContentResolver()
                                 .update(DataStorage.Items.CONTENT_URI, values,
                                         DataStorage.Items._ID + " = " + elementId, null);
                     } else {
+	                    // FIXME cały CRUD powinien odbywać się w AsyncTask lub AsyncLoader
                         getActivity().getContentResolver()
                                 .insert(DataStorage.Items.CONTENT_URI, values);
 
