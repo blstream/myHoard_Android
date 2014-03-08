@@ -21,11 +21,14 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.widget.CursorAdapter;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.myhoard.app.R;
 import com.myhoard.app.provider.DataStorage;
 
@@ -34,16 +37,23 @@ import com.myhoard.app.provider.DataStorage;
  */
 
 public class ImageAdapter extends CursorAdapter {
+    private int width = 200;
 
 	public ImageAdapter(Context context, Cursor c, int flags) {
 		super(context, c, flags);
+
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        //noinspection deprecation
+        width = display.getWidth()/2;  // deprecated from api 13
 	}
 
-	//TODO: resizeImage() correctly
-	private Drawable resizeImage(Context c, Drawable d) {
+
+	private Drawable resizeImage(Context c, Drawable d, int width) {
 
 		Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-		Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
+        //noinspection SuspiciousNameCombination
+        Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, width, width, false);
 		return new BitmapDrawable(c.getResources(), bitmapResized);
 
 	}
@@ -60,17 +70,18 @@ public class ImageAdapter extends CursorAdapter {
 	public void bindView(View view, Context context, Cursor cursor) {
 		if (cursor.isClosed()) return;
 
+        ImageView ivPicture = (ImageView) view.findViewById(R.id.picture);
+        TextView tvName = (TextView) view.findViewById(R.id.text);
+
 		Drawable d;
 		if (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)) == null) {
 			d = context.getResources().getDrawable(R.drawable.nophoto);
 		} else {
 			d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
-			d = resizeImage(context, d);
+            //noinspection SuspiciousNameCombination
+            d = resizeImage(context, d, width);
 		}
 		String name = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME));
-
-		ImageView ivPicture = (ImageView) view.findViewById(R.id.picture);
-		TextView tvName = (TextView) view.findViewById(R.id.text);
 
 		ivPicture.setImageDrawable(d);
 		tvName.setText(name);
