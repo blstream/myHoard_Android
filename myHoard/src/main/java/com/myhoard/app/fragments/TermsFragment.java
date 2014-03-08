@@ -10,11 +10,10 @@ import android.widget.TextView;
 import com.myhoard.app.R;
 
 /**
- * Created by Czyz on 24.02.14.
+ * Created by Mateusz Czyszkiewicz on 24.02.14.
  */
 public class TermsFragment extends DialogFragment {
 
-    private TextView text ;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -23,7 +22,7 @@ public class TermsFragment extends DialogFragment {
 
         getDialog().setTitle(getString(R.string.terms_of_use));
         View v = inflater.inflate(R.layout.terms_fragment_activity,container,false);
-        text = (TextView)v.findViewById(R.id.text_term_fragment);
+      TextView text = (TextView)v.findViewById(R.id.text_term_fragment);
 
        return v;
 
