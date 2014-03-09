@@ -21,6 +21,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -41,10 +42,10 @@ import com.myhoard.app.provider.DataStorage;
  * Created by Rafał Soudani on 20/02/2014
  */
 public class CollectionsListFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>{
+        LoaderManager.LoaderCallbacks<Cursor> {
 
-    private  GridView gridView;
-    private  Context context;
+    private GridView gridView;
+    private Context context;
     private ImageAdapter adapter;
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int EDIT_ID = Menu.FIRST + 2;
@@ -70,7 +71,18 @@ public class CollectionsListFragment extends Fragment implements
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //TODO: show items in collection
+                //passing the selected collection ID
+                Fragment newFragment = new ItemsListFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                Bundle b = new Bundle();
+                b.putString("id", Long.toString(l));
+                newFragment.setArguments(b);
+
+                transaction.replace(R.id.container, newFragment);
+                transaction.addToBackStack(null);
+
+                transaction.commit();
+
                 /*
                 //Testing for collection element - author Sebastian Peryt
                 // Create new fragment and transaction

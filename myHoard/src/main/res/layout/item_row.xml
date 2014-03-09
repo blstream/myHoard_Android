@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="10sp">
+
+        <ImageView
+            android:id="@+id/item_avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="6dip"
+            android:src="@drawable/ic_launcher" />
+
+        <TextView
+            android:id="@+id/item_creation_date"
+            android:layout_width="fill_parent"
+            android:layout_height="26dip"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@id/item_avatar"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:text="Creation date"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/item_name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/item_creation_date"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_toRightOf="@id/item_avatar"
+            android:gravity="center_vertical"
+            android:text="Item Name"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
+
+</LinearLayout>

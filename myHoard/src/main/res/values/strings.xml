@@ -52,6 +52,7 @@
     <string name="wrong_email_format">Wrong email format</string>
     <string name="incoreect_login">incorrect login</string>
     <string name="wrong_password">wrong password</string>
-
+    <string name="noItems">This collection is empty.</string>
+    <string name="title_items_activity">ItemsActivity</string>
 
 </resources>
