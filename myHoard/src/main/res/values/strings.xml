@@ -54,5 +54,6 @@
     <string name="wrong_password">wrong password</string>
     <string name="noItems">This collection is empty.</string>
     <string name="title_items_activity">ItemsActivity</string>
+    <string name="action_acra">Error! Send message to Android group!</string>
 
 </resources>
