@@ -25,6 +25,9 @@
             android:multiprocess="true" >
         </provider>
 
+        <service android:name="com.myhoard.app.gps.GPSProvider" >
+        </service>
+
         <activity
             android:name="com.myhoard.app.activities.LoginActivity"
             android:label="@string/title_activity_login" >
@@ -36,5 +39,6 @@
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>

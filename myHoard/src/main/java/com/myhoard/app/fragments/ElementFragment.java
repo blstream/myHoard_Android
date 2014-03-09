@@ -3,14 +3,19 @@ package com.myhoard.app.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.AsyncQueryHandler;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -25,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
+import com.myhoard.app.gps.GPSProvider;
 import com.myhoard.app.provider.DataStorage;
 
 import java.io.File;
@@ -65,6 +71,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
     private Button btSave, btCancel;
     private int elementId;
     private int modeOn;
+
+    GPSProvider mService;
+    boolean mBound = false;
 
     private Context context;
 
@@ -108,6 +117,82 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 
         return v;
     }
+
+    /*
+     * Część kodu odpowiedzialna za GPS
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getActivity().getApplicationContext()
+                .bindService(new Intent(getActivity(),
+                                GPSProvider.class), mConnection,
+                        Context.BIND_AUTO_CREATE
+                );
+    }
+
+    @Override
+    public void onDestroy() {
+        getActivity().getApplicationContext().unbindService(mConnection);
+        super.onDestroy();
+    }
+
+    /*
+             * broadcast reciver dzięki któremu istnieje połączenie z uslugą GPS
+             */
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //updateMap(intent);
+            Bundle b = intent.getExtras();
+            if(!b.getBoolean("GPS"))
+            {
+                Toast.makeText(getActivity(),"No GPS",Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        context.registerReceiver(broadcastReceiver, new IntentFilter(
+                GPSProvider.BROADCAST_ACTION));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        context.unregisterReceiver(broadcastReceiver);
+    }
+
+    /*
+	 * Część kodu odpowiedzialna za binder
+	 * (http://developer.android.com/guide/components/bound-services.html)
+	 */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // Przywiazano do uslugi i rzutowano IBinder
+            GPSProvider.LocalGPSBinder binder = (GPSProvider.LocalGPSBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            if (D)
+                Log.d(TAG, "Binder");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
+	/*
+	 * KONIEC - Część kodu odpowiedzialna za binder
+	 */
+    /*
+	 * KONIEC - Część kodu odpowiedzialna za GPS
+	 */
 
     @Override
     public void onClick(View view) {
