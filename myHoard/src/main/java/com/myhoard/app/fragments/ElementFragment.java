@@ -2,6 +2,7 @@ package com.myhoard.app.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -53,6 +54,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
     private static final int REQUEST_IMAGE_CAPTURE = 2;
     private static final int SELECT_PICTURE = 1;
 
+    private static final int MODE_ADD = 3;
+    private static final int MODE_EDIT = 4;
+
     private TextView tvElementName, tvElementDescription;
     private EditText etElementName, etElementDescription;
     private String sCurrentPhotoPath;
@@ -60,6 +64,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
     private ImageView ivElementPhoto;
     private Button btSave, btCancel;
     private int elementId;
+    private int modeOn;
 
     private Context context;
 
@@ -92,10 +97,14 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
             tvElementName.setText(b.getString(ElementFragment.NAME));
             tvElementDescription.setText(b.getString(ElementFragment.DESCRIPTION));
             //elementId = b.getInt(ElementFragment.ID);
-            ivElementPhoto.setOnClickListener(this);
+            modeOn = MODE_EDIT;
+            btSave.setText(context.getResources().getString(R.string.edit));
         } else {
+            btSave.setText(context.getResources().getString(R.string.save));
             ivElementPhoto.setOnClickListener(this);
+            modeOn = MODE_ADD;
         }
+
 
         return v;
     }
@@ -105,6 +114,19 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
         switch(view.getId()) {
             case R.id.saveBtn:
                 // TODO in some production
+                if (modeOn == MODE_EDIT){
+                    etElementName.setVisibility(View.VISIBLE);
+                    etElementDescription.setVisibility(View.VISIBLE);
+                    tvElementName.setVisibility(View.INVISIBLE);
+                    tvElementDescription.setVisibility(View.INVISIBLE);
+                    etElementName.setText(tvElementName.getText().toString());
+                    etElementDescription.setText(tvElementDescription.getText().toString());
+                    ivElementPhoto.setOnClickListener(this);
+                    btSave.setText(context.getResources().getString(R.string.save));
+                    modeOn = MODE_ADD;
+                    break;
+                }
+
                 if (TextUtils.isEmpty(etElementName.getText()) && tvElementName.getText() == null) {
                     Toast.makeText(getActivity(), getString(R.string.required_name_element),
                             Toast.LENGTH_SHORT).show();
@@ -122,21 +144,19 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
                     //values.put(DataStorage.Items.AVATAR_FILE_NAME, sImagePath);
                     // TODO fix after explanation
                     //values.put(DataStorage.Elements.COLLECTION_ID);
-                    //values.put(DataStorage.Elements.CREATED_DATE);
                     //values.put(DataStorage.Elements.MODIFIED_DATE);
                     //values.put(DataStorage.Elements.TAGS);
+                    AsyncQueryHandler asyncHandler =
+                            new AsyncQueryHandler(getActivity().getContentResolver()) {};
                     if (elementId!=-1) {
                         Toast.makeText(getActivity(),context.getString(R.string
                                 .element_edited), Toast.LENGTH_SHORT).show();
-	                    // FIXME cały CRUD powinien odbywać się w AsyncTask lub AsyncLoader
-                        getActivity().getContentResolver()
-                                .update(DataStorage.Items.CONTENT_URI, values,
-                                        DataStorage.Items._ID + " = " + elementId, null);
+                        asyncHandler.startUpdate(MODE_EDIT, null, DataStorage.Items.CONTENT_URI, values,
+                                DataStorage.Items._ID + " = " + elementId, null);
                     } else {
-	                    // FIXME cały CRUD powinien odbywać się w AsyncTask lub AsyncLoader
-                        getActivity().getContentResolver()
-                                .insert(DataStorage.Items.CONTENT_URI, values);
-
+                        //values.put(DataStorage.Elements.CREATED_DATE);
+                        asyncHandler.startInsert(MODE_ADD, null, DataStorage
+                                .Items.CONTENT_URI, values);
                     }
                     getFragmentManager().popBackStackImmediate();
                 }

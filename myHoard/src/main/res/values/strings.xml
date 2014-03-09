@@ -39,6 +39,7 @@
     <string name="element_photo">Photo:</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="edit">Edit</string>
     <string name="element_edited">ELEMENT EDITED</string>
     <string name="required_name_element">Required element name</string>
     <string name="name_already_exist">NAME ALREADY EXIST</string>
