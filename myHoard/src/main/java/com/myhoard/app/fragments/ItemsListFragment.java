@@ -25,8 +25,10 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private SimpleCursorAdapter adapter;
     private Context context;
     private ListView listView;
+    private Long collectionID;
 
-    public static String Selected_Collection_ID = "collectionId";
+    public static final String Selected_Collection_ID = "id";
+
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         context = getActivity();
@@ -54,7 +56,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
         // retrieving data from CollectionsListFragment
         Bundle bundle = this.getArguments();
-        Selected_Collection_ID = bundle.getString("id", "default");
+        collectionID = bundle.getLong(Selected_Collection_ID);
 
         registerForContextMenu(listView);
     }
@@ -62,15 +64,15 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     // creates a new loader after initLoader() call
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        // TODO ambigous column names problem; !custom sort!
+        // TODO  !custom sort!
         final String[] projection = {DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items._ID,
                 DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items.NAME,
                 DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items.CREATED_DATE};
         //select items from selected collection
-        String selection = Selected_Collection_ID + " = " + DataStorage.Items.ID_COLLECTION;
+        //String selection = collectionID + " = " + DataStorage.Items.ID_COLLECTION;
 
         return new CursorLoader(context, DataStorage.Items.CONTENT_URI,
-                projection, selection, null, null);
+                projection, null, null, null);
 
     }
 

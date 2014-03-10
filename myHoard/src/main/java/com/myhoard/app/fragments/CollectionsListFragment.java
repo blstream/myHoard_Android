@@ -71,19 +71,19 @@ public class CollectionsListFragment extends Fragment implements
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //passing the selected collection ID
+                //launching ItemsListFragment - author Maciej Plewko
+                //TODO passing the clicked collection ID
                 Fragment newFragment = new ItemsListFragment();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                 Bundle b = new Bundle();
-                b.putString("id", Long.toString(l));
+                b.putLong(ItemsListFragment.Selected_Collection_ID, l);
                 newFragment.setArguments(b);
 
                 transaction.replace(R.id.container, newFragment);
                 transaction.addToBackStack(null);
 
                 transaction.commit();
-
-                /*
+/*
                 //Testing for collection element - author Sebastian Peryt
                 // Create new fragment and transaction
                 Fragment newFragment = new ElementFragment();
@@ -93,7 +93,7 @@ public class CollectionsListFragment extends Fragment implements
                 // Add arguments to opened fragment element
                 Bundle b = new Bundle();
                 // put name
-                b.putString(ElementFragment.NAME,"NAME");
+               b.putString(ElementFragment.NAME,"NAME");
                 // put description
                 b.putString(ElementFragment.DESCRIPTION,"DESCRIPTION");
                 newFragment.setArguments(b);
@@ -106,7 +106,7 @@ public class CollectionsListFragment extends Fragment implements
 
                 // Commit the transaction
                 transaction.commit();
-                */
+*/
             }
         });
         registerForContextMenu(gridView);
