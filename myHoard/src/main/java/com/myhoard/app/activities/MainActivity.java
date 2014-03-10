@@ -22,7 +22,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import com.myhoard.app.R;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
@@ -32,87 +31,87 @@ import com.myhoard.app.fragments.SearchFragment;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements OnFragmentClickListener {
-    CollectionsListFragment collectionsListFragment;
+	CollectionsListFragment collectionsListFragment;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
-        collectionsListFragment = new CollectionsListFragment();
-        FragmentManager fm = getSupportFragmentManager();
-        if (savedInstanceState == null) {
-            fm.beginTransaction()
-                    .add(R.id.container, collectionsListFragment, "Main")
-                    .commit();
-        } else {
-            fm.beginTransaction()
-                    .replace(R.id.container,
-                            fm.findFragmentByTag(savedInstanceState.getString("fragment")))
-                    .commit();
-        }
+		collectionsListFragment = new CollectionsListFragment();
+		FragmentManager fm = getSupportFragmentManager();
+		if (savedInstanceState == null) {
+			fm.beginTransaction()
+					.add(R.id.container, collectionsListFragment, "Main")
+					.commit();
+		} else {
+			fm.beginTransaction()
+					.replace(R.id.container,
+							fm.findFragmentByTag(savedInstanceState.getString("fragment")))
+					.commit();
+		}
 
-    }
+	}
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString("fragment", getVisibleFragmentTag());
-    }
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putString("fragment", getVisibleFragmentTag());
+	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+	public String getVisibleFragmentTag() {
+		FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
+		List<Fragment> fragments = fragmentManager.getFragments();
+		for (Fragment fragment : fragments) {
+			if (fragment != null && fragment.isVisible())
+				return fragment.getTag();
+		}
+		throw new IllegalStateException("There is no active fragment");
+	}
 
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()) {
-            case R.id.action_new_collection:
-                if (!getVisibleFragmentTag().equals("NewCollection")){
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, new CollectionFragment(), "NewCollection")
-                        .addToBackStack("NewCollection")
-                        .commit();
-                }
-            break;
-            case R.id.action_login:
-                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                startActivity(intent);
-            break;
-            case R.id.action_search:
-                if (!getVisibleFragmentTag().equals("Search")){
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.container, new SearchFragment(), "Search")
-                            .addToBackStack("Search")
-                            .commit();
-                }
-            break;
-        default:
-        return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
 
-    @Override
-    public void OnFragmentClick() {
-        getSupportFragmentManager().beginTransaction().replace(R.id.container,
-                collectionsListFragment, "Main").addToBackStack("Main").commit();
-    }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		switch (item.getItemId()) {
+		case R.id.action_new_collection:
+			if (!getVisibleFragmentTag().equals("NewCollection")) {
+				getSupportFragmentManager().beginTransaction()
+						.replace(R.id.container, new CollectionFragment(), "NewCollection")
+						.addToBackStack("NewCollection")
+						.commit();
+			}
+			break;
+		case R.id.action_login:
+			Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+			startActivity(intent);
+			break;
+		case R.id.action_search:
+			if (!getVisibleFragmentTag().equals("Search")) {
+				getSupportFragmentManager().beginTransaction()
+						.replace(R.id.container, new SearchFragment(), "Search")
+						.addToBackStack("Search")
+						.commit();
+			}
+			break;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+		return true;
+	}
 
-    public String getVisibleFragmentTag(){
-        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
-        List<Fragment> fragments = fragmentManager.getFragments();
-        for(Fragment fragment : fragments){
-            if(fragment != null && fragment.isVisible())
-                return fragment.getTag();
-        }
-        throw new IllegalStateException("There is no active fragment");
-    }
+	@Override
+	public void OnFragmentClick() {
+		getSupportFragmentManager().beginTransaction().replace(R.id.container,
+				collectionsListFragment, "Main").addToBackStack("Main").commit();
+	}
 }

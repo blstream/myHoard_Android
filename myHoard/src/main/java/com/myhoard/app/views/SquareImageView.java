@@ -24,13 +24,13 @@ import android.widget.ImageView;
  */
 public class SquareImageView extends ImageView {
 
-    public SquareImageView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public SquareImageView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(getMeasuredWidth(), getMeasuredWidth()); //Snap to width
-    }
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		setMeasuredDimension(getMeasuredWidth(), getMeasuredWidth()); //Snap to width
+	}
 }

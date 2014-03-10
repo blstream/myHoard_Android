@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.myhoard.app" >
+    package="com.myhoard.app">
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:name=".application.AcraApplication"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name="com.myhoard.app.activities.MainActivity"
             android:label="@string/app_name"
-            android:configChanges="orientation|keyboardHidden" >
+            android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,20 +23,16 @@
             android:name="com.myhoard.app.provider.DataProvider"
             android:authorities="com.myhoard.app.provider"
             android:exported="false"
-            android:multiprocess="true" >
-        </provider>
+            android:multiprocess="true"></provider>
 
-        <service android:name="com.myhoard.app.gps.GPSProvider" >
-        </service>
+        <service android:name="com.myhoard.app.gps.GPSProvider"></service>
 
         <activity
             android:name="com.myhoard.app.activities.LoginActivity"
-            android:label="@string/title_activity_login" >
-        </activity>
+            android:label="@string/title_activity_login"></activity>
         <activity
             android:name="com.myhoard.app.activities.RegisterActivity"
-            android:label="@string/title_activity_register" >
-        </activity>
+            android:label="@string/title_activity_register"></activity>
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

@@ -17,15 +17,12 @@ public class DataProvider extends ContentProvider {
 	// Constants used by the Uri matcher to choose an action based on the pattern of the incoming URI
 	public static final int COLLECTIONS = 1;
 	public static final int ELEMENTS = 2;
-    public static final int MEDIA = 3;
-
-	private List<DatabaseTable> tables;
-
+	public static final int MEDIA = 3;
 	/**
 	 * A UriMatcher instance
 	 */
 	private static final UriMatcher uriMatcher;
-
+	private List<DatabaseTable> tables;
 	// Handle to a new DatabaseHelper.
 	private DatabaseHelper helper;
 
@@ -34,7 +31,7 @@ public class DataProvider extends ContentProvider {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI(DataStorage.AUTHORITY, Collections.TABLE_NAME, COLLECTIONS);
 		uriMatcher.addURI(DataStorage.AUTHORITY, Items.TABLE_NAME, ELEMENTS);
-        uriMatcher.addURI(DataStorage.AUTHORITY, Media.TABLE_NAME, MEDIA);
+		uriMatcher.addURI(DataStorage.AUTHORITY, Media.TABLE_NAME, MEDIA);
 	}
 
 	@Override
@@ -42,7 +39,7 @@ public class DataProvider extends ContentProvider {
 		tables = new LinkedList<>();
 		tables.add(new CollectionsTable(getContext(), COLLECTIONS));
 		tables.add(new ItemsTable(getContext(), ELEMENTS));
-        tables.add(new MediaTable(getContext(), MEDIA));
+		tables.add(new MediaTable(getContext(), MEDIA));
 
 		// Creates a new helper object. Note that the database itself isn't opened until
 		// something tries to access it, and it's only created if it doesn't already exist.

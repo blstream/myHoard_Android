@@ -19,5 +19,5 @@ package com.myhoard.app.fragments;
  * Created by Rafał Soudani on 21.02.2014
  */
 public interface OnFragmentClickListener {
-    public void OnFragmentClick();
+	public void OnFragmentClick();
 }

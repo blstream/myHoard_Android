@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-
 import com.myhoard.app.R;
 import com.myhoard.app.provider.DataStorage;
 
@@ -22,85 +21,83 @@ import com.myhoard.app.provider.DataStorage;
  */
 public class ItemsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private SimpleCursorAdapter adapter;
-    private Context context;
-    private ListView listView;
-    private Long collectionID;
+	public static final String Selected_Collection_ID = "id";
+	private SimpleCursorAdapter adapter;
+	private Context context;
+	private ListView listView;
+	private Long collectionID;
 
-    public static final String Selected_Collection_ID = "id";
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		context = getActivity();
+		return inflater.inflate(R.layout.fragment_items_list, container, false);
+	}
 
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		listView = (ListView) view.findViewById(R.id.itemsList);
+		listView.setEmptyView(view.findViewById(R.id.tvNoItems));
+	}
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        context = getActivity();
-        return inflater.inflate(R.layout.fragment_items_list, container, false);
-    }
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        listView = (ListView) view.findViewById(R.id.itemsList);
-        listView.setEmptyView(view.findViewById(R.id.tvNoItems));
-    }
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+			                        int position, long id) {
+				//TODO item clicked action
+			}
+		});
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+		// retrieving data from CollectionsListFragment
+		Bundle bundle = this.getArguments();
+		collectionID = bundle.getLong(Selected_Collection_ID);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                //TODO item clicked action
-            }
-        });
+		registerForContextMenu(listView);
+	}
 
-        // retrieving data from CollectionsListFragment
-        Bundle bundle = this.getArguments();
-        collectionID = bundle.getLong(Selected_Collection_ID);
+	@Override
+	public void onResume() {
+		super.onResume();
+		fillData();
+	}
 
-        registerForContextMenu(listView);
-    }
+	private void fillData() {
+		//Fields from the database
+		String[] from = new String[]{DataStorage.Items._ID, DataStorage.Items.NAME,
+				DataStorage.Items.CREATED_DATE};
+		//UI fields to which the data is mapped
+		int[] to = new int[]{R.id.item_name, R.id.item_creation_date};
 
-    // creates a new loader after initLoader() call
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        // TODO  !custom sort!
-        final String[] projection = {DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items._ID,
-                DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items.NAME,
-                DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items.CREATED_DATE};
-        //select items from selected collection
-        //String selection = collectionID + " = " + DataStorage.Items.ID_COLLECTION;
+		getLoaderManager().initLoader(0, null, this);
+		adapter = new SimpleCursorAdapter(context, R.layout.item_row, null, from, to, 0);
+		listView.setAdapter(adapter);
+	}
 
-        return new CursorLoader(context, DataStorage.Items.CONTENT_URI,
-                projection, null, null, null);
+	// creates a new loader after initLoader() call
+	@Override
+	public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+		// TODO  !custom sort!
+		final String[] projection = {DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items._ID,
+				DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items.NAME,
+				DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items.CREATED_DATE};
+		//select items from selected collection
+		//String selection = collectionID + " = " + DataStorage.Items.ID_COLLECTION;
 
-    }
+		return new CursorLoader(context, DataStorage.Items.CONTENT_URI,
+				projection, null, null, null);
 
-    @Override
-    public void onLoadFinished(Loader loader, Cursor data) {
-        adapter.swapCursor(data);
-    }
+	}
 
-    @Override
-    public void onLoaderReset(Loader loader) {
-        adapter.swapCursor(null);
-    }
+	@Override
+	public void onLoadFinished(Loader loader, Cursor data) {
+		adapter.swapCursor(data);
+	}
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        fillData();
-    }
-
-    private void fillData() {
-        //Fields from the database
-        String[] from = new String[]{DataStorage.Items._ID, DataStorage.Items.NAME,
-                DataStorage.Items.CREATED_DATE};
-        //UI fields to which the data is mapped
-        int[] to = new int[]{R.id.item_name, R.id.item_creation_date};
-
-        getLoaderManager().initLoader(0, null, this);
-        adapter = new SimpleCursorAdapter(context, R.layout.item_row, null, from, to, 0);
-        listView.setAdapter(adapter);
-    }
+	@Override
+	public void onLoaderReset(Loader loader) {
+		adapter.swapCursor(null);
+	}
 }

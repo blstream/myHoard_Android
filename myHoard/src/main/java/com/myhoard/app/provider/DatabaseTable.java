@@ -37,8 +37,11 @@ public abstract class DatabaseTable {
 	}
 
 	public abstract void createTable(SQLiteDatabase db);
+
 	public abstract void upgradeTable(SQLiteDatabase db, int oldVersion, int newVersion);
+
 	public abstract Cursor query(SQLiteDatabase db, String[] projection, String selection, String[] selectionArgs, String sortOrder);
+
 	public abstract Uri insert(SQLiteDatabase db, ContentValues values);
 
 	public int delete(SQLiteDatabase db, String selection, String[] selectionArgs) {

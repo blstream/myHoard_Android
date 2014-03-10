@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-
 import com.myhoard.app.provider.DataStorage.Collections;
 
 public class CollectionsTable extends DatabaseTable {
@@ -28,10 +27,10 @@ public class CollectionsTable extends DatabaseTable {
 				.append(Collections.NAME + " TEXT, ")
 				.append(Collections.DESCRIPTION + " TEXT, ")
 				.append(Collections.AVATAR_FILE_NAME + " TEXT, ")
-                .append(Collections.TAGS + " TEXT, ")
-                .append(Collections.CREATED_DATE + " NUMERIC, ")
-                .append(Collections.MODIFIED_DATE + " NUMERIC, ")
-                .append(Collections.SERVERS + " TEXT)");
+				.append(Collections.TAGS + " TEXT, ")
+				.append(Collections.CREATED_DATE + " NUMERIC, ")
+				.append(Collections.MODIFIED_DATE + " NUMERIC, ")
+				.append(Collections.SERVERS + " TEXT)");
 		db.execSQL(sql.toString());
 	}
 

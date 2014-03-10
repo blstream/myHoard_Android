@@ -15,16 +15,15 @@ import com.myhoard.app.R;
 public class TermsFragment extends DialogFragment {
 
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 
+		getDialog().setTitle(getString(R.string.terms_of_use));
+		View v = inflater.inflate(R.layout.terms_fragment_activity, container, false);
+		TextView text = (TextView) v.findViewById(R.id.text_term_fragment);
 
-        getDialog().setTitle(getString(R.string.terms_of_use));
-        View v = inflater.inflate(R.layout.terms_fragment_activity,container,false);
-      TextView text = (TextView)v.findViewById(R.id.text_term_fragment);
+		return v;
 
-       return v;
-
-    }
+	}
 }

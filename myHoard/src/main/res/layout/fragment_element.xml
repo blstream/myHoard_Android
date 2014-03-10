@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <TextView
-    android:id="@+id/nameLabel"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/element_name" />
+        android:id="@+id/nameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/element_name" />
 
     <EditText
         android:id="@+id/nameEditText"
@@ -22,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/nameLabel"
         android:layout_toRightOf="@+id/nameLabel"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/descriptionLabel"
@@ -30,14 +31,14 @@
         android:layout_height="wrap_content"
         android:text="@string/element_description"
         android:layout_below="@+id/nameEditText"
-        android:layout_alignParentLeft="true"/>
+        android:layout_alignParentLeft="true" />
 
     <EditText
         android:id="@+id/descriptionEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/descriptionLabel"
-        android:layout_toRightOf="@+id/descriptionLabel"/>
+        android:layout_toRightOf="@+id/descriptionLabel" />
 
     <TextView
         android:id="@+id/descriptionTextView"
@@ -45,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/descriptionLabel"
         android:layout_toRightOf="@+id/descriptionLabel"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/photoLabel"
@@ -53,7 +54,7 @@
         android:layout_height="wrap_content"
         android:text="@string/element_photo"
         android:layout_below="@+id/descriptionEditText"
-        android:layout_alignParentLeft="true"/>
+        android:layout_alignParentLeft="true" />
 
     <ImageView
         android:id="@+id/ivThumbnailPhoto"
@@ -71,7 +72,7 @@
         android:layout_marginTop="5dp"
         android:layout_below="@+id/ivThumbnailPhoto"
         android:layout_alignParentLeft="true"
-        android:text="@string/save"/>
+        android:text="@string/save" />
 
     <Button
         android:id="@+id/cancelBtn"
@@ -79,6 +80,6 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/saveBtn"
         android:layout_alignTop="@+id/saveBtn"
-        android:text="@string/cancel"/>
+        android:text="@string/cancel" />
 
 </RelativeLayout>

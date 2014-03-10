@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.myhoard.app.R;
 import com.myhoard.app.provider.DataStorage;
 
@@ -37,73 +36,72 @@ import com.myhoard.app.provider.DataStorage;
  */
 
 public class ImageAdapter extends CursorAdapter {
-    private int width = 200;
+	private int width = 200;
 
 
-    public ImageAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+	public ImageAdapter(Context context, Cursor c, int flags) {
+		super(context, c, flags);
 
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        //noinspection deprecation
-        width = display.getWidth() / 2;  // deprecated from api 13
-    }
+		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		Display display = wm.getDefaultDisplay();
+		//noinspection deprecation
+		width = display.getWidth() / 2;  // deprecated from api 13
+	}
+
+	@Override
+	public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+		LayoutInflater inflater = LayoutInflater.from(context);
+		View v = inflater.inflate(R.layout.collection_griditem, viewGroup, false);
+
+		ViewHolder holder = new ViewHolder();
+		if (v != null) {
+			holder.name = (TextView) v.findViewById(R.id.tvSquareName);
+			holder.img = (ImageView) v.findViewById(R.id.ivSquareAvatar);
+			holder.nameIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.NAME);
+			holder.imgIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.AVATAR_FILE_NAME);
+			v.setTag(holder);
+		}
+
+		bindView(v, context, cursor);
+		return v;
+	}
+
+	private Drawable resizeImage(Context c, Drawable d, int width) {
+
+		Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+		//noinspection SuspiciousNameCombination
+		Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, width, width, false);
+		return new BitmapDrawable(c.getResources(), bitmapResized);
+
+	}
+
+	@Override
+	public void bindView(View view, Context context, Cursor cursor) {
+		if (cursor.isClosed()) return;
+
+		ViewHolder holder = (ViewHolder) view.getTag();
+		holder.name.setText(cursor.getString(holder.nameIndex));
 
 
-    private Drawable resizeImage(Context c, Drawable d, int width) {
+		Drawable d;
+		if (cursor.getString(holder.imgIndex) == null) {
+			d = context.getResources().getDrawable(R.drawable.nophoto);
+		} else {
+			d = new BitmapDrawable(context.getResources(), cursor.getString(holder.imgIndex));
+			//d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
+			//noinspection SuspiciousNameCombination
+			d = resizeImage(context, d, width);
+		}
+		holder.img.setImageDrawable(d);
 
-        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-        //noinspection SuspiciousNameCombination
-        Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, width, width, false);
-        return new BitmapDrawable(c.getResources(), bitmapResized);
+	}
 
-    }
-
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View v = inflater.inflate(R.layout.collection_griditem, viewGroup, false);
-
-        ViewHolder holder = new ViewHolder();
-        if (v != null) {
-            holder.name = (TextView) v.findViewById(R.id.tvSquareName);
-            holder.img = (ImageView) v.findViewById(R.id.ivSquareAvatar);
-            holder.nameIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.NAME);
-            holder.imgIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.AVATAR_FILE_NAME);
-            v.setTag(holder);
-        }
-
-        bindView(v, context, cursor);
-        return v;
-    }
-
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        if (cursor.isClosed()) return;
-
-        ViewHolder holder = (ViewHolder) view.getTag();
-        holder.name.setText(cursor.getString(holder.nameIndex));
-
-
-        Drawable d;
-        if (cursor.getString(holder.imgIndex) == null) {
-            d = context.getResources().getDrawable(R.drawable.nophoto);
-        } else {
-            d = new BitmapDrawable(context.getResources(), cursor.getString(holder.imgIndex));
-            //d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
-            //noinspection SuspiciousNameCombination
-            d = resizeImage(context, d, width);
-        }
-        holder.img.setImageDrawable(d);
-
-    }
-
-    private static class ViewHolder {
-        int nameIndex;
-        int imgIndex;
-        TextView name;
-        ImageView img;
-    }
+	private static class ViewHolder {
+		int nameIndex;
+		int imgIndex;
+		TextView name;
+		ImageView img;
+	}
 
 
 }

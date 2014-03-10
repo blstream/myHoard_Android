@@ -29,72 +29,72 @@ import java.lang.ref.WeakReference;
  * Created by Rafał Soudani on 21.02.2014
  */
 public class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
-    private final WeakReference<ImageButton> imageViewReference;
-    private String data = "";
-    Context context;
+	private final WeakReference<ImageButton> imageViewReference;
+	Context context;
+	private String data = "";
 
-    public BitmapWorkerTask(ImageButton imageButton, Context context) {
-        this.context = context;
+	public BitmapWorkerTask(ImageButton imageButton, Context context) {
+		this.context = context;
 
-        // Use a WeakReference to ensure the ImageView can be garbage collected
-        imageViewReference = new WeakReference<ImageButton>(imageButton);
+		// Use a WeakReference to ensure the ImageView can be garbage collected
+		imageViewReference = new WeakReference<ImageButton>(imageButton);
 
-    }
+	}
 
-    // Decode image in background.
-    @Override
-    protected Bitmap doInBackground(String... params) {
-        data = params[0];
-        return decodeSampledBitmapFromResource(context.getResources(), data, 100, 100);
-    }
+	// Decode image in background.
+	@Override
+	protected Bitmap doInBackground(String... params) {
+		data = params[0];
+		return decodeSampledBitmapFromResource(context.getResources(), data, 100, 100);
+	}
 
-    // Once complete, see if ImageView is still around and set bitmap.
-    @Override
-    protected void onPostExecute(Bitmap bitmap) {
-        if (imageViewReference != null && bitmap != null) {
-            final ImageView imageView = imageViewReference.get();
-            if (imageView != null) {
-                imageView.setImageBitmap(bitmap);
-            }
-        }
-    }
+	// Once complete, see if ImageView is still around and set bitmap.
+	@Override
+	protected void onPostExecute(Bitmap bitmap) {
+		if (imageViewReference != null && bitmap != null) {
+			final ImageView imageView = imageViewReference.get();
+			if (imageView != null) {
+				imageView.setImageBitmap(bitmap);
+			}
+		}
+	}
 
-    public static Bitmap decodeSampledBitmapFromResource(Resources res, String imgPath,
-                                                         int reqWidth, int reqHeight) {
+	public static Bitmap decodeSampledBitmapFromResource(Resources res, String imgPath,
+	                                                     int reqWidth, int reqHeight) {
 
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imgPath, options);
+		// First decode with inJustDecodeBounds=true to check dimensions
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(imgPath, options);
 
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+		// Calculate inSampleSize
+		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(imgPath, options);
-    }
+		// Decode bitmap with inSampleSize set
+		options.inJustDecodeBounds = false;
+		return BitmapFactory.decodeFile(imgPath, options);
+	}
 
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
+	public static int calculateInSampleSize(
+			BitmapFactory.Options options, int reqWidth, int reqHeight) {
+		// Raw height and width of image
+		final int height = options.outHeight;
+		final int width = options.outWidth;
+		int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
+		if (height > reqHeight || width > reqWidth) {
 
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
+			final int halfHeight = height / 2;
+			final int halfWidth = width / 2;
 
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
+			// Calculate the largest inSampleSize value that is a power of 2 and keeps both
+			// height and width larger than the requested height and width.
+			while ((halfHeight / inSampleSize) > reqHeight
+					&& (halfWidth / inSampleSize) > reqWidth) {
+				inSampleSize *= 2;
+			}
+		}
 
-        return inSampleSize;
-    }
+		return inSampleSize;
+	}
 }
