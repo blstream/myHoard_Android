@@ -16,24 +16,55 @@
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="5dp">
 
-    <com.myhoard.app.views.SquareImageView
-        android:id="@+id/ivSquareAvatar"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:background="@drawable/grid_item_border"
+        tools:ignore="UselessParent">
+
+        <com.myhoard.app.views.SquareImageView
+            android:id="@+id/ivSquareAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop" />
 
     <TextView
-        android:id="@+id/tvSquareName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="15dp"
-        android:paddingBottom="15dp"
-        android:layout_gravity="bottom"
-        android:textColor="@android:color/white"
-        android:background="#55000000" />
+        android:id="@+id/tvSquareCount"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:layout_alignBottom="@id/ivSquareAvatar"
+        android:layout_alignRight="@id/ivSquareAvatar"
+        android:layout_margin="5dp"
+        android:background="@drawable/oval"
+        android:textColor="@color/collectionListName"
+        android:textStyle="bold"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ivSquareAvatar"
+            android:background="#000000"
+            android:orientation="vertical"
+            android:padding="2dp">
+
+            <TextView
+                android:id="@+id/tvSquareName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="@color/collectionListName" />
+
+            <TextView
+                android:id="@+id/tvSquareTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#ffdddddd" />
+        </LinearLayout>
+    </RelativeLayout>
 </FrameLayout>

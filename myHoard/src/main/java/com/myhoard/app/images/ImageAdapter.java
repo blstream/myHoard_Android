@@ -56,9 +56,13 @@ public class ImageAdapter extends CursorAdapter {
 		ViewHolder holder = new ViewHolder();
 		if (v != null) {
 			holder.name = (TextView) v.findViewById(R.id.tvSquareName);
+			holder.tags = (TextView) v.findViewById(R.id.tvSquareTags);
 			holder.img = (ImageView) v.findViewById(R.id.ivSquareAvatar);
+            holder.count = (TextView) v.findViewById(R.id.tvSquareCount);
 			holder.nameIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.NAME);
+			holder.tagsIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.TAGS);
 			holder.imgIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.AVATAR_FILE_NAME);
+            //TODO: holder.countIndex = get collection items count
 			v.setTag(holder);
 		}
 
@@ -81,6 +85,8 @@ public class ImageAdapter extends CursorAdapter {
 
 		ViewHolder holder = (ViewHolder) view.getTag();
 		holder.name.setText(cursor.getString(holder.nameIndex));
+        holder.tags.setText(cursor.getString(holder.tagsIndex));
+        holder.count.setText("0"); //TODO: get collection items count
 
 
 		Drawable d;
@@ -99,7 +105,11 @@ public class ImageAdapter extends CursorAdapter {
 	private static class ViewHolder {
 		int nameIndex;
 		int imgIndex;
+        int countIndex;
+        int tagsIndex;
 		TextView name;
+		TextView tags;
+        TextView count;
 		ImageView img;
 	}
 

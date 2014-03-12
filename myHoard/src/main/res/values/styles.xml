@@ -1,8 +1,23 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="AppTheme"
+        parent="Theme.AppCompat.Light">
+        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/MyActionBar</item>
+
+
+        <!-- Support library compatibility -->
+        <item name="actionBarStyle">@style/MyActionBar</item>
     </style>
 
-</resources>
+    <!-- ActionBar styles -->
+    <style name="MyActionBar"
+        parent="@style/Widget.AppCompat.Light.ActionBar">
+        <item name="android:background">@color/actionBarBackgroundColor</item>
+        <item name="android:icon">@android:color/transparent</item>
+
+        <!-- Support library compatibility -->
+        <item name="background">@color/actionBarBackgroundColor</item>
+        <item name="icon">@android:color/transparent</item>
+    </style>
+    </resources>
