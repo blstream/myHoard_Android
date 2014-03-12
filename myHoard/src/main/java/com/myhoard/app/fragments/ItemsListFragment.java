@@ -4,10 +4,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,6 +25,8 @@ import com.myhoard.app.provider.DataStorage;
 public class ItemsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 	public static final String Selected_Collection_ID = "id";
+    private static final int DELETE_ID = Menu.FIRST + 1;
+    private static final int EDIT_ID = Menu.FIRST + 2;
 	private SimpleCursorAdapter adapter;
 	private Context context;
 	private ListView listView;
@@ -48,6 +53,28 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 			public void onItemClick(AdapterView<?> parent, View view,
 			                        int position, long id) {
 				//TODO item clicked action
+                //Testing for collection element - author Sebastian Peryt
+                // Create new fragment and transaction
+                Fragment newFragment = new ElementFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+                // DO NOT USE - Testing
+                // Add arguments to opened fragment element
+                //Bundle b = new Bundle();
+                // put name
+                //b.putString(ElementFragment.NAME,"NAME");
+                // put description
+                //b.putString(ElementFragment.DESCRIPTION,"DESCRIPTION");
+                //newFragment.setArguments(b);
+                // FROM THIS POINT -> USE
+
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack
+                transaction.replace(R.id.container, newFragment);
+                transaction.addToBackStack(null);
+
+                // Commit the transaction
+                transaction.commit();
 			}
 		});
 
@@ -63,6 +90,14 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 		super.onResume();
 		fillData();
 	}
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0, EDIT_ID, 0, R.string.menu_edit);
+        menu.add(0, DELETE_ID, 1, R.string.menu_delete);
+    }
 
 	private void fillData() {
 		//Fields from the database
