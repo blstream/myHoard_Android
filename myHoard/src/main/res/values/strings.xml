@@ -55,5 +55,6 @@
     <string name="noItems">This collection is empty.</string>
     <string name="title_items_activity">ItemsActivity</string>
     <string name="action_acra">Error! Send message to Android group!</string>
+    <string name="action_new_element">New Element</string>
 
 </resources>

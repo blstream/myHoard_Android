@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import com.myhoard.app.R;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
+import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.OnFragmentClickListener;
 import com.myhoard.app.fragments.SearchFragment;
 
@@ -84,12 +85,21 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
 		// as you specify a parent activity in AndroidManifest.xml.
 		switch (item.getItemId()) {
 		case R.id.action_new_collection:
-			if (!getVisibleFragmentTag().equals("NewCollection")) {
+			if (!getVisibleFragmentTag().equals("NewCollection") &&
+                    !getVisibleFragmentTag().equals("ItemsList") &&
+                    !getVisibleFragmentTag().equals("NewElement")) {
+                item.setTitle(R.string.action_new_collection);//TODO correct
 				getSupportFragmentManager().beginTransaction()
 						.replace(R.id.container, new CollectionFragment(), "NewCollection")
 						.addToBackStack("NewCollection")
 						.commit();
-			}
+			} else if (getVisibleFragmentTag().equals("ItemsList")) {
+                item.setTitle(R.string.action_new_element);//TODO correct
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, new ElementFragment(), "NewElement")
+                        .addToBackStack("NewElement")
+                        .commit();
+            }
 			break;
 		case R.id.action_login:
 			Intent intent = new Intent(MainActivity.this, LoginActivity.class);

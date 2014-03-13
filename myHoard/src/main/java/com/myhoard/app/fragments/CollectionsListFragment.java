@@ -78,8 +78,8 @@ public class CollectionsListFragment extends Fragment implements
 				b.putLong(ItemsListFragment.Selected_Collection_ID, l);
 				newFragment.setArguments(b);
 
-				transaction.replace(R.id.container, newFragment);
-				transaction.addToBackStack(null);
+				transaction.replace(R.id.container, newFragment, "ItemsList");
+				transaction.addToBackStack("ItemsList");
 
 				transaction.commit();
 			}
