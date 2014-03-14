@@ -19,7 +19,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="5dp">
+    android:padding="7dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -42,7 +42,7 @@
         android:layout_alignRight="@id/ivSquareAvatar"
         android:layout_margin="5dp"
         android:background="@drawable/oval"
-        android:textColor="@color/collectionListName"
+        android:textColor="@color/yellow_main"
         android:textStyle="bold"/>
 
         <LinearLayout
@@ -58,13 +58,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:textColor="@color/collectionListName" />
+                android:textColor="@color/yellow_main" />
 
             <TextView
                 android:id="@+id/tvSquareTags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#ffdddddd" />
+                android:textColor="@color/gray_main" />
         </LinearLayout>
     </RelativeLayout>
 </FrameLayout>

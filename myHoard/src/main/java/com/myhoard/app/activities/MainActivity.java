@@ -22,21 +22,25 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import com.myhoard.app.R;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
-import com.myhoard.app.fragments.OnFragmentClickListener;
 import com.myhoard.app.fragments.SearchFragment;
 
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity implements OnFragmentClickListener {
+public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
 	CollectionsListFragment collectionsListFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+        //Listen for changes in the back stack
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
+        shouldDisplayHomeUp();
 
 		collectionsListFragment = new CollectionsListFragment();
 		FragmentManager fm = getSupportFragmentManager();
@@ -74,7 +78,7 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
 
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-		return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -85,11 +89,14 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
 		switch (item.getItemId()) {
 		case R.id.action_new_collection:
 			if (!getVisibleFragmentTag().equals("NewCollection")) {
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.container, new CollectionFragment(), "NewCollection")
-						.addToBackStack("NewCollection")
+                FragmentManager fm = getSupportFragmentManager();
+				fm.beginTransaction()
+                        .remove(fm.findFragmentByTag(getVisibleFragmentTag()))
+						.add(R.id.container, new CollectionFragment(), "NewCollection")
+						.addToBackStack(getVisibleFragmentTag())
 						.commit();
 			}
+
 			break;
 		case R.id.action_login:
 			Intent intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -97,6 +104,7 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
 			break;
 		case R.id.action_search:
 			if (!getVisibleFragmentTag().equals("Search")) {
+
 				getSupportFragmentManager().beginTransaction()
 						.replace(R.id.container, new SearchFragment(), "Search")
 						.addToBackStack("Search")
@@ -109,9 +117,21 @@ public class MainActivity extends ActionBarActivity implements OnFragmentClickLi
 		return true;
 	}
 
-	@Override
-	public void OnFragmentClick() {
-		getSupportFragmentManager().beginTransaction().replace(R.id.container,
-				collectionsListFragment, "Main").addToBackStack("Main").commit();
-	}
+    @Override
+    public void onBackStackChanged() {
+        shouldDisplayHomeUp();
+    }
+
+    public void shouldDisplayHomeUp(){
+        //Enable Up button only  if there are entries in the back stack
+        boolean canBack = getSupportFragmentManager().getBackStackEntryCount()>0;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        //This method is called when the up button is pressed. Just the pop back stack.
+        getSupportFragmentManager().popBackStack();
+        return true;
+    }
 }

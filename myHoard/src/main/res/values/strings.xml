@@ -55,5 +55,9 @@
     <string name="noItems">This collection is empty.</string>
     <string name="title_items_activity">ItemsActivity</string>
     <string name="action_acra">Error! Send message to Android group!</string>
+    <string name="accept">Accept</string>
+    <string name="new_collection">New collection</string>
+    <string name="collection_type">Type:</string>
+    <string name="action_camera">Camera</string>
 
 </resources>

@@ -28,6 +28,7 @@ import android.support.v4.content.Loader;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,7 @@ public class CollectionsListFragment extends Fragment implements
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
 		context = getActivity();
+        setHasOptionsMenu(true);
 		return inflater.inflate(R.layout.fragment_collections_list, container, false);
 	}
 
@@ -140,6 +142,15 @@ public class CollectionsListFragment extends Fragment implements
 		}
 		return super.onContextItemSelected(item);
 	}
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.main, menu);
+        getActivity().setTitle(context.getString(R.string.app_name));
+    }
 
 	public void fillGridView() {
 		getLoaderManager().restartLoader(0, null, this);

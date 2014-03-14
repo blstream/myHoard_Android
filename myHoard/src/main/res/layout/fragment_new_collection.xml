@@ -28,118 +28,93 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#f0f0f0"
-            android:paddingTop="75dp"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:background="@color/backgroundColor"
             android:weightSum="1">
 
             <TextView
                 android:id="@+id/tvCollectionName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/gray_main"
                 android:textSize="22sp"
-                android:text="@string/collection_name"
-                android:layout_gravity="center_horizontal" />
+                android:text="@string/collection_name"/>
 
             <EditText
                 android:id="@+id/etCollectionName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginBottom="10dp"
                 android:singleLine="true"
                 android:textSize="24sp"
-                android:background="#0f0f0f0f"
+                android:background="#000000"
+                android:textColor="@color/yellow_main"
                 android:layout_gravity="center_horizontal" />
-
-
-            <TextView
-                android:id="@+id/tvCollectionAvatar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="22sp"
-                android:text="@string/collection_avatar"
-                android:layout_gravity="center_horizontal" />
-
-            <ImageButton
-                android:id="@+id/ibCollectionAvatar"
-                android:layout_width="160dp"
-                android:layout_height="160dp"
-                android:src="@drawable/nophoto"
-                android:layout_gravity="center" />
 
             <TextView
                 android:id="@+id/tvCollectionTags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/gray_main"
                 android:textSize="22sp"
-                android:text="@string/collection_tags"
+                android:text="@string/collection_tags" />
+
+            <EditText
+                android:id="@+id/etCollectionTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:singleLine="true"
+                android:textSize="24sp"
+                android:background="#000000"
+                android:focusable="false"
+                android:textColor="@color/yellow_main"
+                android:text="Tags are not complete"
                 android:layout_gravity="center_horizontal" />
-
-            <LinearLayout
-                android:id="@+id/layoutCollectionTags"
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center" />
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center">
-
-                <Button
-                    android:id="@+id/bCollectionTagAdd"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="ADD TAG" />
-
-                <Button
-                    android:id="@+id/bCollectionTagDelete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:visibility="gone"
-                    android:text="DELETE TAG" />
-            </LinearLayout>
 
             <TextView
-                android:id="@+id/tvCollectionAvatar"
+                android:id="@+id/tvCollectionDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/gray_main"
                 android:textSize="22sp"
-                android:text="@string/collection_description"
-                android:layout_gravity="center_horizontal" />
+                android:text="@string/collection_description" />
 
 
             <EditText
                 android:id="@+id/etCollectionDescription"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="10dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:textSize="24sp"
                 android:gravity="top"
                 android:inputType="textMultiLine"
-                android:ems="10"
-                android:background="#0f0f0f0f"
+                android:background="#000000"
+                android:textColor="@color/gray_description"
+                android:minLines="4"
                 android:layout_gravity="center_horizontal" />
 
+            <TextView
+                android:id="@+id/tvCollectionType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray_main"
+                android:textSize="22sp"
+                android:text="@string/collection_type"/>
 
-        </LinearLayout>
+            <EditText
+                android:id="@+id/etCollectionType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:singleLine="true"
+                android:textSize="24sp"
+                android:background="#000000"
+                android:focusable="false"
+                android:textColor="@color/yellow_main"
+                android:text="Type is not complete"
+                android:layout_gravity="center_horizontal" />
+</LinearLayout>
     </ScrollView>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="15dp"
-        android:background="#f0f0f0">
-
-        <Button
-            android:id="@+id/bCollectionAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/collection_add" />
-    </FrameLayout>
 </FrameLayout>
