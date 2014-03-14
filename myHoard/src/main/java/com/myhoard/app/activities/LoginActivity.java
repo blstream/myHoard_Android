@@ -45,6 +45,7 @@ public class LoginActivity extends ActionBarActivity {
 			public void onClick(View view) {
 				Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
 				startActivity(intent);
+
 			}
 		});
 

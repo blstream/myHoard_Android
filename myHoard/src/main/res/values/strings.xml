@@ -6,7 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="Accept_of_terms">I read and accept terms of use</string>
     <string name="app_name">MyHoard</string>
-    <string name="blabla">blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla</string>
     <string name="checkbox_not_check_registration">You have to accept the terms of use</string>
     <string name="collection_add">ADD COLLECTION</string>
     <string name="collection_avatar">Avatar:</string>
@@ -19,7 +18,7 @@
     <string name="menu_edit">Edit</string>
     <string name="noentries">Add a new collection in the upper right corner</string>
     <string name="Password">Password</string>
-    <string name="password_information">Password must contain at least 5 characters, least 1 number,both lower and uppercase letters and special characters</string>
+    <string name="password_information">Password must contain at least 4 characters</string>
     <string name="Register">Register</string>
     <string name="Registration_form">Registration form</string>
     <string name="Registration_link">New to myHoard? Register here</string>
