@@ -15,8 +15,6 @@
 
 package com.myhoard.app.fragments;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Context;
@@ -35,25 +33,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
+import com.myhoard.app.dialogs.TypeDialog;
 import com.myhoard.app.provider.DataStorage;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * Created by Rafał Soudani on 20.02.2014
  */
-public class CollectionFragment extends Fragment implements View.OnClickListener,
-		LoaderManager.LoaderCallbacks<Cursor> {
+public class CollectionFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 	private static final int LOAD_DATA_FOR_EDIT = 20;
 	private static final int LOAD_NAMES = 30;
@@ -61,9 +54,8 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
 	private Long mEditId;
 	private String mName, mDescription;
 	private ArrayList<String> mNamesList = new ArrayList<>();
-	private List<String> mTagsAvailable = new ArrayList<>();
 	private String mTags = "";
-	private EditText etCollectionName, etCollectionDescription, etCollectionTags;
+	private EditText etCollectionName, etCollectionDescription, etCollectionTags, etCollectionType;
 
 	public CollectionFragment() {
 		super();
@@ -74,74 +66,6 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
 		mEditId = args.getLong("id");
 
 	}
-
-	@Override
-	public void onClick(View view) {
-		switch (view.getId()) {
-            //TODO: Tags
-		case R.id.etCollectionTags: {
-			AlertDialog.Builder builder = new AlertDialog.Builder(context);
-			builder.setTitle(context.getString(R.string.select_tag_to_add));
-
-			final ListView modeList = new ListView(context);
-			builder.setView(modeList);
-			final Dialog dialog = builder.create();
-			ArrayAdapter<String> modeAdapter = new ArrayAdapter<>(context,
-					android.R.layout.simple_list_item_1, android.R.id.text1, mTagsAvailable);
-			modeList.setAdapter(modeAdapter);
-			modeList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> adapterView, View v, int i, long l) {
-					//noinspection ConstantConditions
-					String item = ((TextView) v).getText().toString();
-
-					mTagsAvailable.remove(item);
-					mTags += item + ",";
-					dialog.dismiss();
-				}
-			});
-
-			dialog.show();
-		}
-		break;
-
-        //Wait for UX
-		/*case R.id.bCollectionTagDelete:
-			AlertDialog.Builder builder = new AlertDialog.Builder(context);
-			builder.setTitle(context.getString(R.string.select_tag_to_delete));
-
-			final ListView modeList = new ListView(context);
-			builder.setView(modeList);
-			final Dialog dialog = builder.create();
-			final List<String> tags = Arrays.asList(mTags.split("\\s*,\\s*"));
-			ArrayAdapter<String> modeAdapter = new ArrayAdapter<>(context,
-					android.R.layout.simple_list_item_1, android.R.id.text1, tags);
-			modeList.setAdapter(modeAdapter);
-			modeList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> adapterView, View v, int i, long l) {
-					//noinspection ConstantConditions
-					String item = ((TextView) v).getText().toString();
-					mTagsAvailable.add(item);
-					mTags = "";
-					for (String s : tags) {
-						if (!s.equals(item)) mTags += s + " , ";
-					}
-					if (mTags.isEmpty()) bDeleteTag.setVisibility(View.GONE);
-					bAddTag.setVisibility(View.VISIBLE);
-					tagsLayout.removeAllViews();
-					getTags();
-					dialog.dismiss();
-				}
-			});
-
-			dialog.show();
-
-
-		}*/
-	}}
-
-
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -155,10 +79,14 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
 			etCollectionName = (EditText) v.findViewById(R.id.etCollectionName);
 			etCollectionDescription = (EditText) v.findViewById(R.id.etCollectionDescription);
             etCollectionTags = (EditText) v.findViewById(R.id.etCollectionTags);
-            etCollectionTags.setOnClickListener(this);
-
-
-			fillTags();
+            etCollectionType = (EditText) v.findViewById(R.id.etCollectionType);
+            etCollectionType.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    TypeDialog typeDialog = new TypeDialog();
+                    typeDialog.show(getFragmentManager(),"");
+                }
+            });
 
 
 			if (!this.getTag().equals("EditCollection")) {
@@ -168,7 +96,7 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
 			if (savedInstanceState != null) {
 				mEditId = savedInstanceState.getLong("editId");
 				mTags = savedInstanceState.getString("tags");
-				//TODO: Tags
+				etCollectionTags.setText(mTags);
 			} else if (this.getTag().equals("EditCollection")) {
 				getLoaderManager().restartLoader(LOAD_DATA_FOR_EDIT, null, this);
 			}
@@ -206,6 +134,9 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
                         if (etCollectionDescription.getText() != null) {
                             mDescription = etCollectionDescription.getText().toString();
                         }
+                        if (etCollectionTags.getText() != null) {
+                            mTags = etCollectionTags.getText().toString();
+                        }
                         ContentValues values = new ContentValues();
                         values.put(DataStorage.Collections.NAME, mName);
                         values.put(DataStorage.Collections.DESCRIPTION, mDescription);
@@ -240,17 +171,11 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
         return true;
     }
 
-    private void fillTags() {
-		mTagsAvailable.add("Zamki");
-		mTagsAvailable.add("Kapsle");
-		mTagsAvailable.add("Ludzie");
-	}
-
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		if (mEditId != null) outState.putLong("editId", mEditId);
-		outState.putString("tags", mTags);
+		//TODO: delete outState.putString("tags", mTags);
 	}
 
 	@Override
@@ -282,11 +207,8 @@ public class CollectionFragment extends Fragment implements View.OnClickListener
 			etCollectionName.setText(mName);
 			mDescription = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.DESCRIPTION));
 			etCollectionDescription.setText(mDescription);
-			if (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TAGS)) != null) {
-				mTags = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TAGS));
-                //TODO collectionTags display here
-			}
-			etCollectionDescription.setText(mDescription);
+            mTags = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TAGS));
+            etCollectionTags.setText(mTags);
 			break;
 		case LOAD_NAMES:
 			while (!cursor.isAfterLast()) {

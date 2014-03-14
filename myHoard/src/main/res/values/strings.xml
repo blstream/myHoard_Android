@@ -59,6 +59,7 @@
     <string name="collection_type">Type:</string>
     <string name="action_camera">Camera</string>
     <string name="action_new_element">New Element</string>
+    <string name="offline">offline</string>
 
 
 </resources>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="actionBarBackgroundColor">#ffffc002</color>
-    <color name="backgroundColor">#ff333333</color>
+    <color name="gray_background">#ff333333</color>
     <color name="yellow_main">#ffffc002</color>
-    <color name="gray_main">#b3b3b3</color>
+    <color name="gray_text">#b3b3b3</color>
     <color name="gray_description">#e6e6e6</color>
 </resources>

@@ -41,7 +41,7 @@
         android:layout_alignBottom="@id/ivSquareAvatar"
         android:layout_alignRight="@id/ivSquareAvatar"
         android:layout_margin="5dp"
-        android:background="@drawable/oval"
+        android:background="@drawable/items_count_oval"
         android:textColor="@color/yellow_main"
         android:textStyle="bold"/>
 
@@ -64,7 +64,7 @@
                 android:id="@+id/tvSquareTags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/gray_main" />
+                android:textColor="@color/gray_text" />
         </LinearLayout>
     </RelativeLayout>
 </FrameLayout>
