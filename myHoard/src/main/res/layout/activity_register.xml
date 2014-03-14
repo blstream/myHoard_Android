@@ -55,23 +55,6 @@
                 android:id="@+id/password_register"
                 android:layout_margin="20dp" />
 
-            <CheckBox
-                android:layout_width="341dp"
-                android:layout_height="wrap_content"
-                android:text="@string/Accept_of_terms"
-                android:id="@+id/checkBox_reg"
-                android:checked="false"
-                android:layout_margin="20dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/terms_of_use"
-                android:id="@+id/text_term"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp" />
-
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

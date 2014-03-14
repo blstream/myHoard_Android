@@ -11,6 +11,7 @@ import android.support.v4.content.Loader;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -60,18 +61,16 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
                 // DO NOT USE - Testing
                 // Add arguments to opened fragment element
-                //Bundle b = new Bundle();
-                // put name
-                //b.putString(ElementFragment.NAME,"NAME");
-                // put description
-                //b.putString(ElementFragment.DESCRIPTION,"DESCRIPTION");
-                //newFragment.setArguments(b);
+                Bundle b = new Bundle();
+                // put id
+                b.putLong(ElementFragment.ID,id);
+                newFragment.setArguments(b);
                 // FROM THIS POINT -> USE
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack
-                transaction.replace(R.id.container, newFragment);
-                transaction.addToBackStack(null);
+                transaction.replace(R.id.container, newFragment, "NewElement");
+                transaction.addToBackStack("NewElement");
 
                 // Commit the transaction
                 transaction.commit();
@@ -107,7 +106,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 		int[] to = new int[]{R.id.item_name, R.id.item_creation_date};
 
 		getLoaderManager().initLoader(0, null, this);
-		adapter = new SimpleCursorAdapter(context, R.layout.item_row, null, from, to, 0);
+		adapter = new SimpleCursorAdapter(context, R.layout.item_row, null, from, to);
 		listView.setAdapter(adapter);
 	}
 
@@ -128,11 +127,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
 	@Override
 	public void onLoadFinished(Loader loader, Cursor data) {
-		adapter.swapCursor(data);
+		adapter.changeCursor(data);
 	}
 
 	@Override
 	public void onLoaderReset(Loader loader) {
-		adapter.swapCursor(null);
+		adapter.changeCursor(null);
 	}
 }

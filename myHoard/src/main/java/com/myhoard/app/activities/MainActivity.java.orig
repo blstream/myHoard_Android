@@ -93,6 +93,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     !getVisibleFragmentTag().equals("ItemsList") &&
                     !getVisibleFragmentTag().equals("NewElement")) {
                 item.setTitle(R.string.action_new_collection);//TODO correct
+						.add(R.id.container, new CollectionFragment(), "NewCollection")
+						.addToBackStack(getVisibleFragmentTag())
 				getSupportFragmentManager().beginTransaction()
 						.replace(R.id.container, new CollectionFragment(), "NewCollection")
 						.addToBackStack("NewCollection")

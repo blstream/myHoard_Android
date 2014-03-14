@@ -19,6 +19,7 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,15 +44,16 @@ import java.util.Date;
  */
 public class ElementFragment extends Fragment implements View.OnClickListener {
 
+    //TODO Clean and refactor code
+
 	public static final String ID = "elementId";
 	public static final String NAME = "elementName";
-	// END - Debug mode variables
 	public static final String DESCRIPTION = "elementDescription";
 	public static final String COLLECTION_ID = "elementCollectionId";
 	public static final String CREATED_DATE = "elementCreatedDate";
 	public static final String MODIFIED_DATE = "elementModifiedDate";
 	public static final String TAGS = "elementTags";
-	// Debug mode variables
+
 	private static final String TAG = "ElementFragment";
 	private static final boolean D = false;
 	private static final int REQUEST_IMAGE_CAPTURE = 2;
@@ -100,7 +102,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 			//updateMap(intent);
 			Bundle b = intent.getExtras();
 			if (!b.getBoolean("GPS")) {
-				Toast.makeText(getActivity(), "No GPS", Toast.LENGTH_SHORT).show();
+				if(D) Toast.makeText(getActivity(), "No GPS", Toast.LENGTH_SHORT).show();
 			}
 		}
 	};
@@ -150,7 +152,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 					asyncHandler.startUpdate(MODE_EDIT, null, DataStorage.Items.CONTENT_URI, values,
 							DataStorage.Items._ID + " = " + elementId, null);
 				} else {
-					//values.put(DataStorage.Elements.CREATED_DATE);
+					values.put(DataStorage.Items.CREATED_DATE, getCurrentDate());
 					asyncHandler.startInsert(MODE_ADD, null, DataStorage
 							.Items.CONTENT_URI, values);
 				}
@@ -366,4 +368,10 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 		context.sendBroadcast(mediaScanIntent);
 		return contentUri;
 	}
+
+    private String getCurrentDate() {
+        Date d = new Date();
+        CharSequence s  = DateFormat.format("d.MM.yyyy", d.getTime());
+        return s.toString();
+    }
 }
