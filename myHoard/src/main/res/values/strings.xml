@@ -61,8 +61,11 @@
     <string name="action_camera">Camera</string>
     <string name="action_new_element">New Element</string>
     <string name="offline">offline</string>
+    <string name="action_sort_by_name">Sort by Name</string>
+    <string name="action_sort_by_date">Sort by Date</string>
     <string name="first_collection_button_description">Empty image with plus</string>
     <string name="first_collection_image_description">Create your first collection</string>
+
 
 
 </resources>

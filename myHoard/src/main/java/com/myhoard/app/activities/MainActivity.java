@@ -15,6 +15,7 @@
 
 package com.myhoard.app.activities;
 
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,6 +28,7 @@ import com.myhoard.app.R;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
+import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.fragments.SearchFragment;
 
 import java.util.List;
@@ -119,9 +121,23 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 						.commit();
 			}
 			break;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
+            case R.id.action_sort:
+                //TODO place sort button!
+                if (!getVisibleFragmentTag().equals("NewCollection") &&
+                        !getVisibleFragmentTag().equals("ItemsList") &&
+                        !getVisibleFragmentTag().equals("NewElement")) {
+                    //TODO collection custom sort
+
+                } else if (getVisibleFragmentTag().equals("ItemsList")) {
+                    ItemsListFragment fragment = (ItemsListFragment) getSupportFragmentManager().
+                            findFragmentByTag("ItemsList");
+                    fragment.sortChange(item);
+                }
+
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
 		return true;
 	}
 

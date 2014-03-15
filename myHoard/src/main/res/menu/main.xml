@@ -4,6 +4,12 @@
     tools:context="com.myhoard.app.activities.MainActivity">
 
     <item
+        android:id="@+id/action_sort"
+        android:title="@string/action_sort_by_date"
+        android:orderInCategory="999"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"
