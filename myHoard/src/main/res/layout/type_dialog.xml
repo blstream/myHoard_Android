@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:background="@color/gray_background"
         android:textColor="@color/yellow_main"
-        android:text="Type:"
+        android:text="@string/collection_type_upper_case"
         android:padding="10dp"/>
 
     <RadioGroup

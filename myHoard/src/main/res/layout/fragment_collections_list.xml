@@ -14,13 +14,27 @@
         android:stretchMode="columnWidth"
         android:numColumns="2" />
 
-    <TextView
-        android:id="@+id/tvEmpty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:text="@string/noentries" />
+   <RelativeLayout
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:id="@+id/tvEmpty">
+
+       <ImageView
+           android:id="@+id/ivFirstCollectionButton"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:padding="7dp"
+           android:src="@drawable/first_collection_image"
+           android:contentDescription="@string/first_collection_button_description" />
+
+       <ImageView
+           android:layout_width="300dp"
+           android:layout_height="wrap_content"
+           android:layout_alignParentRight="true"
+           android:layout_below="@id/ivFirstCollectionButton"
+           android:src="@drawable/first_collection_text"
+           android:contentDescription="@string/first_collection_image_description" />
+
+       </RelativeLayout>
 
 </FrameLayout>

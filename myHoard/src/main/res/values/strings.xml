@@ -57,9 +57,12 @@
     <string name="accept">Accept</string>
     <string name="new_collection">New collection</string>
     <string name="collection_type">Type:</string>
+    <string name="collection_type_upper_case">TYPE:</string>
     <string name="action_camera">Camera</string>
     <string name="action_new_element">New Element</string>
     <string name="offline">offline</string>
+    <string name="first_collection_button_description">Empty image with plus</string>
+    <string name="first_collection_image_description">Create your first collection</string>
 
 
 </resources>

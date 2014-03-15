@@ -34,6 +34,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
+
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapter;
 import com.myhoard.app.provider.DataStorage;
@@ -50,7 +52,7 @@ public class CollectionsListFragment extends Fragment implements
 	private Context context;
 	private ImageAdapter adapter;
 
-	@Override
+    @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
 		context = getActivity();
@@ -64,7 +66,18 @@ public class CollectionsListFragment extends Fragment implements
 		gridView = (GridView) view.findViewById(R.id.gridview);
 		gridView.setEmptyView(view.findViewById(R.id.tvEmpty));
 
-	}
+        ImageView ivFirstCollectionButton = (ImageView) view.findViewById(R.id.ivFirstCollectionButton);
+        ivFirstCollectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, new CollectionFragment(), "NewCollection")
+                        .addToBackStack("NewCollection")
+                        .commit();
+            }
+        });
+
+    }
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
