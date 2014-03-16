@@ -108,23 +108,12 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //set sort option visible in the ItemsListFragment
         menu.findItem(R.id.action_sort).setVisible(true);
+        //set proper menu option title depending on the sort order
+        if (sortOrder == sortByDate) {
+            menu.findItem(R.id.action_sort).setTitle(R.string.action_sort_by_name);
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
-
-   /* @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()) {
-            case R.id.action_sort:
-                    itemsSortOrderChange(item);
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }*/
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
