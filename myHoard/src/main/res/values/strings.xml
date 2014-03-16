@@ -72,5 +72,7 @@
     <string name="name_too_short">Name is too short</string>
     <string name="element_position">Position:</string>
     <string name="add_image">Add image</string>
+    <string name="app_id">1388908654663237</string>
+    <string name="menu_share">Share on FB</string>
 
 </resources>
