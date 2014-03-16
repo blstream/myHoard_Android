@@ -1,6 +1,8 @@
 package com.myhoard.app.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,6 +22,13 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.RequestAsyncTask;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
 import com.myhoard.app.R;
 import com.myhoard.app.provider.DataStorage;
 
@@ -31,6 +40,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	public static final String Selected_Collection_ID = "id";
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int EDIT_ID = Menu.FIRST + 2;
+    private static final int SHARE_ID = Menu.FIRST + 3; // Facebook
+    private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
+
     private SimpleCursorAdapter adapter;
     private Context context;
     private ListView listView;
@@ -48,9 +60,27 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         return inflater.inflate(R.layout.fragment_items_list, container, false);
 	}
 
+    private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
+    private ProgressDialog mProgressDialog; //Facebook
+    private int mItemPosition;
+
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+
+        // Lifecycle Facebook session
+        Session session = Session.getActiveSession();
+        if (session == null) {
+            if (savedInstanceState != null) {
+                session = Session.restoreSession(getActivity(), null, statusCallback, savedInstanceState);
+            }
+            if (session == null) {
+                session = new Session(getActivity());
+
+            }
+            Session.setActiveSession(session);
+        }
+
 		listView = (ListView) view.findViewById(R.id.itemsList);
 		listView.setEmptyView(view.findViewById(R.id.tvNoItems));
         getLoaderManager().initLoader(0, null, this);
@@ -101,6 +131,31 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         getLoaderManager().restartLoader(0, null, this);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Session.getActiveSession().addCallback(statusCallback);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Session.getActiveSession().removeCallback(statusCallback);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Session session = Session.getActiveSession();
+        Session.saveSession(session, outState);
+    }
+
     //create options menu with a MenuInflater to have all needed options visible in this fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -119,6 +174,22 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add(0, EDIT_ID, 0, R.string.menu_edit);
         menu.add(0, DELETE_ID, 1, R.string.menu_delete);
+        menu.add(0, SHARE_ID, 2, R.string.menu_share); // Sharing on FB
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        final AdapterView.AdapterContextMenuInfo info =
+                (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            // Sharing item from list
+            case SHARE_ID:
+                mItemPosition = info.position;
+                share();
+                return true;
+        }
+
+        return super.onContextItemSelected(item);
     }
 
     private void bindData() {
@@ -167,5 +238,74 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             item.setTitle(R.string.action_sort_by_date);
         }
         getLoaderManager().restartLoader(0, null, this);
+    }
+
+    /*
+    * Sharing on Facebook name/description/photos/location
+    * TODO: sharing description/photos/location
+    */
+    private class SessionStatusCallback implements Session.StatusCallback {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+
+            if (session != null && session.isOpened()) {
+                mProgressDialog = ProgressDialog.show(getActivity(),"","In progress...",true);
+                // Temporary sharing only element name
+                Bundle postParams = prepareDataToShare();
+
+                Request.Callback callback = new Request.Callback() {
+                    public void onCompleted(Response response) {
+
+                        FacebookRequestError error = response.getError();
+                        if (error != null) {
+                            Toast.makeText(getActivity()
+                                            .getApplicationContext(),
+                                    error.getErrorMessage(),
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        } else {
+
+                            Toast.makeText(getActivity()
+                                            .getApplicationContext(),
+                                    "Sharing succeeded",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                        mProgressDialog.dismiss();
+                    }
+                };
+
+                Request postRequest = new Request(session, "me/feed", postParams, HttpMethod.POST, callback);
+                RequestAsyncTask task = new RequestAsyncTask(postRequest);
+                task.execute();
+
+            }
+        }
+    }
+
+    /*
+    Opening Facebook session for publish
+     */
+    private void share() {
+        Session session = Session.getActiveSession();
+        Session.OpenRequest request = new Session.OpenRequest(this).setCallback(statusCallback);
+        request.setPermissions(PERMISSIONS);
+
+        if (!session.isOpened() && !session.isClosed()) {
+            session.openForPublish(request);
+        } else {
+            Session.openActiveSession(getActivity(), this, true, statusCallback);
+        }
+    }
+    /*
+     Retrieving data that will be sharing on FB
+     */
+    private Bundle prepareDataToShare() {
+        Cursor cursor = adapter.getCursor();
+        cursor.moveToPosition(mItemPosition); // position on list
+        String[] data = {cursor.getString(cursor.getColumnIndex(DataStorage.Items.NAME))};
+        Bundle bundle = new Bundle();
+        bundle.putString("message",data[0]); // Temporary post on fb only message with name
+        return  bundle;
     }
 }
