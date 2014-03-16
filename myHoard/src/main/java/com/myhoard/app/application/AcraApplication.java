@@ -3,6 +3,7 @@ package com.myhoard.app.application;
 import android.app.Application;
 import com.myhoard.app.R;
 import org.acra.ACRA;
+import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 
@@ -12,8 +13,11 @@ import org.acra.annotation.ReportsCrashes;
  */
 @ReportsCrashes(formKey = "",
 		mailTo = "pat2014-szn-android-list@blstream.com",
-		mode = ReportingInteractionMode.TOAST,
-		resToastText = R.string.action_acra)
+        customReportContent = {ReportField.APP_VERSION_CODE,ReportField.APP_VERSION_NAME,
+                ReportField.ANDROID_VERSION,ReportField.BRAND,ReportField.PHONE_MODEL,
+                ReportField.CUSTOM_DATA,ReportField.USER_COMMENT,ReportField.STACK_TRACE},
+		mode = ReportingInteractionMode.DIALOG,
+        resDialogText = R.string.action_acra)
 
 public class AcraApplication extends Application {
 	@Override

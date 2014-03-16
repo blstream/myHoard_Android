@@ -9,6 +9,13 @@
         android:name=".application.AcraApplication"
         android:theme="@style/AppTheme">
         <activity
+            android:name="org.acra.CrashReportDialog"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleInstance"
+            android:theme="@android:style/Theme.Dialog">
+        </activity>
+        <activity
             android:name="com.myhoard.app.activities.MainActivity"
             android:label="@string/app_name"
             android:configChanges="orientation|keyboardHidden">
