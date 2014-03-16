@@ -50,6 +50,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
 
 	private static final int LOAD_DATA_FOR_EDIT = 20;
 	private static final int LOAD_NAMES = 30;
+    private static final int MIN_NUMBER_OF_CHARAKCTERS = 2;
     private Context context;
 	private Long mEditId;
 	private String mName, mDescription;
@@ -121,6 +122,12 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                 if (etCollectionName.getText() != null) {
                     if (TextUtils.isEmpty(etCollectionName.getText())) {
                         Toast.makeText(getActivity(), getString(R.string.required_name_collection),
+                                Toast.LENGTH_SHORT).show();
+                    } else if (isWhiteSpaces(etCollectionName.getText().toString())) {
+                        Toast.makeText(getActivity(), getString(R.string.required_name_collection),
+                                Toast.LENGTH_SHORT).show();
+                    } else if (etCollectionName.getText().toString().length()<MIN_NUMBER_OF_CHARAKCTERS) {
+                        Toast.makeText(getActivity(), getString(R.string.name_too_short),
                                 Toast.LENGTH_SHORT).show();
                     } else if (mNamesList.contains(etCollectionName.getText().toString())) {
                         Toast toast = Toast.makeText(getActivity(), getString(R.string.name_already_exist),
@@ -230,4 +237,8 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
 	public void onLoaderReset(Loader<Cursor> loader) {
 
 	}
+
+    boolean isWhiteSpaces( String s ) {
+        return s != null && s.matches("\\s+");
+    }
 }
