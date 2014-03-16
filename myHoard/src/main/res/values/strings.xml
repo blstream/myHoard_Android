@@ -69,6 +69,6 @@
     <string name="generate_collection">Number of collections:</string>
     <string name="generate_elements">Number of elements:</string>
     <string name="generator">Generate!</string>
-
+    <string name="name_too_short">Name is too short</string>
 
 </resources>
