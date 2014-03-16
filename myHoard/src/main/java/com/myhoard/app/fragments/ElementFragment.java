@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +61,17 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 	private static final int REQUEST_IMAGE_CAPTURE = 2;
 	private static final int SELECT_PICTURE = 1;
 
+    private TextView tvElementName, tvElementDescription, tvElementPosition;
+    private EditText etElementName, etElementDescription;
+    private String sCurrentPhotoPath;
+    private String sImagePath;
+    private int iCollectionId;
+    private GridView gvImages;
+    private Button btSave, btCancel, btAdd;
+    private int elementId;
+    private int modeOn;
+    private Context context;
+
 	private static final int MODE_ADD = 3;
 	private static final int MODE_EDIT = 4;
 	GPSProvider mService;
@@ -84,32 +97,31 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 			mBound = false;
 		}
 	};
-	private TextView tvElementName, tvElementDescription;
-	private EditText etElementName, etElementDescription;
-	private String sCurrentPhotoPath;
-	private String sImagePath;
-	private ImageView ivElementPhoto;
-	private Button btSave, btCancel;
-	private int elementId;
-	private int modeOn;
-	private Context context;
+
 	/*
 		     * broadcast reciver dzięki któremu istnieje połączenie z uslugą GPS
 		     */
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			//updateMap(intent);
+			updatePosition(intent);
 			Bundle b = intent.getExtras();
 			if (!b.getBoolean("GPS")) {
-				if(D) Toast.makeText(getActivity(), "No GPS", Toast.LENGTH_SHORT).show();
+                tvElementPosition.setText("brak");
+                tvElementPosition.setTextColor(Color.RED);
 			}
 		}
 	};
+	/*
+	 * KONIEC - Część kodu odpowiedzialna za binder
+	 */
 
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
+        case R.id.addBtn:
+            imagePicker();
+            break;
 		case R.id.saveBtn:
 			// TODO in some production
 			if (modeOn == MODE_EDIT) {
@@ -119,13 +131,13 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 				tvElementDescription.setVisibility(View.INVISIBLE);
 				etElementName.setText(tvElementName.getText().toString());
 				etElementDescription.setText(tvElementDescription.getText().toString());
-				ivElementPhoto.setOnClickListener(this);
+				//ivElementPhoto.setOnClickListener(this);
 				btSave.setText(context.getResources().getString(R.string.save));
 				modeOn = MODE_ADD;
 				break;
 			}
 
-			if (TextUtils.isEmpty(etElementName.getText()) && tvElementName.getText() == null) {
+			if (tvElementName.getText() == null || TextUtils.isEmpty(etElementName.getText())) {
 				Toast.makeText(getActivity(), getString(R.string.required_name_element),
 						Toast.LENGTH_SHORT).show();
 			} else {
@@ -139,16 +151,14 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 				ContentValues values = new ContentValues();
 				values.put(DataStorage.Items.NAME, sName);
 				values.put(DataStorage.Items.DESCRIPTION, sDescription);
+                values.put(DataStorage.Items.ID_COLLECTION, iCollectionId);
 				//values.put(DataStorage.Items.AVATAR_FILE_NAME, sImagePath);
 				// TODO fix after explanation
-				//values.put(DataStorage.Elements.COLLECTION_ID);
-				//values.put(DataStorage.Elements.MODIFIED_DATE);
 				//values.put(DataStorage.Elements.TAGS);
 				AsyncQueryHandler asyncHandler =
 						new AsyncQueryHandler(getActivity().getContentResolver()) {};
 				if (elementId != -1) {
-					Toast.makeText(getActivity(), context.getString(R.string
-							.element_edited), Toast.LENGTH_SHORT).show();
+                    values.put(DataStorage.Items.MODIFIED_DATE, getCurrentDate());
 					asyncHandler.startUpdate(MODE_EDIT, null, DataStorage.Items.CONTENT_URI, values,
 							DataStorage.Items._ID + " = " + elementId, null);
 				} else {
@@ -162,9 +172,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 		case R.id.cancelBtn:
 			getFragmentManager().popBackStackImmediate();
 			break;
-		case R.id.ivThumbnailPhoto:
-			imagePicker();
-			break;
+        case R.id.positionTextView:
+            //todo
+            break;
 		}
 	}
 
@@ -267,19 +277,12 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 				Log.e(TAG, e.toString());
 				e.printStackTrace();
 			}
-			ivElementPhoto.setImageBitmap(bitmap);
+			//ivElementPhoto.setImageBitmap(bitmap);
 		} else {
 			// Response is wrong - visible only in debug mode
 			if (D) Log.d(TAG, "Response != " + Activity.RESULT_OK);
 		}
 	}
-
-	/*
-	 * KONIEC - Część kodu odpowiedzialna za binder
-	 */
-    /*
-	 * KONIEC - Część kodu odpowiedzialna za GPS
-	 */
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -290,31 +293,42 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 
 		tvElementName = (TextView) v.findViewById(R.id.nameTextView);
 		tvElementDescription = (TextView) v.findViewById(R.id.descriptionTextView);
+        tvElementPosition = (TextView) v.findViewById(R.id.positionTextView);
 		etElementName = (EditText) v.findViewById(R.id.nameEditText);
 		etElementDescription = (EditText) v.findViewById(R.id.descriptionEditText);
-		ivElementPhoto = (ImageView) v.findViewById(R.id.ivThumbnailPhoto);
+		//gvImages = (GridView) v.findViewById(R.id.gridview);
+
+        btAdd = (Button) v.findViewById(R.id.addBtn);
+        btAdd.setOnClickListener(this);
 
 		btSave = (Button) v.findViewById(R.id.saveBtn);
 		btCancel = (Button) v.findViewById(R.id.cancelBtn);
 		btSave.setOnClickListener(this);
 		btCancel.setOnClickListener(this);
 
+        tvElementPosition.setOnClickListener(this);
+
+        tvElementPosition.setText("ustalam");
+        tvElementPosition.setTextColor(Color.YELLOW);
+
 		elementId = -1;
+        iCollectionId = 0;
 
 		Bundle b = getArguments();
-		if (b != null) {
+		if (b != null && (b.getInt(ElementFragment.ID)!=-1)) {
 			etElementName.setVisibility(View.INVISIBLE);
 			etElementDescription.setVisibility(View.INVISIBLE);
 			tvElementName.setVisibility(View.VISIBLE);
 			tvElementDescription.setVisibility(View.VISIBLE);
 			tvElementName.setText(b.getString(ElementFragment.NAME));
 			tvElementDescription.setText(b.getString(ElementFragment.DESCRIPTION));
-			//elementId = b.getInt(ElementFragment.ID);
+			elementId = b.getInt(ElementFragment.ID);
+            iCollectionId = (int)b.getLong(ElementFragment.COLLECTION_ID);
 			modeOn = MODE_EDIT;
 			btSave.setText(context.getResources().getString(R.string.edit));
 		} else {
 			btSave.setText(context.getResources().getString(R.string.save));
-			ivElementPhoto.setOnClickListener(this);
+			//ivElementPhoto.setOnClickListener(this);
 			modeOn = MODE_ADD;
 		}
 
@@ -354,6 +368,30 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 		super.onDestroy();
 	}
 
+    private void updatePosition(Intent intent) {
+        Log.e(TAG,"In");
+        if(intent==null)
+        {
+            Log.e(TAG,"error");
+            return;
+        }
+        Log.e(TAG,"OK");
+        Bundle b = intent.getExtras();
+        double lat = b.getDouble(GPSProvider.POS_LAT);
+        double lon = b.getDouble(GPSProvider.POS_LON);
+
+        tvElementPosition.setText(pos2str(lat,lon));
+        tvElementPosition.setTextColor(Color.GREEN);
+    }
+
+    private String pos2str(double lat, double lon) {
+        String pos = lat + ":" + lon;
+        return pos;
+    }
+    /*
+	 * KONIEC - Część kodu odpowiedzialna za GPS
+	 */
+
 	/**
 	 * Method refreshes gallery view with added photo, so
 	 * it can be seen by users in gallery.
@@ -369,9 +407,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 		return contentUri;
 	}
 
-    private String getCurrentDate() {
+    private int getCurrentDate() {
         Date d = new Date();
-        CharSequence s  = DateFormat.format("d.MM.yyyy", d.getTime());
-        return s.toString();
+        CharSequence s  = DateFormat.format("dMMyyyy", d.getTime());
+        return Integer.getInteger(s.toString());
     }
 }

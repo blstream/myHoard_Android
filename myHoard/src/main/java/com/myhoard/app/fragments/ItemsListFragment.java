@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -60,24 +61,25 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
+        // retrieving data from CollectionsListFragment
+        Bundle bundle = this.getArguments();
+        collectionID = bundle.getLong(Selected_Collection_ID);
+
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 			                        int position, long id) {
 				//TODO item clicked action
-                //Testing for collection element - author Sebastian Peryt
                 // Create new fragment and transaction
-                /*
+
                 Fragment newFragment = new ElementFragment();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
-                // DO NOT USE - Testing
                 // Add arguments to opened fragment element
                 Bundle b = new Bundle();
-                // put id
                 b.putLong(ElementFragment.ID,id);
+                b.putLong(ElementFragment.COLLECTION_ID,collectionID);
                 newFragment.setArguments(b);
-                // FROM THIS POINT -> USE
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack
@@ -86,13 +88,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
                 // Commit the transaction
                 transaction.commit();
-                */
+
             }
         });
-
-        // retrieving data from CollectionsListFragment
-		Bundle bundle = this.getArguments();
-		collectionID = bundle.getLong(Selected_Collection_ID);
 
 		registerForContextMenu(listView);
 	}

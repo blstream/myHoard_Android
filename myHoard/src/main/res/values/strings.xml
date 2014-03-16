@@ -70,5 +70,7 @@
     <string name="generate_elements">Number of elements:</string>
     <string name="generator">Generate!</string>
     <string name="name_too_short">Name is too short</string>
+    <string name="element_position">Position:</string>
+    <string name="add_image">Add image</string>
 
 </resources>

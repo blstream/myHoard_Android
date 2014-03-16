@@ -25,6 +25,10 @@ public class GPSProvider extends Service implements LocationListener {
 	private static final String TAG = GPSProvider.class
 			.getSimpleName();
 	private static final boolean D = true;// debug
+
+    public static final String POS_LON = "lon";
+    public static final String POS_LAT = "lat";
+
 	// Binder dla aktywnosci przywiazanych
 	private final IBinder mBinder = new LocalGPSBinder();
 	// Zmienne location
@@ -112,8 +116,9 @@ public class GPSProvider extends Service implements LocationListener {
 		Bundle b = new Bundle();
 		// Przygotowanie broadcasta
 		Intent out = new Intent(BROADCAST_ACTION);
-		//b.putDouble(GConstants.POI_LON, lon);
-		//b.putDouble(GConstants.POI_LAT, lat);
+		b.putDouble(GPSProvider.POS_LON, lon);
+		b.putDouble(GPSProvider.POS_LAT, lat);
+        b.putBoolean("GPS",true);
 		out.putExtras(b);
 		// Wyslanie broadcasta
 		sendBroadcast(out);

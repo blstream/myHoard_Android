@@ -49,28 +49,53 @@
         android:visibility="gone" />
 
     <TextView
+        android:id="@+id/positionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/element_position"
+        android:layout_below="@+id/descriptionEditText"
+        android:layout_alignParentLeft="true" />
+
+    <TextView
+        android:id="@+id/positionTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/positionLabel"
+        android:layout_toRightOf="@+id/positionLabel" />
+
+    <TextView
         android:id="@+id/photoLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/element_photo"
-        android:layout_below="@+id/descriptionEditText"
+        android:layout_below="@+id/positionLabel"
         android:layout_alignParentLeft="true" />
 
-    <ImageView
-        android:id="@+id/ivThumbnailPhoto"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_marginTop="10dp"
-        android:layout_alignParentLeft="true"
+    <!--<GridView
+        android:id="@+id/gridview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/photoLabel"
-        android:src="@drawable/nophoto" />
+        android:verticalSpacing="0dp"
+        android:horizontalSpacing="0dp"
+        android:stretchMode="columnWidth"
+        android:numColumns="2" />-->
+
+    <Button
+        android:id="@+id/addBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/photoLabel"
+        android:layout_alignParentLeft="true"
+        android:text="@string/add_image" />
 
     <Button
         android:id="@+id/saveBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:layout_below="@+id/ivThumbnailPhoto"
+        android:layout_below="@+id/addBtn"
         android:layout_alignParentLeft="true"
         android:text="@string/save" />
 
