@@ -13,8 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.myhoard.app.R;
 
-import java.lang.ref.WeakReference;
-
 
 /**
  * Created by Piotr Brzozowski on 01.03.14.
@@ -23,6 +21,11 @@ import java.lang.ref.WeakReference;
 
 public class ImageAdapterList extends CursorAdapter {
 
+    static class ViewHolder {
+        TextView name;
+        ImageView img;
+        String path;
+    }
 
 	public ImageAdapterList(Context context, Cursor c, int flags) {
 		super(context, c, flags);
@@ -32,25 +35,29 @@ public class ImageAdapterList extends CursorAdapter {
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		LayoutInflater inflater = LayoutInflater.from(context);
 		View v = inflater.inflate(R.layout.search_listitem, parent, false);
+        //Create ViewHolder to ListView scrolling smooth
+        ViewHolder viewHolder = new ViewHolder();
+        assert v != null;
+        viewHolder.name = (TextView)v.findViewById(R.id.textViewListRowSearch);
+        viewHolder.img = (ImageView)v.findViewById(R.id.imageViewListRowSearch);
+        v.setTag(viewHolder);
 		bindView(v, context, cursor);
 		return v;
 	}
 
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
-		//Get TextView object from ListView
-		TextView textViewCollectionElementName = (TextView) view.findViewById(R.id.textViewListRowSearch);
-		//Get ImageView object from ListView
-		ImageView imageViewCollectionElementAvatar = (ImageView) view.findViewById(R.id.imageViewListRowSearch);
+        ViewHolder viewHolder = (ViewHolder) view.getTag();
 		//Set text for TextView in search_listitem
-		textViewCollectionElementName.setText(cursor.getString(0));
+		viewHolder.name.setText(cursor.getString(0));
 		//Set image for ImageView in search_listitem
 		if (cursor.getString(1) == null) {
-			imageViewCollectionElementAvatar.setImageResource(R.drawable.nophoto);
+			viewHolder.img.setImageResource(R.drawable.nophoto);
 		} else {
 			//imageViewCollectionElementAvatar.setImageBitmap(decodeSampledBitmapFromResource(cursor.getString(1), 100, 100));
             //Load bitmap asynchronously
-		    loadBitmap(cursor.getString(1),imageViewCollectionElementAvatar);
+            viewHolder.path = cursor.getString(1);
+		    loadBitmap(viewHolder);
         }
 
 	}
@@ -90,33 +97,32 @@ public class ImageAdapterList extends CursorAdapter {
 
 		return inSampleSize;
 	}
-    public void loadBitmap(String path, ImageView imageView) {
-        BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-        task.execute(path);
+    public void loadBitmap(ViewHolder viewHolder) {
+        BitmapWorkerTask task = new BitmapWorkerTask();
+        task.execute(viewHolder);
     }
-    class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
-        private final WeakReference<ImageView> imageViewReference;
-        private String data;
+    class BitmapWorkerTask extends AsyncTask<ViewHolder, Void, Bitmap> {
+        //private final WeakReference<ImageView> imageViewReference;
+        private ViewHolder data;
 
-        public BitmapWorkerTask(ImageView imageView) {
+        /*public BitmapWorkerTask(ImageView imageView) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
             imageViewReference = new WeakReference<>(imageView);
-        }
+        }*/
 
         // Decode image in background.
         @Override
-        protected Bitmap doInBackground(String... params) {
+        protected Bitmap doInBackground(ViewHolder... params) {
             data = params[0];
-            return decodeSampledBitmapFromResource(data, 100, 100);
+            return decodeSampledBitmapFromResource(data.path, 100, 100);
         }
 
         // Once complete, see if ImageView is still around and set bitmap.
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             if (bitmap != null) {
-                final ImageView imageView = imageViewReference.get();
-                if (imageView != null) {
-                    imageView.setImageBitmap(bitmap);
+                if (data.img != null) {
+                    data.img.setImageBitmap(bitmap);
                 }
             }
         }
