@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/generate_collection"
+        android:id="@+id/textViewGeneratorDialog"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editTextGeneratorDialog"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/textViewGeneratorDialog" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/generate_elements"
+        android:id="@+id/textView2GeneratorDialog"
+        android:layout_below="@+id/editTextGeneratorDialog"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText2GeneratorDialog"
+        android:layout_below="@+id/editTextGeneratorDialog"
+        android:layout_toRightOf="@+id/textView2GeneratorDialog" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:id="@+id/buttonGeneratorDialog"
+        android:layout_below="@+id/editText2GeneratorDialog"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/generator"
+        android:id="@+id/button2GeneratorDialog"
+        android:layout_alignTop="@+id/buttonGeneratorDialog"
+        android:layout_toRightOf="@+id/buttonGeneratorDialog" />
+</RelativeLayout>

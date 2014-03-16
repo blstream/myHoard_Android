@@ -65,7 +65,10 @@
     <string name="action_sort_by_date">Sort by Date</string>
     <string name="first_collection_button_description">Empty image with plus</string>
     <string name="first_collection_image_description">Create your first collection</string>
-
+    <string name="action_generate">Generate collections and elements</string>
+    <string name="generate_collection">Number of collections:</string>
+    <string name="generate_elements">Number of elements:</string>
+    <string name="generator">Generate!</string>
 
 
 </resources>

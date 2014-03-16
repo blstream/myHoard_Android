@@ -43,4 +43,8 @@
         android:orderInCategory="30"
         app:showAsAction="ifRoom|withText" />
 
+    <item
+        android:id="@+id/action_generate"
+        android:title="@string/action_generate"/>
+
 </menu>
