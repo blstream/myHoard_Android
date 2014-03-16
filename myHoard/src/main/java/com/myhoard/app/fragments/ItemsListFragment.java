@@ -11,6 +11,7 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         context = getActivity();
+        // call the method setHasOptionsMenu, to have access to the menu from the fragment
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_items_list, container, false);
 	}
 
@@ -100,6 +103,29 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         getLoaderManager().restartLoader(0, null, this);
     }
 
+    //create options menu with a MenuInflater to have all needed options visible in this fragment
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //set sort option visible in the ItemsListFragment
+        menu.findItem(R.id.action_sort).setVisible(true);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+   /* @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        switch (item.getItemId()) {
+            case R.id.action_sort:
+                    itemsSortOrderChange(item);
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }*/
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
@@ -143,14 +169,14 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 		adapter.changeCursor(null);
 	}
 
-    public void sortChange(MenuItem item) {
+    public void itemsSortOrderChange(MenuItem item) {
         if (sortOrder.equals(sortByName)) {
             sortOrder = sortByDate;
-            Toast.makeText(context, "SORTED BY DATE", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "ITEMS SORTED BY DATE", Toast.LENGTH_SHORT).show();
             item.setTitle(R.string.action_sort_by_name);
         } else if (sortOrder.equals(sortByDate)) {
             sortOrder = sortByName;
-            Toast.makeText(context, "SORTED BY NAME", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "ITEMS SORTED BY NAME", Toast.LENGTH_SHORT).show();
             item.setTitle(R.string.action_sort_by_date);
         }
         getLoaderManager().restartLoader(0, null, this);

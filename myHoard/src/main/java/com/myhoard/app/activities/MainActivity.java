@@ -82,6 +82,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+        //setting sort option unvisible
+        menu.findItem(R.id.action_sort).setVisible(false);
         return super.onCreateOptionsMenu(menu);
 	}
 
@@ -127,18 +129,17 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 			}
 			break;
             case R.id.action_sort:
-                //TODO place sort button!
                 if (!getVisibleFragmentTag().equals("NewCollection") &&
                         !getVisibleFragmentTag().equals("ItemsList") &&
                         !getVisibleFragmentTag().equals("NewElement")) {
-                    //TODO collection custom sort
+                    //TODO collection list custom sort
 
                 } else if (getVisibleFragmentTag().equals("ItemsList")) {
+                    // items list sort order change
                     ItemsListFragment fragment = (ItemsListFragment) getSupportFragmentManager().
                             findFragmentByTag("ItemsList");
-                    fragment.sortChange(item);
+                    fragment.itemsSortOrderChange(item);
                 }
-
                 break;
             default:
                 return super.onOptionsItemSelected(item);
