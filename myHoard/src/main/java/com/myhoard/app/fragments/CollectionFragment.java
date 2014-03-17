@@ -150,6 +150,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                         values.put(DataStorage.Collections.TAGS, mTags);
                         values.put(DataStorage.Collections.MODIFIED_DATE, Calendar.getInstance()
                                 .getTime().getTime());
+                        values.put(DataStorage.Collections.TYPE, getTypeOfCollection());
                         if (this.getTag().equals("EditCollection")) {
                             Toast.makeText(getActivity(), context.getString(R.string
                                     .collection_edited), Toast.LENGTH_LONG).show();
@@ -240,5 +241,18 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
 
     boolean isWhiteSpaces( String s ) {
         return s != null && s.matches("\\s+");
+    }
+
+    private int getTypeOfCollection() {
+        if (etCollectionType.getText().toString().equals("offline")) {
+            return DataStorage.TypeOfCollection.OFFLINE.getType();
+        }
+        else if (etCollectionType.getText().toString().equals("public")) {
+            return DataStorage.TypeOfCollection.PUBLIC.getType();
+        }
+        else if (etCollectionType.getText().toString().equals("private")) {
+            return DataStorage.TypeOfCollection.PRIVATE.getType();
+        }
+        return DataStorage.TypeOfCollection.ERROR.getType();
     }
 }

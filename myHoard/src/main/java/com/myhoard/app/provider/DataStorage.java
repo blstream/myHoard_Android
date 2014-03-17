@@ -65,6 +65,11 @@ public final class DataStorage {
 		 */
 		public static final String SERVERS = "servers";
 
+        /**
+         * Type of collection(offline,private,public). Column name.
+         * <p>Type: NUMERIC</p>
+         */
+        public static final String TYPE = "type";
 	}
 
 	protected interface ItemsColumns {
@@ -147,7 +152,8 @@ public final class DataStorage {
 				TAGS,
 				CREATED_DATE,
 				MODIFIED_DATE,
-				SERVERS
+				SERVERS,
+                TYPE
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
 		/**
 		 * This utility class cannot be instantiated
@@ -183,4 +189,18 @@ public final class DataStorage {
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
 
 	}
+
+    public enum TypeOfCollection {
+        ERROR(-1), OFFLINE(0), PUBLIC(1), PRIVATE(2);
+
+        private int type;
+
+        private TypeOfCollection (int type) {
+            this.type = type;
+        }
+
+        public int getType() {
+            return type;
+        }
+    }
 }
