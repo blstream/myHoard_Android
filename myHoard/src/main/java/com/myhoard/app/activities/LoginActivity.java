@@ -10,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.myhoard.app.R;
+import com.myhoard.app.classes.LoginApi;
 
 public class LoginActivity extends ActionBarActivity {
 
@@ -66,6 +67,7 @@ public class LoginActivity extends ActionBarActivity {
 						editor.clear();
 						editor.commit();
 					}
+                    new LoginApi().execute(email_ch,password_ch,getUsername(email_ch));
 					Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 					startActivity(intent);
 
@@ -83,5 +85,11 @@ public class LoginActivity extends ActionBarActivity {
 
 	}
 
+    private String getUsername(String email)
+    {
+        String[]tab = email.split("@");
+        String username;
+        return username = tab[0];
+    }
 
 }
