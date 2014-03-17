@@ -358,7 +358,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
      Retrieving data that will be sharing on FB
      */
     private Bundle prepareDataToShare() {
-        Cursor cursor = adapter.getCursor();
+        Cursor cursor = mImageAdapterList.getCursor();
         cursor.moveToPosition(mItemPosition); // position on list
         String[] data = {cursor.getString(cursor.getColumnIndex(DataStorage.Items.NAME))};
         Bundle bundle = new Bundle();
