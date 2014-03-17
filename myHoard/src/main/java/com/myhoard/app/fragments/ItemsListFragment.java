@@ -11,6 +11,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +21,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -30,12 +34,13 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.myhoard.app.R;
+import com.myhoard.app.images.ImageAdapterList;
 import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Maciej Plewko on 04.03.14.
  */
-public class ItemsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ItemsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
 
 	public static final String Selected_Collection_ID = "id";
     private static final int DELETE_ID = Menu.FIRST + 1;
@@ -52,12 +57,51 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private static String sortByDate = DataStorage.Items.TABLE_NAME + "." +
             DataStorage.Items.CREATED_DATE + " ASC";
     private static String sortOrder = sortByName;
+    private ImageAdapterList mImageAdapterList;
+    private EditText mSearchText;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_search, container, false);
         context = getActivity();
         // call the method setHasOptionsMenu, to have access to the menu from the fragment
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_items_list, container, false);
+        //Create adapter to adapt data to individual list row
+        mImageAdapterList = new ImageAdapterList(context, null, 0);
+        ImageButton imButtonSearch = (ImageButton) v.findViewById(R.id.imageButtonSearch);
+        imButtonSearch.setOnClickListener(this);
+        mSearchText = (EditText) v.findViewById(R.id.editTextSearch);
+        //Use text changed listener by mSearchTest EditText object to find elements in real time of search
+        mSearchText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                assert mSearchText.getText() != null;
+                String collectionElementText = mSearchText.getText().toString();
+                collectionElementText = collectionElementText.trim();
+                collectionElementText = collectionElementText.toLowerCase();
+                //Search element when text to search have more than two characters
+                if (collectionElementText.length() >= 2) {
+                    Bundle args = new Bundle();
+                    //Put text to search to Bundle object
+                    args.putString("fragmentElement", collectionElementText);
+                    //Restart to load data when user query is changed
+                    getLoaderManager().restartLoader(1, args, ItemsListFragment.this);
+                } else {
+                    //Get all element from collection
+                    getLoaderManager().restartLoader(0,null,ItemsListFragment.this);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        return v;
 	}
 
     private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
@@ -81,7 +125,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             Session.setActiveSession(session);
         }
 
-		listView = (ListView) view.findViewById(R.id.itemsList);
+		listView = (ListView) view.findViewById(R.id.listViewSearch);
 		listView.setEmptyView(view.findViewById(R.id.tvNoItems));
         getLoaderManager().initLoader(0, null, this);
         bindData();
@@ -193,38 +237,46 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     private void bindData() {
-        //Fields from the database
-        String[] from = new String[]{DataStorage.Items.NAME,
-                DataStorage.Items.CREATED_DATE};
-        //UI fields to which the data is mapped
-        int[] to = new int[]{R.id.item_name, R.id.item_creation_date};
-        adapter = new SimpleCursorAdapter(context, R.layout.item_row, null, from, to, 0);
-        listView.setAdapter(adapter);
+        listView.setAdapter(mImageAdapterList);
     }
 
     // creates a new loader after initLoader() call
 	@Override
 	public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        // columns to be selected from the table
-        final String[] projection = {DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items._ID,
-                DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items.NAME,
-                DataStorage.Items.TABLE_NAME + '.' + DataStorage.Items.CREATED_DATE};
-        //TODO select items from selected collection
-        //String selection = collectionID + " = " + DataStorage.Items.ID_COLLECTION;
+        CursorLoader cursorLoader = null;
+        switch(i){
+            //Get all elements from collection
+            case 0:
+                // columns to be selected from the table
+                final String[] projection = new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR,
+                        DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID};
+                String selection = collectionID + " = " + DataStorage.Items.ID_COLLECTION;
 
-        return new CursorLoader(context, DataStorage.Items.CONTENT_URI,
-                projection, null, null, sortOrder);
+                cursorLoader =  new CursorLoader(context, DataStorage.Items.CONTENT_URI,
+                        projection, selection, null, sortOrder);
+                break;
+            //Get concrete element form user editText
+            case 1:
+                //Get text to search from args object
+                String collectionElementText = bundle.getString("fragmentElement");
+                //CursorLoader used to get data from user query
+                cursorLoader = new CursorLoader(context, DataStorage.Items.CONTENT_URI,
+                        new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID},
+                        collectionID + " = " + DataStorage.Items.ID_COLLECTION + " AND ("+ DataStorage.Items.DESCRIPTION + " LIKE '%" + collectionElementText + "%' OR " + DataStorage.Items.NAME + " = '" + collectionElementText + "')", null, null);
+                break;
+        }
+        return cursorLoader;
 
     }
 
     @Override
     public void onLoadFinished(Loader loader, Cursor data) {
-		adapter.changeCursor(data);
+		mImageAdapterList.swapCursor(data);
 	}
 
 	@Override
 	public void onLoaderReset(Loader loader) {
-		adapter.changeCursor(null);
+		mImageAdapterList.swapCursor(null);
 	}
 
     public void itemsSortOrderChange(MenuItem item) {
@@ -238,6 +290,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             item.setTitle(R.string.action_sort_by_date);
         }
         getLoaderManager().restartLoader(0, null, this);
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 
     /*
