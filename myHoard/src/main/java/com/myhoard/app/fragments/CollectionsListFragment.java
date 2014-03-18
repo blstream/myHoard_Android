@@ -38,6 +38,7 @@ import android.widget.ImageView;
 
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapter;
+import com.myhoard.app.model.UserSingleton;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -79,7 +80,19 @@ public class CollectionsListFragment extends Fragment implements
 
     }
 
-	@Override
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        UserSingleton userSingleton = UserSingleton.getInstance();
+        if (userSingleton.user != null) {
+            menu.findItem(R.id.action_login).setTitle("Logout");
+        }
+        else {
+            menu.findItem(R.id.action_login).setTitle("Login");
+        }
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

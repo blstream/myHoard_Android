@@ -74,5 +74,6 @@
     <string name="add_image">Add image</string>
     <string name="app_id">1388908654663237</string>
     <string name="menu_share">Share on FB</string>
+    <string name="incorrect_data"></string>
 
 </resources>

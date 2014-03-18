@@ -21,8 +21,10 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.myhoard.app.R;
 import com.myhoard.app.dialogs.GeneratorDialog;
@@ -31,11 +33,13 @@ import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.fragments.SearchFragment;
+import com.myhoard.app.model.UserSingleton;
 
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
 	CollectionsListFragment collectionsListFragment;
+    UserSingleton userSingleton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +83,6 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
         //setting sort option unvisible
@@ -87,7 +90,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         return super.onCreateOptionsMenu(menu);
 	}
 
-	@Override
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
@@ -118,8 +127,19 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
 			break;
 		case R.id.action_login:
-			Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-			startActivity(intent);
+            userSingleton = UserSingleton.getInstance();
+            if (userSingleton.user == null) {
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+            else {
+                userSingleton.user = null;
+                userSingleton.token = null;
+                Toast toast = Toast.makeText(getApplicationContext(), "Wylogowano",
+                        Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+                toast.show();
+            }
 			break;
         case R.id.action_generate:
                 GeneratorDialog generatorDialog = new GeneratorDialog();
