@@ -28,4 +28,5 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     compile files('libs/acra-4.5.0.jar')
     compile project(':libraries:facebook')
+	compile files('libs/gson-2.2.4.jar')
 }
