@@ -2,10 +2,10 @@
 <merger>
 
     <dataSet config="main" >
-        <source path="C:\Users\Piotr Brzozowski\Documents\BlStream Patronage 2014\myHoard_Android\libraries\facebook\src\main\assets" />
+        <source path="C:\Users\Czyz\Documents\GitHub\myHoard_Android\libraries\facebook\src\main\assets" />
     </dataSet>
     <dataSet config="debug" >
-        <source path="C:\Users\Piotr Brzozowski\Documents\BlStream Patronage 2014\myHoard_Android\libraries\facebook\src\debug\assets" />
+        <source path="C:\Users\Czyz\Documents\GitHub\myHoard_Android\libraries\facebook\src\debug\assets" />
     </dataSet>
 
 </merger>

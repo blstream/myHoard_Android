@@ -5,4 +5,6 @@
     <color name="yellow_main">#ffffc002</color>
     <color name="gray_text">#b3b3b3</color>
     <color name="gray_description">#e6e6e6</color>
+    <color name="yellow_text">#fffff106</color>
+    <color name="white_border">#ffffffff</color>
 </resources>
