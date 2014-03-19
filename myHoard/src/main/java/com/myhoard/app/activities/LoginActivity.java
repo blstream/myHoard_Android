@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
+import com.myhoard.app.httpengine.ConnectionDetector;
 import com.myhoard.app.httpengine.UserHttpEngine;
 import com.myhoard.app.model.Token;
 import com.myhoard.app.model.User;
@@ -62,41 +63,47 @@ public class LoginActivity extends ActionBarActivity {
 			@Override
 			public void onClick(View view) {
 
-				String email_ch = String.valueOf(email.getText());
-				String password_ch = String.valueOf(password.getText());
+                ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+                if (cd.isConnectingToInternet()) {
+                    String email_ch = String.valueOf(email.getText());
+                    String password_ch = String.valueOf(password.getText());
 
-                user = new User();
-                user.setUsername(email_ch);
-                user.setPassword(password_ch);
-                new getUserSingleton().execute();
-
-
-				if (email_ch.equals(login_fix) && password_ch.equals(password_fix)) {
-					if (remember_check.isChecked()) {
-
-						editor.putBoolean("saveLogin", true);
-						editor.putString("username", email_ch);
-						editor.putString("password", password_ch);
-						editor.commit();
-					} else {
-						editor.clear();
-						editor.commit();
-					}
-                    //new LoginApi().execute(email_ch,password_ch,getUsername(email_ch));
-					//Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-					//startActivity(intent);
+                    user = new User();
+                    user.setUsername(email_ch);
+                    user.setPassword(password_ch);
+                    new getUserSingleton().execute();
 
 
-				} else {
-					if (!email_ch.equals(login_fix)) {
-						//email.setError(getString(R.string.incoreect_login));
-					}
-					if (!password_ch.equals(password_fix)) {
-						//password.setError(getString(R.string.wrong_password));
-					}
+                    if (email_ch.equals(login_fix) && password_ch.equals(password_fix)) {
+                        if (remember_check.isChecked()) {
 
-				}
-			}
+                            editor.putBoolean("saveLogin", true);
+                            editor.putString("username", email_ch);
+                            editor.putString("password", password_ch);
+                            editor.commit();
+                        } else {
+                            editor.clear();
+                            editor.commit();
+                        }
+                        //new LoginApi().execute(email_ch,password_ch,getUsername(email_ch));
+                        //Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        //startActivity(intent);
+
+
+                    } else {
+                        if (!email_ch.equals(login_fix)) {
+                            //email.setError(getString(R.string.incoreect_login));
+                        }
+                        if (!password_ch.equals(password_fix)) {
+                            //password.setError(getString(R.string.wrong_password));
+                        }
+
+                    }
+                } else {
+                    TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
+                    incorrectData.setText("YOU DON'T HAVE INTERNET CONNECTION");
+                }
+            }
 		});
 
 	}

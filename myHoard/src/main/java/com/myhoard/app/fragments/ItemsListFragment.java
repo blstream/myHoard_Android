@@ -35,6 +35,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapterList;
+import com.myhoard.app.model.UserSingleton;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -198,6 +199,18 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         super.onSaveInstanceState(outState);
         Session session = Session.getActiveSession();
         Session.saveSession(session, outState);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        UserSingleton userSingleton = UserSingleton.getInstance();
+        if (userSingleton.user != null) {
+            menu.findItem(R.id.action_login).setTitle("Logout");
+        }
+        else {
+            menu.findItem(R.id.action_login).setTitle("Login");
+        }
+        super.onPrepareOptionsMenu(menu);
     }
 
     //create options menu with a MenuInflater to have all needed options visible in this fragment

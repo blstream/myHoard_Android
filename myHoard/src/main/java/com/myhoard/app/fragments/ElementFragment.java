@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -158,11 +159,13 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 				AsyncQueryHandler asyncHandler =
 						new AsyncQueryHandler(getActivity().getContentResolver()) {};
 				if (elementId != -1) {
-                    values.put(DataStorage.Items.MODIFIED_DATE, getCurrentDate());
+                    values.put(DataStorage.Items.MODIFIED_DATE, Calendar.getInstance()
+                            .getTime().getTime());
 					asyncHandler.startUpdate(MODE_EDIT, null, DataStorage.Items.CONTENT_URI, values,
 							DataStorage.Items._ID + " = " + elementId, null);
 				} else {
-					values.put(DataStorage.Items.CREATED_DATE, getCurrentDate());
+					values.put(DataStorage.Items.CREATED_DATE, Calendar.getInstance()
+                            .getTime().getTime());
 					asyncHandler.startInsert(MODE_ADD, null, DataStorage
 							.Items.CONTENT_URI, values);
 				}
