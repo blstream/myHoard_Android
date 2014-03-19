@@ -34,120 +34,120 @@ import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.fragments.SearchFragment;
 import com.myhoard.app.model.UserSingleton;
+import com.myhoard.app.services.SynchronizeService;
 
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
-	CollectionsListFragment collectionsListFragment;
+    CollectionsListFragment collectionsListFragment;
     UserSingleton userSingleton;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         //Listen for changes in the back stack
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         shouldDisplayHomeUp();
 
-		collectionsListFragment = new CollectionsListFragment();
-		FragmentManager fm = getSupportFragmentManager();
-		if (savedInstanceState == null) {
-			fm.beginTransaction()
-					.add(R.id.container, collectionsListFragment, "Main")
-					.commit();
-		} else {
-			fm.beginTransaction()
-					.replace(R.id.container,
-							fm.findFragmentByTag(savedInstanceState.getString("fragment")))
-					.commit();
-		}
+        collectionsListFragment = new CollectionsListFragment();
+        FragmentManager fm = getSupportFragmentManager();
+        if (savedInstanceState == null) {
+            fm.beginTransaction()
+                    .add(R.id.container, collectionsListFragment, "Main")
+                    .commit();
+        } else {
+            fm.beginTransaction()
+                    .replace(R.id.container,
+                            fm.findFragmentByTag(savedInstanceState.getString("fragment")))
+                    .commit();
+        }
 
-	}
+    }
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putString("fragment", getVisibleFragmentTag());
-	}
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("fragment", getVisibleFragmentTag());
+    }
 
-	public String getVisibleFragmentTag() {
-		FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
-		List<Fragment> fragments = fragmentManager.getFragments();
-		for (Fragment fragment : fragments) {
-			if (fragment != null && fragment.isVisible())
-				return fragment.getTag();
-		}
-		throw new IllegalStateException("There is no active fragment");
-	}
+    public String getVisibleFragmentTag() {
+        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
+        List<Fragment> fragments = fragmentManager.getFragments();
+        for (Fragment fragment : fragments) {
+            if (fragment != null && fragment.isVisible())
+                return fragment.getTag();
+        }
+        throw new IllegalStateException("There is no active fragment");
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
         //setting sort option unvisible
         menu.findItem(R.id.action_sort).setVisible(false);
         return super.onCreateOptionsMenu(menu);
-	}
+    }
 
     @Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		switch (item.getItemId()) {
-		case R.id.action_new_collection:
-			if (!getVisibleFragmentTag().equals("NewCollection") &&
-                    !getVisibleFragmentTag().equals("ItemsList") &&
-                    !getVisibleFragmentTag().equals("NewElement")) {
-                //item.setTitle(R.string.action_new_collection);//TODO correct
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.container, new CollectionFragment(), "NewCollection")
-						.addToBackStack("NewCollection")
-						.commit();
-			} else if (getVisibleFragmentTag().equals("ItemsList")) {
-                //item.setTitle(R.string.action_new_element);//TODO correct
-                Fragment elementFragment = new ElementFragment();
-                Bundle b = new Bundle();
-                //TODO Add collection id
-                //b.putLong(ElementFragment.COLLECTION_ID,collectionID);
-                b.putInt(ElementFragment.ID,-1);
-                elementFragment.setArguments(b);
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, elementFragment, "NewElement")
-                        .addToBackStack("NewElement")
-                        .commit();
-            }
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        switch (item.getItemId()) {
+            case R.id.action_new_collection:
+                if (!getVisibleFragmentTag().equals("NewCollection") &&
+                        !getVisibleFragmentTag().equals("ItemsList") &&
+                        !getVisibleFragmentTag().equals("NewElement")) {
+                    //item.setTitle(R.string.action_new_collection);//TODO correct
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, new CollectionFragment(), "NewCollection")
+                            .addToBackStack("NewCollection")
+                            .commit();
+                } else if (getVisibleFragmentTag().equals("ItemsList")) {
+                    //item.setTitle(R.string.action_new_element);//TODO correct
+                    Fragment elementFragment = new ElementFragment();
+                    Bundle b = new Bundle();
+                    //TODO Add collection id
+                    //b.putLong(ElementFragment.COLLECTION_ID,collectionID);
+                    b.putInt(ElementFragment.ID, -1);
+                    elementFragment.setArguments(b);
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, elementFragment, "NewElement")
+                            .addToBackStack("NewElement")
+                            .commit();
+                }
 
-			break;
-		case R.id.action_login:
-            userSingleton = UserSingleton.getInstance();
-            if (userSingleton.user == null) {
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(intent);
-            }
-            else {
-                userSingleton.user = null;
-                userSingleton.token = null;
-                Toast toast = Toast.makeText(getApplicationContext(), "Wylogowano",
-                        Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
-                toast.show();
-            }
-			break;
-        case R.id.action_generate:
-                GeneratorDialog generatorDialog = new GeneratorDialog();
-                generatorDialog.show(getSupportFragmentManager(),"");
                 break;
-		case R.id.action_search:
-			if (!getVisibleFragmentTag().equals("Search")) {
+            case R.id.action_login:
+                userSingleton = UserSingleton.getInstance();
+                if (userSingleton.user == null) {
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                } else {
+                    userSingleton.user = null;
+                    userSingleton.token = null;
+                    Toast toast = Toast.makeText(getApplicationContext(), "Wylogowano",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+                    toast.show();
+                }
+                break;
+            case R.id.action_generate:
+                GeneratorDialog generatorDialog = new GeneratorDialog();
+                generatorDialog.show(getSupportFragmentManager(), "");
+                break;
+            case R.id.action_search:
+                if (!getVisibleFragmentTag().equals("Search")) {
 
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.container, new SearchFragment(), "Search")
-						.addToBackStack("Search")
-						.commit();
-			}
-			break;
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, new SearchFragment(), "Search")
+                            .addToBackStack("Search")
+                            .commit();
+                }
+                break;
             case R.id.action_sort:
                 if (!getVisibleFragmentTag().equals("NewCollection") &&
                         !getVisibleFragmentTag().equals("ItemsList") &&
@@ -161,20 +161,24 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     fragment.itemsSortOrderChange(item);
                 }
                 break;
+            case R.id.action_synchronize:
+                Intent synchronize = new Intent(this, SynchronizeService.class);
+                startService(synchronize);
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
-		return true;
-	}
+        return true;
+    }
 
     @Override
     public void onBackStackChanged() {
         shouldDisplayHomeUp();
     }
 
-    public void shouldDisplayHomeUp(){
+    public void shouldDisplayHomeUp() {
         //Enable Up button only  if there are entries in the back stack
-        boolean canBack = getSupportFragmentManager().getBackStackEntryCount()>0;
+        boolean canBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
         getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
     }
 

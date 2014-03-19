@@ -2,12 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.myhoard.app">
 
-    <!-- Internet Permissions -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-
-    <!-- Network State Permissions -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -19,8 +13,7 @@
             android:excludeFromRecents="true"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Dialog">
-        </activity>
+            android:theme="@android:style/Theme.Dialog"/>
         <activity
             android:name="com.myhoard.app.activities.MainActivity"
             android:label="@string/app_name"
@@ -36,16 +29,18 @@
             android:name="com.myhoard.app.provider.DataProvider"
             android:authorities="com.myhoard.app.provider"
             android:exported="false"
-            android:multiprocess="true"></provider>
+            android:multiprocess="true"/>
 
-        <service android:name="com.myhoard.app.gps.GPSProvider"></service>
+        <service android:name="com.myhoard.app.gps.GPSProvider"/>
+        <service android:name="com.myhoard.app.services.SynchronizeService"
+                 android:exported="false"/>
 
         <activity
             android:name="com.myhoard.app.activities.LoginActivity"
-            android:label="@string/title_activity_login"></activity>
+            android:label="@string/title_activity_login"/>
         <activity
             android:name="com.myhoard.app.activities.RegisterActivity"
-            android:label="@string/title_activity_register"></activity>
+            android:label="@string/title_activity_register"/>
         <activity android:name="com.facebook.LoginActivity"/>
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id" />
     </application>
@@ -53,5 +48,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>

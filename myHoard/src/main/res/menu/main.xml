@@ -17,6 +17,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_synchronize"
+        android:title="@string/action_synchronize"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_new_collection"
         android:title="@string/action_new_collection"
         android:icon="@drawable/ic_action_new"

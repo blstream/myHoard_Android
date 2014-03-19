@@ -206,9 +206,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         UserSingleton userSingleton = UserSingleton.getInstance();
         if (userSingleton.user != null) {
             menu.findItem(R.id.action_login).setTitle("Logout");
+            menu.findItem(R.id.action_synchronize).setVisible(true);
         }
         else {
             menu.findItem(R.id.action_login).setTitle("Login");
+            menu.findItem(R.id.action_synchronize).setVisible(false);
         }
         super.onPrepareOptionsMenu(menu);
     }

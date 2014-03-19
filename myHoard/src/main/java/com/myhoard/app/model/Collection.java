@@ -23,6 +23,16 @@ public class Collection implements IModel {
     private String created_date;
     private String modified_date;
 
+    public Collection(String name, String description, List<String> tags, String owner, String items_number, String created_date, String modified_date) {
+        this.name = name;
+        this.description = description;
+        this.tags = tags;
+        this.owner = owner;
+        this.items_number = items_number;
+        this.created_date = created_date;
+        this.modified_date = modified_date;
+    }
+
     public String getDescription() {
         return description;
     }
