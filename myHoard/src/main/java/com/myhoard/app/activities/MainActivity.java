@@ -26,12 +26,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
@@ -49,6 +53,7 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     CollectionsListFragment collectionsListFragment;
     UserManager userManager;
+
 
     //to receive information from service SynchronizeService
     private ResponseReceiver receiver;
@@ -82,7 +87,62 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     .replace(R.id.container,
                             fm.findFragmentByTag(savedInstanceState.getString("fragment")))
                     .commit();
+
         }
+        String[]  drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+
+
+
+        ArrayAdapter adapter = new ArrayAdapter<>(getBaseContext(),R.layout.drawer_menu_row,R.id.textViewRow,drawerListItems);
+        final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        final  ListView navigationList = (ListView)findViewById(R.id.drawer_list);
+        navigationList.setAdapter(adapter);
+
+        navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i,final long l) {
+                drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener(){
+
+                    @Override
+                    public void onDrawerClosed(View drawerView) {
+                        super.onDrawerClosed(drawerView);
+                        int w = i;
+
+                        switch(w){
+
+                            case 0:
+                                getSupportFragmentManager().beginTransaction()
+                                        .replace(R.id.container, new SearchFragment(), "Search")
+                                        .addToBackStack("Search")
+                                        .commit();
+                                break;
+                            case 1:
+
+                                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                                    startActivity(intent);
+                                break;
+                            case 2:
+                                getSupportFragmentManager().beginTransaction()
+                                        .replace(R.id.container, new CollectionFragment(),"NewCollection")
+                                        .addToBackStack("NewCollection")
+                                        .commit();
+                                break;
+                            case 3:
+                                GeneratorDialog generatorDialog = new GeneratorDialog();
+                                generatorDialog.show(getSupportFragmentManager(), "");
+                                break;
+                            case 4:
+                                break;
+
+                        }
+
+
+                    }
+                });
+                drawerLayout.closeDrawer(navigationList);
+            }
+        });
+
     }
 
     @Override

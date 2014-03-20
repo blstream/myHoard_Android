@@ -10,6 +10,7 @@
         <item>@string/action_search</item>
         <item>@string/Login</item>
         <item>@string/collection</item>
+        <item>@string/action_generate</item>
         <item>@string/friends</item>
         <item>@string/profile</item>
 
