@@ -24,7 +24,7 @@ import com.myhoard.app.httpengine.HttpEngine;
 /**
  * Singleton class for managing currently logged user and new user registration
  *
- * @author gohilukk & Marcin Łasszcz
+ * @author Tomasz Nosal & Marcin Łasszcz
  *         Date: 18.03.14
  */
 public class UserManager {

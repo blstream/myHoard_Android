@@ -16,11 +16,19 @@
 package com.myhoard.app.activities;
 
 
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +48,19 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     CollectionsListFragment collectionsListFragment;
+    UserManager userManager;
+
+    //to receive information from service SynchronizeService
+    private ResponseReceiver receiver;
+
+    //variables to progressBar
+    ProgressDialog progressBar;
+    private Double progressBarStatusIn = 0.;
+    private Double progressBarStatusOut = 0.;
+    private double maxProgressBarStatus = 10000;
+    private static final int MIN_VALUE = 0;
+    private static final int MAX_VALUE = 100;
+    private Handler progressBarHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,13 +83,47 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                             fm.findFragmentByTag(savedInstanceState.getString("fragment")))
                     .commit();
         }
+    }
 
+    @Override
+    protected void onStart() {
+        IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new ResponseReceiver();
+        registerReceiver(receiver, filter);
+        super.onStart();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("fragment", getVisibleFragmentTag());
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("TAG", "onSTop");
+        if (receiver == null){
+            Log.d("TAG","onSTop Receiver == null");
+        } else {
+            Log.d("TAG","onSTop Receiver not null");
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("TAG", "onDestroy");
+        if (receiver == null){
+            Log.d("TAG","onDestroy Receiver == null");
+        } else {
+            Log.d("TAG","onDestroy Receiver not null");
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
+        super.onDestroy();
     }
 
     public String getVisibleFragmentTag() {
@@ -121,11 +176,12 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                 break;
             case R.id.action_login:
-                if (!UserManager.getInstance().isLoggedIn()) {
+                userManager = UserManager.getInstance();
+                if (!userManager.isLoggedIn()) {
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);
                 } else {
-                    UserManager.getInstance().logout();
+                    userManager.logout();
                     Toast toast = Toast.makeText(getApplicationContext(), "Wylogowano",
                             Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
@@ -159,6 +215,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 }
                 break;
             case R.id.action_synchronize:
+                startProgressBar();
                 Intent synchronize = new Intent(this, SynchronizeService.class);
                 startService(synchronize);
                 break;
@@ -184,5 +241,74 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         //This method is called when the up button is pressed. Just the pop back stack.
         getSupportFragmentManager().popBackStack();
         return true;
+    }
+
+    public class ResponseReceiver extends BroadcastReceiver {
+        public static final String ACTION_RESP = "MESSAGE_SYNCHRONIZE";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String status = intent.getStringExtra(SynchronizeService.currentStatus);
+            progressBarStatusOut = Double.parseDouble(status);
+            status = intent.getStringExtra(SynchronizeService.maxStatus);
+            maxProgressBarStatus = Double.parseDouble(status);
+        }
+
+    }
+
+
+    private void startProgressBar() {
+        // prepare for a progress bar dialog
+        progressBar = new ProgressDialog(this);
+        progressBar.setCancelable(true);
+        progressBar.setMessage("File synchronizing ...");
+        progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressBar.setProgress(MIN_VALUE);
+        progressBar.setMax(MAX_VALUE);
+
+        progressBar.setCancelable(false);
+        progressBar.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        progressBar.show();
+        //reset progress bar status
+        progressBarStatusIn = 0.;
+        progressBarStatusOut = 0.;
+
+        new Thread(new Runnable() {
+            public void run() {
+                while (progressBarStatusIn < MAX_VALUE) {
+
+                    // calculate progress bar status
+                    progressBarStatusIn = progressBarStatusOut/maxProgressBarStatus*MAX_VALUE;
+
+                    // Update the progress bar
+                    progressBarHandler.post(new Runnable() {
+                        public void run() {
+                            progressBar.setProgress((int) progressBarStatusIn.doubleValue());
+                        }
+                    });
+                }
+
+                // ok, file is downloaded,
+                if (progressBarStatusIn >= MAX_VALUE) {
+
+                    // sleep 1 seconds, so that you can see the 100%
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    maxProgressBarStatus = 100000;
+                    // close the progress bar dialog
+                    progressBar.dismiss();
+                }
+            }
+        }).start();
     }
 }

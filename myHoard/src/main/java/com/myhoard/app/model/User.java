@@ -7,7 +7,7 @@ import org.json.JSONObject;
 /**
  * Description
  *
- * @author gohilukk
+ * @author Tomasz Nosal
  *         Date: 18.03.14
  */
  public class User implements IModel {

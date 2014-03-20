@@ -13,7 +13,10 @@ import com.myhoard.app.provider.DataStorage.Items;
 import com.myhoard.app.provider.DataStorage.Media;
 
 /**
- * Created by gohilukk on 03.03.14.
+ * Description
+ *
+ * @author Tomasz Nosal
+ *         Date: 19.03.14
  */
 public class MediaTable extends DatabaseTable {
 

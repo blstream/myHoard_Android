@@ -15,7 +15,10 @@ import com.myhoard.app.provider.DataStorage.Items;
 import com.myhoard.app.provider.DataStorage.Media;
 
 /**
- * Created by gohilukk on 19.02.14.
+ * Description
+ *
+ * @author Tomasz Nosal
+ *         Date: 19.03.14
  */
 public class ItemsTable extends DatabaseTable {
 

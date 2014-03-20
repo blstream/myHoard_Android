@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Description
  *
- * @author gohilukk
+ * @author Tomasz Nosal
  *         Date: 18.03.14
  */
  public class Token {

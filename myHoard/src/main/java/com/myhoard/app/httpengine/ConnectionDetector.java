@@ -7,7 +7,7 @@ import android.net.NetworkInfo;
 /**
  * Description
  *
- * @author gohilukk
+ * @author Tomasz Nosal
  *         Date: 19.03.14
  */
 public class ConnectionDetector {

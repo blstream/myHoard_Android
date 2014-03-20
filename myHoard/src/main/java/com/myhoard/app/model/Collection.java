@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Description
  *
- * @author gohilukk
+ * @author Tomasz Nosal
  *         Date: 17.03.14
  */
 public class Collection implements IModel {

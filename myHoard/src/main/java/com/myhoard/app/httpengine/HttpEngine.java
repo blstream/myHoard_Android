@@ -34,7 +34,7 @@ import com.myhoard.app.model.Token;
 /**
  * Description
  *
- * @author gohilukk
+ * @author Tomasz Nosal
  *         Date: 17.03.14
  */
  public class HttpEngine<T> implements IHttpEngine<T> {
