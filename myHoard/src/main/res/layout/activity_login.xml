@@ -37,7 +37,7 @@
 
             <EditText
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="35dp"
                 android:inputType="textEmailAddress"
                 android:background="@drawable/login_and_registration_border"
                 android:textColor="@color/yellow_text"
@@ -58,7 +58,7 @@
 
             <EditText
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="35dp"
                 android:textColor="@color/yellow_text"
                 android:background="@drawable/login_and_registration_border"
                 android:inputType="textPassword"
@@ -110,6 +110,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/Login"
                 android:id="@+id/button_login"
+                android:background="@color/yellow_text"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginBottom="20dp" />

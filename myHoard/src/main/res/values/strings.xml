@@ -76,5 +76,9 @@
     <string name="menu_share">Share on FB</string>
     <string name="incorrect_data"></string>
     <string name="action_synchronize">Synchronize</string>
+    <string name="collection">Collection</string>
+    <string name="friends">Friends</string>
+    <string name="profile">Profile</string>
+    <string name="sign_up">Sign Up</string>
 
 </resources>

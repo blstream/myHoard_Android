@@ -20,10 +20,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
@@ -38,9 +43,13 @@ import com.myhoard.app.services.SynchronizeService;
 
 import java.util.List;
 
+import static android.support.v4.widget.DrawerLayout.SimpleDrawerListener;
+
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     CollectionsListFragment collectionsListFragment;
     UserSingleton userSingleton;
+    ListView navigationList;
+    String[] drawerListItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +72,23 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                             fm.findFragmentByTag(savedInstanceState.getString("fragment")))
                     .commit();
         }
+        drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+
+        ArrayAdapter adapter = new ArrayAdapter<>(getBaseContext(),android.R.layout.simple_list_item_1,drawerListItems);
+       final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        navigationList = (ListView)findViewById(R.id.drawer_list);
+        navigationList.setAdapter(adapter);
+
+        navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                drawerLayout.setDrawerListener(new SimpleDrawerListener(){
+
+                });
+            }
+        });
+
+
 
     }
 
@@ -102,7 +128,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                         !getVisibleFragmentTag().equals("ItemsList") &&
                         !getVisibleFragmentTag().equals("NewElement")) {
                     //item.setTitle(R.string.action_new_collection);//TODO correct
+
                     getSupportFragmentManager().beginTransaction()
+
                             .replace(R.id.container, new CollectionFragment(), "NewCollection")
                             .addToBackStack("NewCollection")
                             .commit();

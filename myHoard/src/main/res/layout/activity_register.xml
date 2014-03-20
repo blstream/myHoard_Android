@@ -1,23 +1,23 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/gray_background"
     android:id="@+id/scrollView">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:weightSum="1">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/gray_text"
                 android:text="@string/Registration_form"
                 android:id="@+id/textView"
                 android:layout_gravity="center_horizontal"
@@ -27,13 +27,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/gray_text"
+
                 android:text="@string/Email"
                 android:id="@+id/textView2"
                 android:layout_marginLeft="20dp" />
 
             <EditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="35dp"
+                android:textColor="@color/yellow_text"
+                android:background="@color/black_background"
                 android:inputType="textEmailAddress"
                 android:ems="10"
                 android:id="@+id/email_register"
@@ -43,13 +47,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/gray_text"
                 android:text="@string/Password"
                 android:id="@+id/textView3"
                 android:layout_marginLeft="20dp" />
 
             <EditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="35dp"
+                android:background="@color/black_background"
+                android:textColor="@color/yellow_text"
                 android:inputType="textPassword"
                 android:ems="10"
                 android:id="@+id/password_register"
@@ -58,10 +65,12 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/Register"
+                android:background="@color/yellow_text"
+                android:text="@string/sign_up"
                 android:id="@+id/reg_button"
-                android:layout_gravity="center_horizontal" />
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="20dp"/>
 
         </LinearLayout>
-    </RelativeLayout>
+
 </ScrollView>
