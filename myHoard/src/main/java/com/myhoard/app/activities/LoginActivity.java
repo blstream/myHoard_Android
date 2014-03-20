@@ -15,10 +15,8 @@ import android.widget.Toast;
 
 import com.myhoard.app.R;
 import com.myhoard.app.httpengine.ConnectionDetector;
-import com.myhoard.app.httpengine.UserHttpEngine;
-import com.myhoard.app.model.Token;
 import com.myhoard.app.model.User;
-import com.myhoard.app.model.UserSingleton;
+import com.myhoard.app.model.UserManager;
 
 public class LoginActivity extends ActionBarActivity {
 
@@ -30,7 +28,7 @@ public class LoginActivity extends ActionBarActivity {
 	private CheckBox remember_check;
 	private SharedPreferences.Editor editor;
 
-    User user;
+    private User user;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -115,25 +113,15 @@ public class LoginActivity extends ActionBarActivity {
         return username = tab[0];
     }
 
-
-
-    private class getUserSingleton extends AsyncTask<Void, Void, Token> {
-
-        User u;
+    private class getUserSingleton extends AsyncTask<Void, Void, Boolean> {
 
         @Override
-        protected Token doInBackground(Void... params) {
-            UserHttpEngine userHttpEngine = new UserHttpEngine("http://78.133.154.18:8080/oauth/token/");
-            //return userHttpEngine.getAuthenticationCode(user);
-            return userHttpEngine.getToken(user);
+        protected Boolean doInBackground(Void... params) {
+            return UserManager.getInstance().login(user);
         }
 
-        protected void onPostExecute(Token token) {
-            if (token != null) {
-                UserSingleton userS = UserSingleton.getInstance();
-                userS.user = user;
-                userS.token = token;
-
+        protected void onPostExecute(Boolean result) {
+            if (result) {
                 Toast toast = Toast.makeText(getApplicationContext(), "Zalogowano",
                         Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);

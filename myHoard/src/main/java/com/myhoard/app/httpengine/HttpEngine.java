@@ -82,13 +82,15 @@ import com.myhoard.app.model.Token;
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpResponse response;
-        JSONObject json = new JSONObject();
+        JSONObject json;
 
         try {
             HttpPost httpPost = new HttpPost(url);
 
             httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Authorization", token.getAccess_token());
+            if (token != null) {
+                httpPost.setHeader("Authorization", token.getAccess_token());
+            }
 
             json = item.toJson();
 

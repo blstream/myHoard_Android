@@ -1,16 +1,19 @@
 package com.myhoard.app.model;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Description
  *
  * @author gohilukk
  *         Date: 18.03.14
  */
- public class User {
+ public class User implements IModel {
     private String username;
     private String email;
     private String password;
-    private String authentication_code;
 
     public String getUsername() {
         return username;
@@ -36,11 +39,14 @@ package com.myhoard.app.model;
         this.password = password;
     }
 
-    public String getAuthentication_code() {
-        return authentication_code;
-    }
+    @Override
+    public JSONObject toJson() throws JSONException {
+        JSONObject json = new JSONObject();
 
-    public void setAuthentication_code(String authentication_code) {
-        this.authentication_code = authentication_code;
+        json.put("username", getUsername());
+        json.put("email", getEmail());
+        json.put("password", getPassword());
+
+        return json;
     }
 }
