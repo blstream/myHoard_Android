@@ -38,7 +38,7 @@ import android.widget.ImageView;
 
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapter;
-import com.myhoard.app.model.UserSingleton;
+import com.myhoard.app.model.UserManager;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -82,8 +82,8 @@ public class CollectionsListFragment extends Fragment implements
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        UserSingleton userSingleton = UserSingleton.getInstance();
-        if (userSingleton.user != null) {
+        UserManager userManager = UserManager.getInstance();
+        if (userManager.isLoggedIn()) {
             menu.findItem(R.id.action_login).setTitle("Logout");
             menu.findItem(R.id.action_synchronize).setVisible(true);
         }

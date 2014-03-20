@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.myhoard.app.httpengine.HttpEngine;
 import com.myhoard.app.model.Collection;
-import com.myhoard.app.model.UserSingleton;
+import com.myhoard.app.model.UserManager;
 import com.myhoard.app.provider.DataProvider;
 import com.myhoard.app.provider.DataStorage.Collections;
 
@@ -23,7 +23,7 @@ import java.util.List;
 public class SynchronizeService extends IntentService {
 
     public static final String URL = "http://78.133.154.18:8080/collections/";
-    UserSingleton userSingleton;
+    UserManager userManager;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -43,8 +43,8 @@ public class SynchronizeService extends IntentService {
         // Gets data from the incoming Intent
         String dataString = workIntent.getDataString();
 
-        userSingleton = UserSingleton.getInstance();
-        if (userSingleton.user != null) {
+        userManager = UserManager.getInstance();
+        if (userManager.isLoggedIn()) {
             HttpEngine<Collection> collections = new HttpEngine<>(URL);
 
 
@@ -52,7 +52,7 @@ public class SynchronizeService extends IntentService {
             localCollections = getLocalCollections();
 
             for (Collection c : localCollections) {
-                collections.create(c,userSingleton.token);
+                collections.create(c, userManager.getToken());
             }
         }
     }
