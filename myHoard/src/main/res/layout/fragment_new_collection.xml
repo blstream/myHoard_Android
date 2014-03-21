@@ -48,28 +48,32 @@
                 android:layout_marginBottom="10dp"
                 android:singleLine="true"
                 android:textSize="24sp"
-                android:background="#000000"
+                android:background="@drawable/edittext_background_color"
                 android:textColor="@color/yellow_main"
+                android:textCursorDrawable="@null"
                 android:layout_gravity="center_horizontal" />
 
             <TextView
-                android:id="@+id/tvCollectionTags"
+                android:id="@+id/tvCollectionType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/gray_text"
                 android:textSize="22sp"
-                android:text="@string/collection_tags" />
+                android:text="@string/collection_type"/>
 
             <EditText
-                android:id="@+id/etCollectionTags"
+                android:id="@+id/etCollectionType"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:singleLine="true"
                 android:textSize="24sp"
-                android:background="#000000"
+                android:background="@drawable/edittext_background_color"
+                android:focusable="false"
                 android:textColor="@color/yellow_main"
+                android:text="@string/offline"
                 android:layout_gravity="center_horizontal" />
+
 
             <TextView
                 android:id="@+id/tvCollectionDescription"
@@ -88,31 +92,32 @@
                 android:textSize="24sp"
                 android:gravity="top"
                 android:inputType="textMultiLine"
-                android:background="#000000"
-                android:textColor="@color/gray_description"
+                android:background="@drawable/edittext_background_color"
+                android:textColor="@color/yellow_main"
                 android:minLines="4"
+                android:textCursorDrawable="@null"
                 android:layout_gravity="center_horizontal" />
 
             <TextView
-                android:id="@+id/tvCollectionType"
+                android:id="@+id/tvCollectionTags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/gray_text"
                 android:textSize="22sp"
-                android:text="@string/collection_type"/>
+                android:text="@string/collection_tags" />
 
             <EditText
-                android:id="@+id/etCollectionType"
+                android:id="@+id/etCollectionTags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:singleLine="true"
                 android:textSize="24sp"
-                android:background="#000000"
-                android:focusable="false"
+                android:background="@drawable/edittext_background_color"
                 android:textColor="@color/yellow_main"
-                android:text="@string/offline"
+                android:textCursorDrawable="@null"
                 android:layout_gravity="center_horizontal" />
-</LinearLayout>
+
+        </LinearLayout>
     </ScrollView>
 </FrameLayout>

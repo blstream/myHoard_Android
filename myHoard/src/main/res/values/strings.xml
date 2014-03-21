@@ -80,5 +80,6 @@
     <string name="friends">Friends</string>
     <string name="profile">Profile</string>
     <string name="sign_up">Sign Up</string>
+    <string name="create_first_collection">Create first collection</string>
 
 </resources>

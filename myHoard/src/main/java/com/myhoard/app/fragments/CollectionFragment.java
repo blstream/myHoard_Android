@@ -46,7 +46,8 @@ import java.util.Calendar;
 /**
  * Created by Rafał Soudani on 20.02.2014
  */
-public class CollectionFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class CollectionFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        View.OnFocusChangeListener{
 
 	private static final int LOAD_DATA_FOR_EDIT = 20;
 	private static final int LOAD_NAMES = 30;
@@ -78,8 +79,11 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
 
         if (v != null) {
 			etCollectionName = (EditText) v.findViewById(R.id.etCollectionName);
+            etCollectionName.setOnFocusChangeListener(this);
 			etCollectionDescription = (EditText) v.findViewById(R.id.etCollectionDescription);
+            etCollectionDescription.setOnFocusChangeListener(this);
             etCollectionTags = (EditText) v.findViewById(R.id.etCollectionTags);
+            etCollectionTags.setOnFocusChangeListener(this);
             etCollectionType = (EditText) v.findViewById(R.id.etCollectionType);
             etCollectionType.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -254,5 +258,15 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
             return DataStorage.TypeOfCollection.PRIVATE.getType();
         }
         return DataStorage.TypeOfCollection.ERROR.getType();
+    }
+
+    @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        EditText et = (EditText) view;
+        if (hasFocus) {
+            et.setTextColor(getResources().getColor(R.color.white));
+        }
+        else
+            et.setTextColor(getResources().getColor(R.color.yellow_main));
     }
 }
