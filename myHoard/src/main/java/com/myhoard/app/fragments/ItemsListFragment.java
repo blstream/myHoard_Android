@@ -10,9 +10,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,9 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.FacebookRequestError;
@@ -49,7 +45,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private static final int SHARE_ID = Menu.FIRST + 3; // Facebook
     private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
 
-    private SimpleCursorAdapter adapter;
     private Context context;
     private GridView gridView;
 	private Long collectionID;
@@ -59,7 +54,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             DataStorage.Items.CREATED_DATE + " ASC";
     private static String sortOrder = sortByName;
     private ImageAdapterList mImageAdapterList;
-    private EditText mSearchText;
+    private TextView mItemsDescription;
+    private TextView mItemsTags;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_items_list, container, false);
@@ -68,40 +64,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         setHasOptionsMenu(true);
         //Create adapter to adapt data to individual list row
         mImageAdapterList = new ImageAdapterList(context, null, 0);
-        ImageButton imButtonSearch = (ImageButton) v.findViewById(R.id.imageButtonSearch);
-        imButtonSearch.setOnClickListener(this);
-        mSearchText = (EditText) v.findViewById(R.id.editTextSearch);
-        //Use text changed listener by mSearchTest EditText object to find elements in real time of search
-        mSearchText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                assert mSearchText.getText() != null;
-                String collectionElementText = mSearchText.getText().toString();
-                collectionElementText = collectionElementText.trim();
-                collectionElementText = collectionElementText.toLowerCase();
-                //Search element when text to search have more than two characters
-                if (collectionElementText.length() >= 2) {
-                    Bundle args = new Bundle();
-                    //Put text to search to Bundle object
-                    args.putString("fragmentElement", collectionElementText);
-                    //Restart to load data when user query is changed
-                    getLoaderManager().restartLoader(1, args, ItemsListFragment.this);
-                } else {
-                    //Get all element from collection
-                    getLoaderManager().restartLoader(0,null,ItemsListFragment.this);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
+        mItemsDescription = (TextView) v.findViewById(R.id.tvItemsListDescription);
+        mItemsTags = (TextView)v.findViewById(R.id.tvItemsListTags);
         return v;
 	}
 
@@ -126,7 +90,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             Session.setActiveSession(session);
         }
 
-		gridView = (GridView) view.findViewById(R.id.gridViewSearch);
+		gridView = (GridView) view.findViewById(R.id.gvItemsList);
 		//gridView.setEmptyView(view.findViewById(R.id.tvNoItems));
         getLoaderManager().initLoader(0, null, this);
         bindData();
@@ -139,7 +103,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         // retrieving data from CollectionsListFragment
         Bundle bundle = this.getArguments();
         collectionID = bundle.getLong(Selected_Collection_ID);
-
+        getLoaderManager().initLoader(2, null, this);
 		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
@@ -264,9 +228,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             case 0:
                 // columns to be selected from the table
                 final String[] projection = new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR,
-                        DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID};
+                        DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,DataStorage.Items.DESCRIPTION};
                 String selection = collectionID + " = " + DataStorage.Items.ID_COLLECTION;
-
                 cursorLoader =  new CursorLoader(context, DataStorage.Items.CONTENT_URI,
                         projection, selection, null, sortOrder);
                 break;
@@ -279,6 +242,12 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                         new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID},
                         collectionID + " = " + DataStorage.Items.ID_COLLECTION + " AND ("+ DataStorage.Items.DESCRIPTION + " LIKE '%" + collectionElementText + "%' OR " + DataStorage.Items.NAME + " = '" + collectionElementText + "')", null, null);
                 break;
+            case 2:
+                //CursorLoader used to get data from user query
+                cursorLoader = new CursorLoader(context, DataStorage.Collections.CONTENT_URI,
+                        new String[]{DataStorage.Collections.DESCRIPTION,DataStorage.Collections.TAGS},
+                        collectionID + " = " + DataStorage.Collections._ID, null, null);
+                break;
         }
         return cursorLoader;
 
@@ -286,12 +255,21 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader loader, Cursor data) {
-		mImageAdapterList.swapCursor(data);
-	}
+		if(loader.getId()==2){
+            data.moveToFirst();
+            mItemsDescription.setText(data.getString(0));
+            mItemsTags.setText(data.getString(1));
+        }
+        else {
+            mImageAdapterList.swapCursor(data);
+        }
+    }
 
 	@Override
 	public void onLoaderReset(Loader loader) {
-		mImageAdapterList.swapCursor(null);
+		if(loader.getId()!=2) {
+            mImageAdapterList.swapCursor(null);
+        }
 	}
 
     public void itemsSortOrderChange(MenuItem item) {

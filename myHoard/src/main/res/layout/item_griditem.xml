@@ -18,7 +18,7 @@
             android:scaleType="centerCrop" />
 
         <ImageView
-            android:id="@+id/ivSquareCount"
+            android:id="@+id/ivSquarePosition"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:gravity="center"
@@ -39,6 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
+            android:textSize="24dp"
             android:textColor="@color/yellow_main" />
         </LinearLayout>
     </RelativeLayout>
