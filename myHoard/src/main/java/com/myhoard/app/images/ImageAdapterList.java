@@ -34,12 +34,12 @@ public class ImageAdapterList extends CursorAdapter {
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		LayoutInflater inflater = LayoutInflater.from(context);
-		View v = inflater.inflate(R.layout.search_listitem, parent, false);
+		View v = inflater.inflate(R.layout.item_griditem, parent, false);
         //Create ViewHolder to ListView scrolling smooth
         ViewHolder viewHolder = new ViewHolder();
         assert v != null;
-        viewHolder.name = (TextView)v.findViewById(R.id.textViewListRowSearch);
-        viewHolder.img = (ImageView)v.findViewById(R.id.imageViewListRowSearch);
+        viewHolder.name = (TextView)v.findViewById(R.id.tvSquareNameItem);
+        viewHolder.img = (ImageView)v.findViewById(R.id.ivSquareAvatarItem);
         v.setTag(viewHolder);
 		bindView(v, context, cursor);
 		return v;

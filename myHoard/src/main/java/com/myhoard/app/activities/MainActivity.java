@@ -44,7 +44,6 @@ import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.ItemsListFragment;
-import com.myhoard.app.fragments.SearchFragment;
 import com.myhoard.app.model.UserManager;
 import com.myhoard.app.services.SynchronizeService;
 
@@ -109,29 +108,22 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                         int w = i;
 
                         switch(w){
-
                             case 0:
-                                getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.container, new SearchFragment(), "Search")
-                                        .addToBackStack("Search")
-                                        .commit();
-                                break;
-                            case 1:
 
                                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                                     startActivity(intent);
                                 break;
-                            case 2:
+                            case 1:
                                 getSupportFragmentManager().beginTransaction()
                                         .replace(R.id.container, new CollectionFragment(),"NewCollection")
                                         .addToBackStack("NewCollection")
                                         .commit();
                                 break;
-                            case 3:
+                            case 2:
                                 GeneratorDialog generatorDialog = new GeneratorDialog();
                                 generatorDialog.show(getSupportFragmentManager(), "");
                                 break;
-                            case 4:
+                            case 3:
                                 break;
 
                         }
@@ -251,15 +243,6 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
             case R.id.action_generate:
                 GeneratorDialog generatorDialog = new GeneratorDialog();
                 generatorDialog.show(getSupportFragmentManager(), "");
-                break;
-            case R.id.action_search:
-                if (!getVisibleFragmentTag().equals("Search")) {
-
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.container, new SearchFragment(), "Search")
-                            .addToBackStack("Search")
-                            .commit();
-                }
                 break;
             case R.id.action_sort:
                 if (!getVisibleFragmentTag().equals("NewCollection") &&

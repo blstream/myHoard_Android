@@ -44,13 +44,6 @@
         app:showAsAction="ifRoom|withText" />
 
     <item
-        android:id="@+id/action_search"
-        android:title="@string/action_search"
-        android:icon="@android:drawable/ic_menu_search"
-        android:orderInCategory="30"
-        app:showAsAction="ifRoom|withText" />
-
-    <item
         android:id="@+id/action_generate"
         android:title="@string/action_generate"/>
 

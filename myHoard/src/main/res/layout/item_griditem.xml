@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="7dp">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/grid_item_border"
+        tools:ignore="UselessParent">
+
+        <com.myhoard.app.views.SquareImageView
+            android:id="@+id/ivSquareAvatarItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ivSquareAvatarItem"
+            android:background="#000000"
+            android:orientation="vertical"
+            android:padding="2dp">
+
+        <TextView
+            android:id="@+id/tvSquareNameItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textColor="@color/yellow_main" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

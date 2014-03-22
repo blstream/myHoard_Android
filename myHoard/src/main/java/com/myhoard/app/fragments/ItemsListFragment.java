@@ -22,8 +22,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.facebook.FacebookRequestError;
@@ -51,7 +51,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     private SimpleCursorAdapter adapter;
     private Context context;
-    private ListView listView;
+    private GridView gridView;
 	private Long collectionID;
 
     private static String sortByName = DataStorage.Items.NAME + " ASC";
@@ -62,7 +62,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private EditText mSearchText;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_search, container, false);
+        View v = inflater.inflate(R.layout.fragment_items_list, container, false);
         context = getActivity();
         // call the method setHasOptionsMenu, to have access to the menu from the fragment
         setHasOptionsMenu(true);
@@ -126,8 +126,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             Session.setActiveSession(session);
         }
 
-		listView = (ListView) view.findViewById(R.id.listViewSearch);
-		listView.setEmptyView(view.findViewById(R.id.tvNoItems));
+		gridView = (GridView) view.findViewById(R.id.gridViewSearch);
+		//gridView.setEmptyView(view.findViewById(R.id.tvNoItems));
         getLoaderManager().initLoader(0, null, this);
         bindData();
     }
@@ -140,7 +140,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         Bundle bundle = this.getArguments();
         collectionID = bundle.getLong(Selected_Collection_ID);
 
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 			                        int position, long id) {
@@ -167,7 +167,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             }
         });
 
-		registerForContextMenu(listView);
+		registerForContextMenu(gridView);
 	}
 
 	@Override
@@ -252,7 +252,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     private void bindData() {
-        listView.setAdapter(mImageAdapterList);
+        gridView.setAdapter(mImageAdapterList);
     }
 
     // creates a new loader after initLoader() call
