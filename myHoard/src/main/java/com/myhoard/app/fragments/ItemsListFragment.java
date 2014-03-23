@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -231,8 +232,10 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         switch (item.getItemId()) {
             // Sharing item from list
             case SHARE_ID:
-                mItemPosition = info.position;
-                share();
+                if(info!=null) {
+                    mItemPosition = info.position;
+                    share();
+                }
                 return true;
         }
 
@@ -316,14 +319,14 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     /*
     * Sharing on Facebook name/description/photos/location
-    * TODO: sharing description/photos/location
+    * TODO Sharing group of items
     */
     private class SessionStatusCallback implements Session.StatusCallback {
         @Override
         public void call(Session session, SessionState state, Exception exception) {
 
             if (session != null && session.isOpened()) {
-                mProgressDialog = ProgressDialog.show(getActivity(),"","In progress...",true);
+                mProgressDialog = ProgressDialog.show(getActivity(),"",getString(R.string.progress),true);
                 // Temporary sharing only element name
                 Bundle postParams = prepareDataToShare();
 
@@ -332,24 +335,27 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
                         FacebookRequestError error = response.getError();
                         if (error != null) {
-                            Toast.makeText(getActivity()
-                                            .getApplicationContext(),
-                                    error.getErrorMessage(),
-                                    Toast.LENGTH_SHORT
-                            ).show();
+                            if(getActivity().getApplicationContext()!=null) {
+                                Toast.makeText(getActivity()
+                                                .getApplicationContext(),
+                                        error.getErrorMessage(),
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
                         } else {
-
-                            Toast.makeText(getActivity()
-                                            .getApplicationContext(),
-                                    "Sharing succeeded",
-                                    Toast.LENGTH_LONG
-                            ).show();
+                            if(getActivity().getApplicationContext()!=null) {
+                                Toast.makeText(getActivity()
+                                                .getApplicationContext(),
+                                        R.string.sharing_succeeded,
+                                        Toast.LENGTH_LONG
+                                ).show();
+                            }
                         }
                         mProgressDialog.dismiss();
                     }
                 };
 
-                Request postRequest = new Request(session, "me/feed", postParams, HttpMethod.POST, callback);
+                Request postRequest = new Request(session, "me/photos", postParams, HttpMethod.POST, callback);
                 RequestAsyncTask task = new RequestAsyncTask(postRequest);
                 task.execute();
 
@@ -375,11 +381,23 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
      Retrieving data that will be sharing on FB
      */
     private Bundle prepareDataToShare() {
+        int sizeX = 1000;
+        int sizeY = 1000;
+
         Cursor cursor = mImageAdapterList.getCursor();
         cursor.moveToPosition(mItemPosition); // position on list
-        String[] data = {cursor.getString(cursor.getColumnIndex(DataStorage.Items.NAME))};
+        // getting data form cursor
+        String[] data = {cursor.getString(cursor.getColumnIndex(DataStorage.Items.NAME)),
+                         cursor.getString(cursor.getColumnIndex(DataStorage.Media.AVATAR)),
+                         cursor.getString(cursor.getColumnIndex(DataStorage.Items.DESCRIPTION))};
+        // Decoding image
+        Bitmap image  = ImageAdapterList.decodeSampledBitmapFromResource(data[1],sizeX,sizeY);
         Bundle bundle = new Bundle();
-        bundle.putString("message",data[0]); // Temporary post on fb only message with name
+
+        data[0] += "\n" +data[2]; // Message on FB
+
+        bundle.putParcelable("source",image);
+        bundle.putString("message",data[0]);
         return  bundle;
     }
 }
