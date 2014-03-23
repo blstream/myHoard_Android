@@ -37,6 +37,7 @@ import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Maciej Plewko on 04.03.14.
+ * List of items of collection
  */
 public class ItemsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
 
@@ -65,6 +66,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         setHasOptionsMenu(true);
         //Create adapter to adapt data to individual list row
         mImageAdapterList = new ImageAdapterList(context, null, 0);
+        assert v != null;
         mItemsDescription = (TextView) v.findViewById(R.id.tvItemsListDescription);
         mItemsTags = (TextView)v.findViewById(R.id.tvItemsListTags);
         return v;
@@ -188,7 +190,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         //Set search option visible in the ItemsListFragment
         menu.findItem(R.id.action_search).setVisible(true);
         //set proper menu option title depending on the sort order
-        if (sortOrder == sortByDate) {
+        if (sortOrder.equals(sortByDate)) {
             menu.findItem(R.id.action_sort).setTitle(R.string.action_sort_by_name);
         }
         super.onCreateOptionsMenu(menu, inflater);

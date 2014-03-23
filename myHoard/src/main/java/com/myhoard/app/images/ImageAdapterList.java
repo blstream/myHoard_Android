@@ -21,7 +21,7 @@ import com.myhoard.app.R;
 
 public class ImageAdapterList extends CursorAdapter {
 
-    static class ViewHolder {
+    private static class ViewHolder {
         TextView name;
         ImageView img;
         String path;
