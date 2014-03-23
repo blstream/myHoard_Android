@@ -171,13 +171,18 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         UserManager userManager = UserManager.getInstance();
+        MenuItem item;
         if (userManager.isLoggedIn()) {
-            menu.findItem(R.id.action_login).setTitle("Logout");
-            menu.findItem(R.id.action_synchronize).setVisible(true);
+            item = menu.findItem(R.id.action_login);
+            if(item!=null) item.setTitle("Logout");
+            item = menu.findItem(R.id.action_synchronize);
+            if(item!=null) item.setVisible(true);
         }
         else {
-            menu.findItem(R.id.action_login).setTitle("Login");
-            menu.findItem(R.id.action_synchronize).setVisible(false);
+            item = menu.findItem(R.id.action_login);
+            if(item!=null) item.setTitle("Login");
+            item = menu.findItem(R.id.action_synchronize);
+            if(item!=null) item.setVisible(false);
         }
         super.onPrepareOptionsMenu(menu);
     }
@@ -185,13 +190,17 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     //create options menu with a MenuInflater to have all needed options visible in this fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        MenuItem item;
         //set sort option visible in the ItemsListFragment
-        menu.findItem(R.id.action_sort).setVisible(true);
+        item = menu.findItem(R.id.action_sort);
+        if(item!=null) item.setVisible(true);
         //Set search option visible in the ItemsListFragment
-        menu.findItem(R.id.action_search).setVisible(true);
+        item = menu.findItem(R.id.action_search);
+        if(item!=null) item.setVisible(true);
         //set proper menu option title depending on the sort order
         if (sortOrder.equals(sortByDate)) {
-            menu.findItem(R.id.action_sort).setTitle(R.string.action_sort_by_name);
+            item = menu.findItem(R.id.action_sort);
+            if(item!=null) item.setTitle(R.string.action_sort_by_name);
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
