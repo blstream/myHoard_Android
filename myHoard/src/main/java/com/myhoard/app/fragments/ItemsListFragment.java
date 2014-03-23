@@ -184,11 +184,35 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //set sort option visible in the ItemsListFragment
         menu.findItem(R.id.action_sort).setVisible(true);
+        //Set search option visible in the ItemsListFragment
+        menu.findItem(R.id.action_search).setVisible(true);
         //set proper menu option title depending on the sort order
         if (sortOrder == sortByDate) {
             menu.findItem(R.id.action_sort).setTitle(R.string.action_sort_by_name);
         }
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_search){
+            Fragment newFragment = new SearchFragment();
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+            // Add arguments to opened fragment element
+            Bundle b = new Bundle();
+            b.putLong("SearchFragment",collectionID);
+            newFragment.setArguments(b);
+
+            // Replace whatever is in the fragment_container view with this fragment,
+            // and add the transaction to the back stack
+            transaction.replace(R.id.container, newFragment, "Search");
+            transaction.addToBackStack("Search");
+
+            // Commit the transaction
+            transaction.commit();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -47,4 +47,10 @@
         android:id="@+id/action_generate"
         android:title="@string/action_generate"/>
 
+    <item
+        android:id="@+id/action_search"
+        android:title="@string/action_search"
+        android:icon="@drawable/abc_ic_search"
+        android:visible="false"
+        app:showAsAction="ifRoom|withText"/>
 </menu>

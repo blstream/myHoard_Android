@@ -194,6 +194,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         getMenuInflater().inflate(R.menu.main, menu);
         //setting sort option unvisible
         menu.findItem(R.id.action_sort).setVisible(false);
+        //set search option unvisible
+        menu.findItem(R.id.action_search).setVisible(false);
         return super.onCreateOptionsMenu(menu);
     }
 
