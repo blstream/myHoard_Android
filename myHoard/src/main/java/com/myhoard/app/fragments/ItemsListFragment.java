@@ -274,7 +274,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             case 2:
                 //CursorLoader used to get data from user query
                 cursorLoader = new CursorLoader(context, DataStorage.Collections.CONTENT_URI,
-                        new String[]{DataStorage.Collections.DESCRIPTION,DataStorage.Collections.TAGS},
+                        new String[]{DataStorage.Collections.DESCRIPTION,DataStorage.Collections.TAGS,DataStorage.Collections.NAME},
                         collectionID + " = " + DataStorage.Collections._ID, null, null);
                 break;
         }
@@ -288,6 +288,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             data.moveToFirst();
             mItemsDescription.setText(data.getString(0));
             mItemsTags.setText(data.getString(1));
+            getActivity().setTitle(data.getString(2));
         }
         else {
             mImageAdapterList.swapCursor(data);
