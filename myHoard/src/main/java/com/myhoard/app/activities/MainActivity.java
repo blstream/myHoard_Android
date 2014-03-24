@@ -114,10 +114,27 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                     startActivity(intent);
                                 break;
                             case 1:
-                                getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.container, new CollectionFragment(),"NewCollection")
-                                        .addToBackStack("NewCollection")
-                                        .commit();
+                                if (!getVisibleFragmentTag().equals("NewCollection") &&
+                                        !getVisibleFragmentTag().equals("ItemsList") &&
+                                        !getVisibleFragmentTag().equals("NewElement")) {
+                                    //item.setTitle(R.string.action_new_collection);//TODO correct
+                                    getSupportFragmentManager().beginTransaction()
+                                            .replace(R.id.container, new CollectionFragment(), "NewCollection")
+                                            .addToBackStack("NewCollection")
+                                            .commit();
+                                } else if (getVisibleFragmentTag().equals("ItemsList")) {
+                                    //item.setTitle(R.string.action_new_element);//TODO correct
+                                    Fragment elementFragment = new ElementFragment();
+                                    Bundle b = new Bundle();
+                                    //TODO Add collection id
+                                    //b.putLong(ElementFragment.COLLECTION_ID,collectionID);
+                                    b.putInt(ElementFragment.ID, -1);
+                                    elementFragment.setArguments(b);
+                                    getSupportFragmentManager().beginTransaction()
+                                            .replace(R.id.container, elementFragment, "NewElement")
+                                            .addToBackStack("NewElement")
+                                            .commit();
+                                }
                                 break;
                             case 2:
                                 GeneratorDialog generatorDialog = new GeneratorDialog();
@@ -206,27 +223,11 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_new_collection:
-                if (!getVisibleFragmentTag().equals("NewCollection") &&
-                        !getVisibleFragmentTag().equals("ItemsList") &&
-                        !getVisibleFragmentTag().equals("NewElement")) {
-                    //item.setTitle(R.string.action_new_collection);//TODO correct
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.container, new CollectionFragment(), "NewCollection")
-                            .addToBackStack("NewCollection")
-                            .commit();
-                } else if (getVisibleFragmentTag().equals("ItemsList")) {
-                    //item.setTitle(R.string.action_new_element);//TODO correct
-                    Fragment elementFragment = new ElementFragment();
-                    Bundle b = new Bundle();
-                    //TODO Add collection id
-                    //b.putLong(ElementFragment.COLLECTION_ID,collectionID);
-                    b.putInt(ElementFragment.ID, -1);
-                    elementFragment.setArguments(b);
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.container, elementFragment, "NewElement")
-                            .addToBackStack("NewElement")
-                            .commit();
-                }
+                item.setTitle(R.string.action_new_collection);
+                getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, new CollectionFragment(), "NewCollection")
+                    .addToBackStack("NewCollection")
+                    .commit();
 
                 break;
             case R.id.action_login:

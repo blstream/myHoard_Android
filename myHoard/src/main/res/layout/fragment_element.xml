@@ -1,110 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/newElement"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/nameLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/element_name" />
-
-    <EditText
-        android:id="@+id/nameEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/nameLabel"
-        android:layout_alignLeft="@+id/descriptionEditText" />
-
-    <TextView
-        android:id="@+id/nameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/nameLabel"
-        android:layout_toRightOf="@+id/nameLabel"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/descriptionLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/element_description"
-        android:layout_below="@+id/nameEditText"
-        android:layout_alignParentLeft="true" />
-
-    <EditText
-        android:id="@+id/descriptionEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/descriptionLabel"
-        android:layout_toRightOf="@+id/descriptionLabel" />
-
-    <TextView
-        android:id="@+id/descriptionTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/descriptionLabel"
-        android:layout_toRightOf="@+id/descriptionLabel"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/positionLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/element_position"
-        android:layout_below="@+id/descriptionEditText"
-        android:layout_alignParentLeft="true" />
-
-    <TextView
-        android:id="@+id/positionTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/positionLabel"
-        android:layout_toRightOf="@+id/positionLabel" />
-
-    <TextView
-        android:id="@+id/photoLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/element_photo"
-        android:layout_below="@+id/positionLabel"
-        android:layout_alignParentLeft="true" />
-
-    <!--<GridView
-        android:id="@+id/gridview"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/photoLabel"
-        android:verticalSpacing="0dp"
-        android:horizontalSpacing="0dp"
-        android:stretchMode="columnWidth"
-        android:numColumns="2" />-->
+        android:fillViewport="true">
 
-    <Button
-        android:id="@+id/addBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_below="@+id/photoLabel"
-        android:layout_alignParentLeft="true"
-        android:text="@string/add_image" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/gray_background">
 
-    <Button
-        android:id="@+id/saveBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_below="@+id/addBtn"
-        android:layout_alignParentLeft="true"
-        android:text="@string/save" />
+            <com.myhoard.app.views.ScaleImageView
+                android:id="@+id/ivElementPhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/nophoto"/>
 
-    <Button
-        android:id="@+id/cancelBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/saveBtn"
-        android:layout_alignTop="@+id/saveBtn"
-        android:text="@string/cancel" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:background="@color/gray_background">
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/tvElemntName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray_text"
+                android:textSize="22sp"
+                android:text="@string/element_name"/>
+
+            <EditText
+                android:id="@+id/etElementName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:singleLine="true"
+                android:textSize="24sp"
+                android:background="@drawable/edittext_background_color"
+                android:textColor="@color/yellow_main"
+                android:textCursorDrawable="@null"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/tvElementCategoryLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray_text"
+                android:textSize="22sp"
+                android:text="@string/element_category"/>
+
+            <TextView
+                android:id="@+id/tvElementCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textSize="24sp"
+                android:background="@drawable/edittext_background_color"
+                android:textColor="@color/yellow_main"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/tvElementLocalisationLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray_text"
+                android:textSize="22sp"
+                android:text="@string/element_localisation" />
+
+            <TextView
+                android:id="@+id/tvElementLocalisation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textSize="24sp"
+                android:background="@drawable/edittext_background_color"
+                android:textColor="@color/yellow_main"
+                android:layout_gravity="center_horizontal" />
+
+
+            <TextView
+                android:id="@+id/tvElementDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray_text"
+                android:textSize="22sp"
+                android:text="@string/element_description" />
+
+
+            <EditText
+                android:id="@+id/etElementDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textSize="24sp"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:background="@drawable/edittext_background_color"
+                android:textColor="@color/yellow_main"
+                android:minLines="4"
+                android:textCursorDrawable="@null"
+                android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

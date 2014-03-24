@@ -22,7 +22,11 @@ import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -34,6 +38,7 @@ import android.widget.Toast;
 import com.myhoard.app.R;
 import com.myhoard.app.gps.GPSProvider;
 import com.myhoard.app.provider.DataStorage;
+import com.myhoard.app.views.ScaleImageView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,8 +51,6 @@ import java.util.Date;
  * Created by Sebastian Peryt on 27.02.14.
  */
 public class ElementFragment extends Fragment implements View.OnClickListener {
-
-    //TODO Clean and refactor code
 
 	public static final String ID = "elementId";
 	public static final String NAME = "elementName";
@@ -62,26 +65,22 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 	private static final int REQUEST_IMAGE_CAPTURE = 2;
 	private static final int SELECT_PICTURE = 1;
 
-    private TextView tvElementName, tvElementDescription, tvElementPosition;
+    private TextView tvElementName, tvElementDescription, tvElementPosition, tvElementCategory;
     private EditText etElementName, etElementDescription;
     private String sCurrentPhotoPath;
     private String sImagePath;
     private int iCollectionId;
-    private GridView gvImages;
-    private Button btSave, btCancel, btAdd;
     private int elementId;
-    private int modeOn;
     private Context context;
+    private ScaleImageView ivElementPhoto;
 
-	private static final int MODE_ADD = 3;
-	private static final int MODE_EDIT = 4;
 	GPSProvider mService;
 	boolean mBound = false;
 	/*
-		 * Część kodu odpowiedzialna za binder
-		 * (http://developer.android.com/guide/components/bound-services.html)
-		 */
-	private ServiceConnection mConnection = new ServiceConnection() {
+	* Część kodu odpowiedzialna za binder
+	* (http://developer.android.com/guide/components/bound-services.html)
+	*/
+	private final ServiceConnection mConnection = new ServiceConnection() {
 
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -100,14 +99,14 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 	};
 
 	/*
-		     * broadcast reciver dzięki któremu istnieje połączenie z uslugą GPS
-		     */
-	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+	* broadcast reciver dzięki któremu istnieje połączenie z uslugą GPS
+    */
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			updatePosition(intent);
 			Bundle b = intent.getExtras();
-			if (!b.getBoolean("GPS")) {
+			if (b != null && !b.getBoolean("GPS")) {
                 tvElementPosition.setText("brak");
                 tvElementPosition.setTextColor(Color.RED);
 			}
@@ -117,67 +116,64 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 	 * KONIEC - Część kodu odpowiedzialna za binder
 	 */
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        final View v = inflater.inflate(R.layout.fragment_element, container, false);
+        setHasOptionsMenu(true);
+
+        context = getActivity();
+
+        tvElementName = (TextView) v.findViewById(R.id.tvElemntName);
+        tvElementDescription = (TextView) v.findViewById(R.id.tvElementDescription);
+        tvElementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
+        etElementName = (EditText) v.findViewById(R.id.etElementName);
+        etElementDescription = (EditText) v.findViewById(R.id.etElementDescription);
+        ivElementPhoto = (ScaleImageView) v.findViewById(R.id.ivElementPhoto);
+        tvElementCategory = (TextView) v.findViewById(R.id.tvElementCategory);
+
+        tvElementPosition.setOnClickListener(this);
+
+        tvElementPosition.setText("ustalam");
+        tvElementPosition.setTextColor(Color.YELLOW);
+
+        tvElementCategory.setText("brak");//TODO add dialog to chose category from
+        tvElementCategory.setOnClickListener(this);
+
+        elementId = -1;
+        iCollectionId = 0;
+
+        Bundle b = getArguments();
+        if (b != null && (b.getInt(ElementFragment.ID)!=-1)) {
+            etElementName.setVisibility(View.INVISIBLE);
+            etElementDescription.setVisibility(View.INVISIBLE);
+            tvElementName.setVisibility(View.VISIBLE);
+            tvElementDescription.setVisibility(View.VISIBLE);
+            tvElementName.setText(b.getString(ElementFragment.NAME));
+            tvElementDescription.setText(b.getString(ElementFragment.DESCRIPTION));
+            elementId = b.getInt(ElementFragment.ID);
+            iCollectionId = (int) b.getLong(ElementFragment.COLLECTION_ID);
+        }
+
+        ivElementPhoto.setOnClickListener(this);
+
+        return v;
+    }
+
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
-        case R.id.addBtn:
+        case R.id.ivElementPhoto:
             imagePicker();
             break;
-		case R.id.saveBtn:
-			// TODO in some production
-			if (modeOn == MODE_EDIT) {
-				etElementName.setVisibility(View.VISIBLE);
-				etElementDescription.setVisibility(View.VISIBLE);
-				tvElementName.setVisibility(View.INVISIBLE);
-				tvElementDescription.setVisibility(View.INVISIBLE);
-				etElementName.setText(tvElementName.getText().toString());
-				etElementDescription.setText(tvElementDescription.getText().toString());
-				//ivElementPhoto.setOnClickListener(this);
-				btSave.setText(context.getResources().getString(R.string.save));
-				modeOn = MODE_ADD;
-				break;
-			}
-
-			if (tvElementName.getText() == null || TextUtils.isEmpty(etElementName.getText())) {
-				Toast.makeText(getActivity(), getString(R.string.required_name_element),
-						Toast.LENGTH_SHORT).show();
-			} else {
-				String sName = "", sDescription = "";
-				if (etElementName.getText() != null) {
-					sName = etElementName.getText().toString();
-				}
-				if (etElementDescription.getText() != null) {
-					sDescription = etElementDescription.getText().toString();
-				}
-				ContentValues values = new ContentValues();
-				values.put(DataStorage.Items.NAME, sName);
-				values.put(DataStorage.Items.DESCRIPTION, sDescription);
-                values.put(DataStorage.Items.ID_COLLECTION, iCollectionId);
-				//values.put(DataStorage.Items.AVATAR_FILE_NAME, sImagePath);
-				// TODO fix after explanation
-				//values.put(DataStorage.Elements.TAGS);
-				AsyncQueryHandler asyncHandler =
-						new AsyncQueryHandler(getActivity().getContentResolver()) {};
-				if (elementId != -1) {
-                    values.put(DataStorage.Items.MODIFIED_DATE, Calendar.getInstance()
-                            .getTime().getTime());
-					asyncHandler.startUpdate(MODE_EDIT, null, DataStorage.Items.CONTENT_URI, values,
-							DataStorage.Items._ID + " = " + elementId, null);
-				} else {
-					values.put(DataStorage.Items.CREATED_DATE, Calendar.getInstance()
-                            .getTime().getTime());
-					asyncHandler.startInsert(MODE_ADD, null, DataStorage
-							.Items.CONTENT_URI, values);
-				}
-				getFragmentManager().popBackStackImmediate();
-			}
-			break;
-		case R.id.cancelBtn:
-			getFragmentManager().popBackStackImmediate();
-			break;
-        case R.id.positionTextView:
-            //todo
+        case R.id.tvElementLocalisation:
+            if(tvElementPosition.getText().toString().equals("brak")) {
+                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            }
             break;
+            case R.id.tvElementCategory:
+                //TODO do
+                Toast.makeText(context,"In development",Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -274,74 +270,22 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 			try {
 				bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imgUri);
 			} catch (FileNotFoundException e) {
-				Log.e(TAG, e.toString());
+				Log.e(TAG, "FileNotFoundException error: " + e.toString());
 				e.printStackTrace();
 			} catch (IOException e) {
-				Log.e(TAG, e.toString());
+				Log.e(TAG, "IOException error: " + e.toString());
 				e.printStackTrace();
 			}
-			//ivElementPhoto.setImageBitmap(bitmap);
+			ivElementPhoto.setImageBitmap(bitmap);
 		} else {
 			// Response is wrong - visible only in debug mode
 			if (D) Log.d(TAG, "Response != " + Activity.RESULT_OK);
 		}
 	}
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-		final View v = inflater.inflate(R.layout.fragment_element, container, false);
-
-		context = getActivity();
-
-		tvElementName = (TextView) v.findViewById(R.id.nameTextView);
-		tvElementDescription = (TextView) v.findViewById(R.id.descriptionTextView);
-        tvElementPosition = (TextView) v.findViewById(R.id.positionTextView);
-		etElementName = (EditText) v.findViewById(R.id.nameEditText);
-		etElementDescription = (EditText) v.findViewById(R.id.descriptionEditText);
-		//gvImages = (GridView) v.findViewById(R.id.gridview);
-
-        btAdd = (Button) v.findViewById(R.id.addBtn);
-        btAdd.setOnClickListener(this);
-
-		btSave = (Button) v.findViewById(R.id.saveBtn);
-		btCancel = (Button) v.findViewById(R.id.cancelBtn);
-		btSave.setOnClickListener(this);
-		btCancel.setOnClickListener(this);
-
-        tvElementPosition.setOnClickListener(this);
-
-        tvElementPosition.setText("ustalam");
-        tvElementPosition.setTextColor(Color.YELLOW);
-
-		elementId = -1;
-        iCollectionId = 0;
-
-		Bundle b = getArguments();
-		if (b != null && (b.getInt(ElementFragment.ID)!=-1)) {
-			etElementName.setVisibility(View.INVISIBLE);
-			etElementDescription.setVisibility(View.INVISIBLE);
-			tvElementName.setVisibility(View.VISIBLE);
-			tvElementDescription.setVisibility(View.VISIBLE);
-			tvElementName.setText(b.getString(ElementFragment.NAME));
-			tvElementDescription.setText(b.getString(ElementFragment.DESCRIPTION));
-			elementId = b.getInt(ElementFragment.ID);
-            iCollectionId = (int)b.getLong(ElementFragment.COLLECTION_ID);
-			modeOn = MODE_EDIT;
-			btSave.setText(context.getResources().getString(R.string.edit));
-		} else {
-			btSave.setText(context.getResources().getString(R.string.save));
-			//ivElementPhoto.setOnClickListener(this);
-			modeOn = MODE_ADD;
-		}
-
-
-		return v;
-	}
-
 	/*
-	     * Część kodu odpowiedzialna za GPS
-	     */
+	* Część kodu odpowiedzialna za GPS
+	*/
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -388,8 +332,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
     }
 
     private String pos2str(double lat, double lon) {
-        String pos = lat + ":" + lon;
-        return pos;
+        return lat + ":" + lon;
     }
     /*
 	 * KONIEC - Część kodu odpowiedzialna za GPS
@@ -414,5 +357,58 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
         Date d = new Date();
         CharSequence s  = DateFormat.format("dMMyyyy", d.getTime());
         return Integer.getInteger(s.toString());
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.new_collection, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_accept:
+                if (tvElementName.getText() == null || TextUtils.isEmpty(etElementName.getText())) {
+                    Toast.makeText(getActivity(), getString(R.string.required_name_element),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    String sName = "", sDescription = "";
+                    if (etElementName.getText() != null) {
+                        sName = etElementName.getText().toString();
+                    }
+                    if (etElementDescription.getText() != null) {
+                        sDescription = etElementDescription.getText().toString();
+                    }
+                    ContentValues values = new ContentValues();
+                    values.put(DataStorage.Items.NAME, sName);
+                    values.put(DataStorage.Items.DESCRIPTION, sDescription);
+                    values.put(DataStorage.Items.ID_COLLECTION, iCollectionId);
+                    //values.put(DataStorage.Items.AVATAR_FILE_NAME, sImagePath);
+                    // TODO fix after explanation
+                    //values.put(DataStorage.Elements.TAGS);
+                    AsyncQueryHandler asyncHandler =
+                            new AsyncQueryHandler(getActivity().getContentResolver()) {};
+                    if (elementId != -1) {
+                        values.put(DataStorage.Items.MODIFIED_DATE, Calendar.getInstance()
+                                .getTime().getTime());
+//                        asyncHandler.startUpdate(0, null, DataStorage.Items.CONTENT_URI, values,
+//                                DataStorage.Items._ID + " = " + elementId, null);
+                    } else {
+                        values.put(DataStorage.Items.CREATED_DATE, Calendar.getInstance()
+                                .getTime().getTime());
+//                        asyncHandler.startInsert(0, null, DataStorage
+//                                .Items.CONTENT_URI, values);
+                    }
+                    Toast.makeText(context,"In development",Toast.LENGTH_SHORT).show();
+                    getFragmentManager().popBackStackImmediate();
+                }
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
     }
 }

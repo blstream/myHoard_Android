@@ -70,7 +70,7 @@
     <string name="generate_elements">Number of elements:</string>
     <string name="generator">Generate!</string>
     <string name="name_too_short">Name is too short</string>
-    <string name="element_position">Position:</string>
+    <string name="element_localisation">Localisation:</string>
     <string name="add_image">Add image</string>
     <string name="app_id">1388908654663237</string>
     <string name="menu_share">Share on FB</string>
@@ -83,5 +83,6 @@
     <string name="create_first_collection">Create first collection</string>
     <string name="sharing_succeeded">Sharing succeeded</string>
     <string name="progress">In progress...</string>
+    <string name="element_category">Category:</string>
 
 </resources>
