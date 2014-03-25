@@ -33,11 +33,12 @@ import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Rafał Soudani on 20.02.2014
+ * Modified by Tomasz Nosal on 25.03.2014
  */
 
 public class ImageAdapter extends CursorAdapter {
 	private int width = 200;
-
+    private static final String EMPTY_COLLECTION = "0";
 
 	public ImageAdapter(Context context, Cursor c, int flags) {
 		super(context, c, flags);
@@ -62,7 +63,8 @@ public class ImageAdapter extends CursorAdapter {
 			holder.nameIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.NAME);
 			holder.tagsIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.TAGS);
 			holder.imgIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.AVATAR_FILE_NAME);
-            //TODO: holder.countIndex = get collection items count
+            holder.countIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.ITEMS_NUMBER);
+
 			v.setTag(holder);
 		}
 
@@ -86,8 +88,12 @@ public class ImageAdapter extends CursorAdapter {
 		ViewHolder holder = (ViewHolder) view.getTag();
 		holder.name.setText(cursor.getString(holder.nameIndex));
         holder.tags.setText(cursor.getString(holder.tagsIndex));
-        holder.count.setText("0"); //TODO: get collection items count
 
+        if (cursor.getString(holder.countIndex) == null) {
+            holder.count.setText(EMPTY_COLLECTION);
+        } else {
+            holder.count.setText(cursor.getString(holder.countIndex));
+        }
 
 		Drawable d;
 		if (cursor.getString(holder.imgIndex) == null) {

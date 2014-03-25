@@ -6,6 +6,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.List;
 
+import com.myhoard.app.model.Collection;
+import com.myhoard.app.provider.DataStorage.Items;
+import com.myhoard.app.provider.DataStorage.Collections;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	public static final String DB_NAME = "mh.db";
@@ -26,12 +30,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			for (DatabaseTable tb : tables) {
 				tb.createTable(db);
 			}
+            //create trigger, where is his place?
             StringBuilder sql = new StringBuilder();
-            sql.append("CREATE TRIGGER update_items_number AFTER INSERT ON items ")
+            sql.append("CREATE TRIGGER update_items_number AFTER INSERT ON " + Items.TABLE_NAME)
                     .append(" BEGIN ")
-                    .append(" UPDATE collections set itemsNumber = ")
-                    .append(" (SELECT COUNT(*) from items WHERE items.idCollection = collections._id); ")
-                    .append(" END");
+                    .append("UPDATE " + Collections.TABLE_NAME + " set " + Collections.ITEMS_NUMBER + " = ")
+                    .append("(SELECT COUNT(*) from " + Items.TABLE_NAME)
+                    .append(" WHERE " + Items.TABLE_NAME + "." + Items.ID_COLLECTION)
+                    .append(" = " + Collections.TABLE_NAME + "." + Collections._ID + "); ")
+                    .append("END");
             db.execSQL(sql.toString());
 			db.setTransactionSuccessful();
 		} finally {

@@ -16,7 +16,7 @@ public class DataProvider extends ContentProvider {
 
 	// Constants used by the Uri matcher to choose an action based on the pattern of the incoming URI
 	public static final int COLLECTIONS = 1;
-	public static final int ELEMENTS = 2;
+	public static final int ITEMS = 2;
 	public static final int MEDIA = 3;
 	/**
 	 * A UriMatcher instance
@@ -30,7 +30,7 @@ public class DataProvider extends ContentProvider {
 		// Creates and initializes the URI matcher
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI(DataStorage.AUTHORITY, Collections.TABLE_NAME, COLLECTIONS);
-		uriMatcher.addURI(DataStorage.AUTHORITY, Items.TABLE_NAME, ELEMENTS);
+		uriMatcher.addURI(DataStorage.AUTHORITY, Items.TABLE_NAME, ITEMS);
 		uriMatcher.addURI(DataStorage.AUTHORITY, Media.TABLE_NAME, MEDIA);
 	}
 
@@ -38,7 +38,7 @@ public class DataProvider extends ContentProvider {
 	public boolean onCreate() {
 		tables = new LinkedList<>();
 		tables.add(new CollectionsTable(getContext(), COLLECTIONS));
-		tables.add(new ItemsTable(getContext(), ELEMENTS));
+		tables.add(new ItemsTable(getContext(), ITEMS));
 		tables.add(new MediaTable(getContext(), MEDIA));
 
 		// Creates a new helper object. Note that the database itself isn't opened until

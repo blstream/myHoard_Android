@@ -18,6 +18,7 @@ package com.myhoard.app.activities;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -45,6 +46,7 @@ import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.model.UserManager;
+import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.services.SynchronizeService;
 
 import java.util.List;
@@ -171,11 +173,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     @Override
     protected void onStop() {
-        Log.d("TAG", "onSTop");
         if (receiver == null){
-            Log.d("TAG","onSTop Receiver == null");
         } else {
-            Log.d("TAG","onSTop Receiver not null");
             unregisterReceiver(receiver);
             receiver = null;
         }
@@ -184,11 +183,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     @Override
     protected void onDestroy() {
-        Log.d("TAG", "onDestroy");
         if (receiver == null){
-            Log.d("TAG","onDestroy Receiver == null");
         } else {
-            Log.d("TAG","onDestroy Receiver not null");
             unregisterReceiver(receiver);
             receiver = null;
         }
