@@ -70,6 +70,12 @@ public final class DataStorage {
          * <p>Type: NUMERIC</p>
          */
         public static final String TYPE = "type";
+
+        /**
+         * Number of items in collection. Column name.
+         * <p>Type: NUMERIC</p>
+         */
+        public static final String ITEMS_NUMBER = "itemsNumber";
 	}
 
 	protected interface ItemsColumns {
@@ -102,6 +108,12 @@ public final class DataStorage {
 		 * <p>Type: REAL</p>
 		 */
 		public static final String LOCATION_LNG = "locationLng";
+
+        /**
+         * Location. Column name.
+         * <p>Type: TEXT</p>
+         */
+        public static final String LOCATION = "LOCATION";
 
 		/**
 		 * Created date. Column name.
@@ -153,7 +165,8 @@ public final class DataStorage {
 				CREATED_DATE,
 				MODIFIED_DATE,
 				SERVERS,
-                TYPE
+                TYPE,
+                ITEMS_NUMBER
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
 		/**
 		 * This utility class cannot be instantiated
@@ -172,6 +185,7 @@ public final class DataStorage {
 				DESCRIPTION,
 				LOCATION_LAT,
 				LOCATION_LNG,
+                LOCATION,
 				CREATED_DATE,
 				MODIFIED_DATE
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);

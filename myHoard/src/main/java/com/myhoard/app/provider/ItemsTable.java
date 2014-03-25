@@ -38,6 +38,7 @@ public class ItemsTable extends DatabaseTable {
                 .append(Items.DESCRIPTION + " TEXT, ")
                 .append(Items.LOCATION_LAT + " REAL, ")
                 .append(Items.LOCATION_LNG + " REAL, ")
+                .append(Items.LOCATION + " TEXT, ")
                 .append(Items.CREATED_DATE + " NUMERIC, ")
                 .append(Items.MODIFIED_DATE + " NUMERIC, ")
                 .append("FOREIGN KEY(" + Items.ID_COLLECTION + ") REFERENCES " + Collections.TABLE_NAME + "(" + Collections._ID + "))");

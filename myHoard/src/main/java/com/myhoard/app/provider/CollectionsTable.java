@@ -31,7 +31,8 @@ public class CollectionsTable extends DatabaseTable {
 				.append(Collections.CREATED_DATE + " NUMERIC, ")
 				.append(Collections.MODIFIED_DATE + " NUMERIC, ")
                 .append(Collections.SERVERS + " TEXT, ")
-				.append(Collections.TYPE + " NUMERIC)");
+				.append(Collections.TYPE + " NUMERIC, ")
+                .append(Collections.ITEMS_NUMBER + " NUMERIC)");
 		db.execSQL(sql.toString());
 	}
 

@@ -26,6 +26,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			for (DatabaseTable tb : tables) {
 				tb.createTable(db);
 			}
+            StringBuilder sql = new StringBuilder();
+            sql.append("CREATE TRIGGER update_items_number AFTER INSERT ON items ")
+                    .append(" BEGIN ")
+                    .append(" UPDATE collections set itemsNumber = ")
+                    .append(" (SELECT COUNT(*) from items WHERE items.idCollection = collections._id); ")
+                    .append(" END");
+            db.execSQL(sql.toString());
 			db.setTransactionSuccessful();
 		} finally {
 			db.endTransaction();
