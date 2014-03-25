@@ -4,6 +4,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.myhoard.app.model.Collection;
+import com.myhoard.app.model.IModel;
+import com.myhoard.app.model.Token;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -26,10 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.List;
-
-import com.myhoard.app.model.Collection;
-import com.myhoard.app.model.IModel;
-import com.myhoard.app.model.Token;
 
 /**
  * Description

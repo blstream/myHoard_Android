@@ -6,11 +6,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
@@ -81,32 +79,24 @@ public class RegisterActivity extends ActionBarActivity {
 
     public boolean validatePassword() {
         String password = String.valueOf(passwordRegistry.getText());
-         /* AWA:FIXME: Dead code
-        Zakomentowany kod
-        Patrz:Ksiazka:Czysty kod:Rozdział 4:Zakomentowany kod
-        */
-        //Pattern pattern = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{5,}$");
-        /* AWA:FIXME: Hardcoded value
-                    Umiesc w private final static String ....
-                    lub w strings.xml
-                    */
 
-        Pattern pattern = Pattern.compile(".{4,}");
+
+        Pattern pattern = Pattern.compile(getString(R.string.password_pattern));
         Matcher matcher = pattern.matcher(password);
         /* AWA:FIXME: Hardcoded value
                     Proszę umieścić tekst w strings.xml
                     */
 
-        if (!matcher.matches()) Log.d("REGISTRATION","invalid email");
+        if (!matcher.matches()) Log.d("REGISTRATION",getString(R.string.invalid_mail));
         return matcher.matches();
     }
 
     public boolean validateEmail() {
         String email = String.valueOf(emailRegistry.getText());
-        Pattern p = Pattern.compile((".+@.+\\.[a-z]+"));
+        Pattern p = Pattern.compile((getString(R.string.email_pattern)));
         Matcher m = p.matcher(email);
 
-        if (!m.matches()) Log.d("REGISTRATION","invalid password");
+        if (!m.matches()) Log.d("REGISTRATION",getString(R.string.invalid_password));
         return m.matches();
     }
 

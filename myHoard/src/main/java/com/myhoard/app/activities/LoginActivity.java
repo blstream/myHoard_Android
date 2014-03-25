@@ -104,43 +104,17 @@ public class LoginActivity extends ActionBarActivity {
                             editor.clear();
                             editor.commit();
                         }
-
-                        /* AWA:FIXME: Dead code
-                        Zakomentowany kod
-                        Patrz:Ksiazka:Czysty kod:Rozdział 4:Zakomentowany kod
-                         */
-                        //new LoginApi().execute(email_ch,password_ch,getUsername(email_ch));
-                        //Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        //startActivity(intent);
-
-
-                    } else {
-                        if (!email_ch.equals(login_fix)) {
-                            //email.setError(getString(R.string.incoreect_login));
-                        }
-                        if (!password_ch.equals(password_fix)) {
-                            //password.setError(getString(R.string.wrong_password));
-                        }
-
                     }
                 } else {
                     TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
-                    /* AWA:FIXME: Hardcoded value
-                    Proszę umieścić tekst w strings.xml
-                    */
-                    incorrectData.setText("YOU DON'T HAVE INTERNET CONNECTION");
+                    incorrectData.setText(getString(R.string.no_internet_connection));
                 }
             }
 		});
 
 	}
 
-    private String getUsername(String email)
-    {
-        String[]tab = email.split("@");
-        String username;
-        return username = tab[0];
-    }
+
 
     private class getUserSingleton extends AsyncTask<Void, Void, Boolean> {
 
@@ -154,7 +128,7 @@ public class LoginActivity extends ActionBarActivity {
                  /* AWA:FIXME: Hardcoded value
                     Proszę umieścić tekst w strings.xml
                     */
-                Toast toast = Toast.makeText(getApplicationContext(), "Zalogowano",
+                Toast toast = Toast.makeText(getBaseContext(), getString(R.string.Logged),
                         Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
                 toast.show();
@@ -162,7 +136,7 @@ public class LoginActivity extends ActionBarActivity {
             }
             else {
                 TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
-                incorrectData.setText("E-MAIL OR PASSWORD IS INCORRECT");
+                incorrectData.setText(getString(R.string.email_or_password_incorrect));
             }
         }
     }

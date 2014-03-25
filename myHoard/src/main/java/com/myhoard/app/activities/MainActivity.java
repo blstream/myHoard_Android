@@ -18,7 +18,6 @@ package com.myhoard.app.activities;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,7 +28,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,7 +44,6 @@ import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.model.UserManager;
-import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.services.SynchronizeService;
 
 import java.util.List;
@@ -130,11 +127,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     @Override
                     public void onDrawerClosed(View drawerView) {
                         super.onDrawerClosed(drawerView);
-                        int w = i;
 
-                        switch(w){
+                        switch(i){
                             case 0:
-
                                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                                     startActivity(intent);
                                 break;

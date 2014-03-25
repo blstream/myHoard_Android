@@ -4,11 +4,8 @@
     <string name="action_new_collection">New Collection</string>
     <string name="action_search">"Search"</string>
     <string name="action_settings">Settings</string>
-    <string name="Accept_of_terms">I read and accept terms of use</string>
     <string name="app_name">MyHoard</string>
-    <string name="checkbox_not_check_registration">You have to accept the terms of use</string>
     <string name="collection_add">ADD COLLECTION</string>
-    <string name="collection_avatar">Avatar:</string>
     <string name="collection_description">Description:</string>
     <string name="collection_name">Collection name:</string>
     <string name="Email">Email</string>
@@ -74,7 +71,7 @@
     <string name="add_image">Add image</string>
     <string name="app_id">1388908654663237</string>
     <string name="menu_share">Share on FB</string>
-    <string name="incorrect_data"></string>
+    <string name="incorrect_data">Incorrect data</string>
     <string name="action_synchronize">Synchronize</string>
     <string name="collection">Collection</string>
     <string name="friends">Friends</string>
@@ -84,5 +81,12 @@
     <string name="sharing_succeeded">Sharing succeeded</string>
     <string name="progress">In progress...</string>
     <string name="element_category">Category:</string>
+    <string name="no_internet_connection">YOU DON\'T HAVE INTERNET CONNECTION</string>
+    <string name="Logged">Zalogowano</string>
+    <string name="email_or_password_incorrect">E-MAIL OR PASSWORD IS INCORRECT</string>
+    <string name="password_pattern">.{4,}</string>
+    <string name="invalid_mail">invalid email</string>
+    <string name="invalid_password">invalid password</string>
+    <string name="email_pattern">.+@.+\.[a-z]+</string>
 
 </resources>
