@@ -65,6 +65,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 	private static final int REQUEST_IMAGE_CAPTURE = 2;
 	private static final int SELECT_PICTURE = 1;
 
+    /* AWA:FIXME: Niepotrzebne prefiksy określające typ
+Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
+*/
     private TextView tvElementName, tvElementDescription, tvElementPosition, tvElementCategory;
     private EditText etElementName, etElementDescription;
     private String sCurrentPhotoPath;
@@ -106,7 +109,12 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 		public void onReceive(Context context, Intent intent) {
 			updatePosition(intent);
 			Bundle b = intent.getExtras();
-			if (b != null && !b.getBoolean("GPS")) {
+             /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                    */
+            if (b != null && !b.getBoolean("GPS")) {
                 tvElementPosition.setText("brak");
                 tvElementPosition.setTextColor(Color.RED);
 			}
@@ -214,6 +222,10 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 			try {
 				photoFile = createImageFile();
 			} catch (IOException ex) {
+
+/* AWA:FIXME: Obsługa błędów
+Wypychanie błędów do UI
+*/
 				Log.e(TAG, "Error occurred while creating the File");
 			}
 			// Continue only if the File was successfully created
@@ -232,7 +244,13 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 	 * @throws IOException
 	 */
 	private File createImageFile() throws IOException {
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                    */
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = "JPEG_" + timeStamp;
 		File storageDir = Environment.getExternalStoragePublicDirectory(
 				Environment.DIRECTORY_PICTURES);
@@ -270,6 +288,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 			try {
 				bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imgUri);
 			} catch (FileNotFoundException e) {
+                /* AWA:FIXME: Obsługa błędów
+                Wypychanie błędów do UI
+                */
 				Log.e(TAG, "FileNotFoundException error: " + e.toString());
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -386,6 +407,10 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
                     values.put(DataStorage.Items.NAME, sName);
                     values.put(DataStorage.Items.DESCRIPTION, sDescription);
                     values.put(DataStorage.Items.ID_COLLECTION, iCollectionId);
+                     /* AWA:FIXME: Dead code
+                    Zakomentowany kod
+                    Patrz:Ksiazka:Czysty kod:Rozdział 4:Zakomentowany kod
+                    */
                     //values.put(DataStorage.Items.AVATAR_FILE_NAME, sImagePath);
                     // TODO fix after explanation
                     //values.put(DataStorage.Elements.TAGS);

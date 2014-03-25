@@ -24,6 +24,12 @@ public class TypeDialog extends DialogFragment implements View.OnClickListener {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Dialog dialog = new Dialog(getActivity());
+        /* AWA:FIXME:Uzycie styli zamiast ustawiania w kodzie wygladu Dialogu
+        Proponuję sprawdzić czy nie da się tego ustawić w pliku stylu
+        i ewentualnei w kodzie zroibć tylko ustawianie tego stylu
+        Np.
+        http://stackoverflow.com/questions/19167185/cant-get-my-dialogfragment-background-to-be-transparent
+        */
         dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);

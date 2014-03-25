@@ -18,11 +18,18 @@ import com.myhoard.app.httpengine.ConnectionDetector;
 import com.myhoard.app.model.User;
 import com.myhoard.app.model.UserManager;
 
+/* AWA:FIXME: Brak Autora oraz nagłowka
+*/
 public class LoginActivity extends ActionBarActivity {
 
 	private EditText email;
 	private EditText password;
 
+    /* AWA:FIXME: Powinny być jako
+    private final static String NAZWA_STALEJ
+    SEE:https://source.android.com/source/code-style.html
+    ->Follow Field Naming Conventions
+    */
 	private String login_fix = "jan";
 	private String password_fix = "aA12#";
 	private CheckBox remember_check;
@@ -31,6 +38,10 @@ public class LoginActivity extends ActionBarActivity {
     private User user;
 
 	@Override
+    /* AWA:FIXME: Ciało metody jest za dlugie.
+    Mozna je podzielic na "krótsze" metody
+    Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
+    */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
@@ -41,6 +52,9 @@ public class LoginActivity extends ActionBarActivity {
 		remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
 		SharedPreferences loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
 		editor = loginPreferences.edit();
+        /* AWA:FIXME: Hardcoded value
+        Wartość saveLogin i inne powinny być w private final static NAZWA_STALEJ
+        */
 		Boolean saveLogin = loginPreferences.getBoolean("saveLogin", false);
 
 
@@ -69,6 +83,13 @@ public class LoginActivity extends ActionBarActivity {
                     user = new User();
                     user.setUsername(email_ch);
                     user.setPassword(password_ch);
+
+                    /* AWA:FIXME: AsyncTask canceling
+                    Uruchamiany jest w tym miejscu AsyncTask
+                    Jednak brak jest jego anulowania.
+                    Co gdy uzytkownik opusci to acitivyt przez przycisk BACK?
+                    AsyncTask dalej będzie w tle pracował.
+                    */
                     new getUserSingleton().execute();
 
 
@@ -83,6 +104,11 @@ public class LoginActivity extends ActionBarActivity {
                             editor.clear();
                             editor.commit();
                         }
+
+                        /* AWA:FIXME: Dead code
+                        Zakomentowany kod
+                        Patrz:Ksiazka:Czysty kod:Rozdział 4:Zakomentowany kod
+                         */
                         //new LoginApi().execute(email_ch,password_ch,getUsername(email_ch));
                         //Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         //startActivity(intent);
@@ -99,6 +125,9 @@ public class LoginActivity extends ActionBarActivity {
                     }
                 } else {
                     TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
+                    /* AWA:FIXME: Hardcoded value
+                    Proszę umieścić tekst w strings.xml
+                    */
                     incorrectData.setText("YOU DON'T HAVE INTERNET CONNECTION");
                 }
             }
@@ -122,6 +151,9 @@ public class LoginActivity extends ActionBarActivity {
 
         protected void onPostExecute(Boolean result) {
             if (result) {
+                 /* AWA:FIXME: Hardcoded value
+                    Proszę umieścić tekst w strings.xml
+                    */
                 Toast toast = Toast.makeText(getApplicationContext(), "Zalogowano",
                         Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);

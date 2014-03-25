@@ -51,6 +51,8 @@ import com.myhoard.app.services.SynchronizeService;
 
 import java.util.List;
 
+/* AWA:FIXME: Brak Autora oraz nagłowka
+*/
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     CollectionsListFragment collectionsListFragment;
     UserManager userManager;
@@ -63,12 +65,27 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     ProgressDialog progressBar;
     private Double progressBarStatusIn = 0.;
     private Double progressBarStatusOut = 0.;
+    /* AWA:FIXME: Powinny być jako
+   private final static String NAZWA_STALEJ
+   SEE:https://source.android.com/source/code-style.html
+   ->Follow Field Naming Conventions
+   */
     private double maxProgressBarStatus = 10000;
     private static final int MIN_VALUE = 0;
     private static final int MAX_VALUE = 100;
+
+    /* AWA:FIXME: Nazwa handlera jest mylaca
+    Handler jest połączony z kolejką wiadomości wątku
+    W tym przypadku jest to handler do  głównego wątku.
+    Proponuję poszukać lepszej nazwy
+    */
     private Handler progressBarHandler = new Handler();
 
     @Override
+    /* AWA:FIXME: Ciało metody jest za dlugie.
+    Mozna je podzielic na "krótsze" metody
+    Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
+    */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -80,6 +97,12 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         collectionsListFragment = new CollectionsListFragment();
         FragmentManager fm = getSupportFragmentManager();
         if (savedInstanceState == null) {
+
+
+            /* AWA:FIXME: Hardcoded value
+            String "" powinien być jako stała np.
+            private final static String NAZWA_STALEJ="Main"
+                    */
             fm.beginTransaction()
                     .add(R.id.container, collectionsListFragment, "Main")
                     .commit();
@@ -115,6 +138,10 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                                     startActivity(intent);
                                 break;
+                            /* AWA:FIXME: Hardcoded value
+                            Magiczne numerki co oznaczaja 1, 2, 3....
+                            Musze z kodu wyczytac gdzie trafiłem ???
+                            */
                             case 1:
                                 if (!getVisibleFragmentTag().equals("NewCollection") &&
                                         !getVisibleFragmentTag().equals("ItemsList") &&
@@ -219,6 +246,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_new_collection:
+                /* AWA:FIXME: Hardcoded value
+                    */
                 item.setTitle(R.string.action_new_collection);
                 getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, new CollectionFragment(), "NewCollection")
@@ -233,6 +262,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     startActivity(intent);
                 } else {
                     userManager.logout();
+                    /* AWA:FIXME: Hardcoded value
+                    */
                     Toast toast = Toast.makeText(getApplicationContext(), "Wylogowano",
                             Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
@@ -244,6 +275,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 generatorDialog.show(getSupportFragmentManager(), "");
                 break;
             case R.id.action_sort:
+                /* AWA:FIXME: Hardcoded value
+                    */
                 if (!getVisibleFragmentTag().equals("NewCollection") &&
                         !getVisibleFragmentTag().equals("ItemsList") &&
                         !getVisibleFragmentTag().equals("NewElement")) {
@@ -303,12 +336,16 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         // prepare for a progress bar dialog
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(true);
+        /* AWA:FIXME: Hardcoded value
+                    */
         progressBar.setMessage("File synchronizing ...");
         progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressBar.setProgress(MIN_VALUE);
         progressBar.setMax(MAX_VALUE);
 
         progressBar.setCancelable(false);
+        /* AWA:FIXME: Hardcoded value
+                    */
         progressBar.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -321,6 +358,11 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         progressBarStatusIn = 0.;
         progressBarStatusOut = 0.;
 
+        /* AWA:FIXME: Niebezpieczne używanie wątku
+        Brak anulowania tej operacji.
+        Wyjście z Activity nie kończy wątku,
+        należy o to zadbać.
+        */
         new Thread(new Runnable() {
             public void run() {
                 while (progressBarStatusIn < MAX_VALUE) {
@@ -341,11 +383,15 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                     // sleep 1 seconds, so that you can see the 100%
                     try {
+                        /* AWA:FIXME:
+                        Thread.sleep jednoznacznie powinien byc tutaj zaznaczony ze jest do tesów
+                    */
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
+                    /* AWA:FIXME: Hardcoded value
+                    */
                     maxProgressBarStatus = 100000;
                     // close the progress bar dialog
                     progressBar.dismiss();

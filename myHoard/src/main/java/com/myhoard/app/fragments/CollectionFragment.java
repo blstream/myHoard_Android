@@ -93,7 +93,6 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                 }
             });
 
-
 			if (!this.getTag().equals("EditCollection")) {
                 getActivity().setTitle(context.getString(R.string.new_collection));
 			}
@@ -119,6 +118,10 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
         inflater.inflate(R.menu.new_collection, menu);
     }
 
+    /* AWA:FIXME: Ciało metody jest za dlugie.
+    Mozna je podzielic na "krótsze" metody
+    Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
+    */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -197,6 +200,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
 		case LOAD_DATA_FOR_EDIT:
 			Uri uri2 = DataStorage.Collections.CONTENT_URI;
 			String[] projection2 = DataStorage.Collections.TABLE_COLUMNS;
+            /* AWA:FIXME: Używaj String.format*/
 			return new CursorLoader(context, uri2, projection2, DataStorage.Collections._ID + " = " + mEditId, null, null);
 		case LOAD_NAMES:
 			Uri uri3 = DataStorage.Collections.CONTENT_URI;
@@ -247,6 +251,10 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
         return s != null && s.matches("\\s+");
     }
 
+     /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String ....
+                    lub w strings.xml
+                    */
     private int getTypeOfCollection() {
         if (etCollectionType.getText().toString().equals("offline")) {
             return DataStorage.TypeOfCollection.OFFLINE.getType();

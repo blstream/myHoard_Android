@@ -21,6 +21,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //TODO add username text field
+/* AWA:FIXME: Class header !!!!!!!!!!
+                    */
 public class RegisterActivity extends ActionBarActivity {
 
     private EditText emailRegistry;
@@ -47,9 +49,13 @@ public class RegisterActivity extends ActionBarActivity {
         boolean passwordFound = validatePassword();
         boolean emailFound = validateEmail();
         if (!emailFound) {
+            /* AWA:FIXME: Hardcoded value
+                    */
             emailRegistry.setError(getString(R.string.wrong_email_format));
         }
         if (!passwordFound) {
+            /* AWA:FIXME: Hardcoded value
+                    */
             passwordRegistry.setError(getString(R.string.password_information));
         }
 
@@ -60,6 +66,12 @@ public class RegisterActivity extends ActionBarActivity {
             user.setUsername(String.valueOf(emailRegistry.getText())); //TODO replace with value from username text field that will be added in near future
             user.setPassword(String.valueOf(passwordRegistry.getText()));
 
+
+            /* AWA:FIXME: Niebezpieczne używanie wątku
+        Brak anulowania tej operacji.
+        Wyjście z Activity nie kończy wątku,
+        należy o to zadbać.
+        */
             RegisterUser register  = new RegisterUser();
             register.user = user;
             register.activity = this;
@@ -69,9 +81,21 @@ public class RegisterActivity extends ActionBarActivity {
 
     public boolean validatePassword() {
         String password = String.valueOf(passwordRegistry.getText());
+         /* AWA:FIXME: Dead code
+        Zakomentowany kod
+        Patrz:Ksiazka:Czysty kod:Rozdział 4:Zakomentowany kod
+        */
         //Pattern pattern = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{5,}$");
+        /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String ....
+                    lub w strings.xml
+                    */
+
         Pattern pattern = Pattern.compile(".{4,}");
         Matcher matcher = pattern.matcher(password);
+        /* AWA:FIXME: Hardcoded value
+                    Proszę umieścić tekst w strings.xml
+                    */
 
         if (!matcher.matches()) Log.d("REGISTRATION","invalid email");
         return matcher.matches();

@@ -145,7 +145,10 @@ public class CollectionsListFragment extends Fragment implements
 					.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
 							if (info != null) {
-								getActivity().getContentResolver().delete(
+                                /* AWA:FIXME: Używaj String.format
+*/
+
+                                getActivity().getContentResolver().delete(
 										DataStorage.Collections.CONTENT_URI,
 										DataStorage.Collections._ID + " = " + info.id, null);
 								fillGridView();

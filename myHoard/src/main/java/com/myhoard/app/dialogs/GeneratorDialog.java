@@ -31,6 +31,12 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
     private EditText elementNumber;
     private String collection_id;
     private String element_id;
+
+    /* AWA:FIXME:Proponuje zmienic nazwe na mAppContext
+
+    Natomiast uwazac na trzymanie referencji na Context Activity:
+    http://android-developers.blogspot.com/2009/01/avoiding-memory-leaks.html
+    */
     private Context mContext;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -67,7 +73,18 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         }
     }
 
+    /* AWA:FIXME: Ciało metody jest za dlugie.
+   Mozna je podzielic na "krótsze" metody
+   Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
+   */
     public void generateData() {
+        /* AWA:FIXME: Nadużycie assertów.
+        W przypadku gdy weryfikuje na poziomie UI poprawność wpisanych danych to proponuję
+        sprawdzać w if else i  wyświetlać komunikat lub exception do UI.
+        Asserty proponuję używać do zweryfikowania czy inni programiści poprawnie wykorzystują
+        nasze klasy, metody etc..
+        Mogę to szerzej opowiedzieć na spotkaniu. Proszę się przypomnieć.
+         */
         assert collectionNumber.getText() != null;
         //Get text from Collection number label
         int collection_number = Integer.parseInt(collectionNumber.getText().toString());
@@ -75,6 +92,10 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         //Get text from Element number label
         int element_number = Integer.parseInt(elementNumber.getText().toString());
         InputStream is = null;
+         /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String ....
+                    lub w strings.xml
+                    */
         //List of jpg images in assets folder
         String[] list = new String[]{"flower1.jpg","flower2.jpg","beer1.jpg","snack1.jpg",
                 "ball1.jpg","coins1.jpg","pizza1.jpg","pizza2.jpg","snack2.jpg"};
@@ -87,6 +108,10 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         for (int i = 0; i < collection_number; i++) {
             ContentValues valuesCollection = new ContentValues();
             String collection_name;
+            /* AWA:FIXME: Hardcoded value
+            String "" powinien być jako stała np.
+            private final static String NAZWA_STALEJ="Main"
+                    */
             //Put value about collection to valuesCollection
             valuesCollection.put(DataStorage.Collections.NAME, collection_name = generateString(new Random(), "abcdefgijklmnouprstwuxyz", 10));
             valuesCollection.put(DataStorage.Collections.DESCRIPTION, generateString(new Random(), "abcdefgijklmnouprstwuxyz", 20));
@@ -98,8 +123,19 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             try {
                 is = am.open(list[random_number]);
             } catch (IOException e) {
+                /* AWA:FIXME: Obsługa błędów
+                Wypychanie błędów do UI
+                Patrz:Ksiazka:Czysty kod:Rozdział 7:Obsługa błędów
+                */
                 e.printStackTrace();
             }
+
+             /* AWA:FIXME: Stream brak zamknięcia
+             Proszę zamykać Output/InputStream w bloku finally
+             try..catch..finally
+             Przykład: http://stackoverflow.com/questions/156508/closing-a-java-fileinputstream
+             http://www.ibm.com/developerworks/java/library/j-jtp03216/index.html
+                    */
             //Create new file in mContext.getFilesDir() path
             File file = new File(mContext.getFilesDir(), list[random_number]);
             try {
@@ -108,6 +144,11 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+
+            /* AWA:FIXME: Hardcoded value
+            String "" powinien być jako stała np.
+            private final static String NAZWA_STALEJ="Main"
+                    */
             byte[] b = new byte[2048];
             int length;
             try {

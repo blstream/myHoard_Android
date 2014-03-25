@@ -19,6 +19,10 @@ import org.acra.annotation.ReportsCrashes;
 		mode = ReportingInteractionMode.DIALOG,
         resDialogText = R.string.action_acra)
 
+/* AWA:FIXME:Nazwa klasy Application
+Nazwa klasy powinna byc powiazana z MyHoard
+np. MyHoardApplication
+*/
 public class AcraApplication extends Application {
 	@Override
 	public void onCreate() {
