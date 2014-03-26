@@ -90,7 +90,8 @@ public class GPSProvider extends Service implements LocationListener {
 	public IBinder onBind(Intent arg0) {
 		if (D)
 			Log.d(TAG, "bind");
-
+/* AWA:FIXME: Magic numbers
+*/
 		locationManager
 				.requestLocationUpdates(locationProvider, 10000, 2, this);
 

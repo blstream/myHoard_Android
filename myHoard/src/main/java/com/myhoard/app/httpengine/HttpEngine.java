@@ -36,6 +36,10 @@ import java.util.List;
  * @author Tomasz Nosal
  *         Date: 17.03.14
  */
+/*
+AWA:FIXME: Nazwa klasy
+Proponuję zmianę nazwy na CRUDEngine
+ */
  public class HttpEngine<T> implements IHttpEngine<T> {
 
     protected String url;
@@ -85,7 +89,11 @@ import java.util.List;
 
         try {
             HttpPost httpPost = new HttpPost(url);
-
+/* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                    */
             httpPost.setHeader("Accept", "application/json");
             if (token != null) {
                 httpPost.setHeader("Authorization", token.getAccess_token());
@@ -104,6 +112,9 @@ import java.util.List;
                 String HTTP_response = null;
                 HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                 Log.d("TAG", "Jsontext = " + HTTP_response);
+                /* AWA:FIXME: Uzywaj ternary operator
+http://www.cafeaulait.org/course/week2/43.html
+*/
                 if (HTTP_response.contains("error_code")) {
                     return false;
                 } else {
@@ -111,6 +122,9 @@ import java.util.List;
                 }
             }
         } catch (Exception e) {
+            /* AWA:FIXME: Obsługa błędów
+Wypychanie błędów do UI
+*/
             e.printStackTrace();
         }
         return false;
@@ -126,6 +140,10 @@ import java.util.List;
         try {
             HttpPut httpPut = new HttpPut(url + id);
 
+/* AWA:FIXME: Hardcoded value
+            String "" powinien być jako stała np.
+            private final static String NAZWA_STALEJ="Main"
+                    */
             httpPut.setHeader("Accept", "application/json");
             httpPut.setHeader("Authorization", token.getAccess_token());
 
@@ -150,6 +168,9 @@ import java.util.List;
                 }
             }
         } catch (Exception e) {
+            /* AWA:FIXME: Obsługa błędów
+Wypychanie błędów do UI
+*/
             e.printStackTrace();
         }
     }
@@ -173,6 +194,8 @@ import java.util.List;
 
     }
 
+    /* AWA:FIXME: Magic numbers
+*/
     protected String getASCIIContentFromEntity(HttpEntity entity) throws IllegalStateException, IOException {
         InputStream in = entity.getContent();
         StringBuffer out = new StringBuffer();

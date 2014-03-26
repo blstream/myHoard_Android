@@ -72,6 +72,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         return v;
 	}
 
+    /* AWA:FIXME: Rozdzielona sekcja zadeklarowanych pól klasy
+    Proponuję kumulować deklaracje w jednej sekcji
+    */
     private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
     private ProgressDialog mProgressDialog; //Facebook
     private int mItemPosition;
@@ -106,6 +109,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         // retrieving data from CollectionsListFragment
         Bundle bundle = this.getArguments();
         collectionID = bundle.getLong(Selected_Collection_ID);
+        /* AWA:FIXME: Magic number 2
+*/
         getLoaderManager().initLoader(2, null, this);
 		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
@@ -125,6 +130,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack
+                /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                */
                 transaction.replace(R.id.container, newFragment, "NewElement");
                 transaction.addToBackStack("NewElement");
 
@@ -174,6 +184,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         MenuItem item;
         if (userManager.isLoggedIn()) {
             item = menu.findItem(R.id.action_login);
+            /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                */
             if(item!=null) item.setTitle("Logout");
             item = menu.findItem(R.id.action_synchronize);
             if(item!=null) item.setVisible(true);
@@ -216,6 +231,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             b.putLong("SearchFragment",collectionID);
             newFragment.setArguments(b);
 
+            /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                */
             // Replace whatever is in the fragment_container view with this fragment,
             // and add the transaction to the back stack
             transaction.replace(R.id.container, newFragment, "Search");
@@ -231,6 +251,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
+        /* AWA:FIXME: Magic numbers
+*/
         menu.add(0, EDIT_ID, 0, R.string.menu_edit);
         menu.add(0, DELETE_ID, 1, R.string.menu_delete);
         menu.add(0, SHARE_ID, 2, R.string.menu_share); // Sharing on FB
@@ -267,6 +289,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 // columns to be selected from the table
                 final String[] projection = new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR,
                         DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,DataStorage.Items.DESCRIPTION};
+
+/* AWA:FIXME: Używaj String.format
+*/
                 String selection = collectionID + " = " + DataStorage.Items.ID_COLLECTION;
                 cursorLoader =  new CursorLoader(context, DataStorage.Items.CONTENT_URI,
                         projection, selection, null, sortOrder);
@@ -274,6 +299,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             //Get concrete element form user editText
             case 1:
                 //Get text to search from args object
+                /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                    */
                 String collectionElementText = bundle.getString("fragmentElement");
                 //CursorLoader used to get data from user query
                 cursorLoader = new CursorLoader(context, DataStorage.Items.CONTENT_URI,
@@ -293,6 +323,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader loader, Cursor data) {
+        /* AWA:FIXME: Magic numbers
+*/
 		if(loader.getId()==2){
             data.moveToFirst();
             mItemsDescription.setText(data.getString(0));
@@ -367,7 +399,16 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                     }
                 };
 
+                /* AWA:FIXME: Hardcoded value
+            String "" powinien być jako stała np.
+            private final static String NAZWA_STALEJ="Main"
+                    */
                 Request postRequest = new Request(session, "me/photos", postParams, HttpMethod.POST, callback);
+                /* AWA:FIXME: Niebezpieczne używanie wątku
+        Brak anulowania tej operacji.
+        Wyjście z Activity nie kończy wątku,
+        należy o to zadbać.
+        */
                 RequestAsyncTask task = new RequestAsyncTask(postRequest);
                 task.execute();
 
@@ -393,6 +434,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
      Retrieving data that will be sharing on FB
      */
     private Bundle prepareDataToShare() {
+        /* AWA:FIXME: Magic numbers
+*/
         int sizeX = 1000;
         int sizeY = 1000;
 

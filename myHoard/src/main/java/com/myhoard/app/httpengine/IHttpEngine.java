@@ -11,6 +11,10 @@ import com.myhoard.app.model.Token;
  * @author Tomasz Nosal
  *         Date: 17.03.14
  */
+/*
+AWA:FIXME: Nazwa klasy
+Proponuję zmianę nazwy na ICRUDEngine
+ */
  public interface IHttpEngine<T> {
 
     public List<T> getList(Token token);

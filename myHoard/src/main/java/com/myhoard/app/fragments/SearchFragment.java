@@ -30,6 +30,10 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
     private ImageAdapterList mImageAdapterList;
     private Long mCollectionId;
 
+    /* AWA:FIXME: Ciało metody jest za dlugie.
+Mozna je podzielic na "krótsze" metody
+Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
+*/
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_search, container, false);
@@ -89,6 +93,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
                 collectionElementText = collectionElementText.trim();
                 collectionElementText = collectionElementText.toLowerCase();
                 //Search element when text to search have more than two characters
+                /* AWA:FIXME: Magic numbers
+*/
                 if (collectionElementText.length() >= 2) {
                     Bundle args = new Bundle();
                     //Put text to search to Bundle object
@@ -107,6 +113,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
         //Get text to search from args object
         String collectionElementText = args.getString("fragmentElement");
         //CursorLoader used to get data from user query
+        /* AWA:FIXME: Używaj String.format
+*/
         return new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
                 new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID},
                 mCollectionId + " = " + DataStorage.Items.ID_COLLECTION + " AND ("+ DataStorage.Items.DESCRIPTION + " LIKE '%" + collectionElementText + "%' OR " + DataStorage.Items.NAME + " = '" + collectionElementText + "')", null, null);
