@@ -88,5 +88,8 @@
     <string name="invalid_mail">invalid email</string>
     <string name="invalid_password">invalid password</string>
     <string name="email_pattern">.+@.+\.[a-z]+</string>
+    <string name="drawer_open">Open drawer</string>
+    <string name="drawer_close">Close drawer</string>
+
 
 </resources>

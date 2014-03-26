@@ -22,8 +22,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -33,19 +35,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
+import com.myhoard.app.adapters.NavDrawerListAdapter;
 import com.myhoard.app.dialogs.GeneratorDialog;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.ItemsListFragment;
+import com.myhoard.app.model.RowItem;
 import com.myhoard.app.model.UserManager;
 import com.myhoard.app.services.SynchronizeService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /* AWA:FIXME: Brak Autora oraz nagłowka
@@ -57,6 +61,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     //to receive information from service SynchronizeService
     private ResponseReceiver receiver;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
 
     //variables to progressBar
     ProgressDialog progressBar;
@@ -77,6 +82,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     Proponuję poszukać lepszej nazwy
     */
     private Handler progressBarHandler = new Handler();
+
+
 
     @Override
     /* AWA:FIXME: Ciało metody jest za dlugie.
@@ -110,14 +117,34 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     .commit();
 
         }
-        String[]  drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+
+        String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+      int[] images = {R.drawable.kolekcje,R.drawable.anuluj,R.drawable.znajomi,R.drawable.kolekcje,R.drawable.znajomi};
+        //wiem ze to slabe, postaram sie niedlugo zrobic lepsze przekazywanie ikonek
 
 
+        List<RowItem>list = new ArrayList<RowItem>();
+        for(int i=0; i < drawerListItems.length ;i++)
+        {
+                RowItem item = new RowItem(drawerListItems[i],images[i]);
+                list.add(item);
+        }
 
-        ArrayAdapter adapter = new ArrayAdapter<>(getBaseContext(),R.layout.drawer_menu_row,R.id.textViewRow,drawerListItems);
+        NavDrawerListAdapter navDrawerListAdapter = new NavDrawerListAdapter(this,R.layout.drawer_menu_row,list);
+
         final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         final  ListView navigationList = (ListView)findViewById(R.id.drawer_list);
-        navigationList.setAdapter(adapter);
+        navigationList.setAdapter(navDrawerListAdapter);
+
+
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.drawable.ic_drawer,R.string.drawer_open,R.string.drawer_close);
+
+
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+
 
         navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -166,6 +193,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                 break;
                             case 3:
                                 break;
+                            default:
+                                break;
 
                         }
 
@@ -176,6 +205,18 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
             }
         });
 
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        actionBarDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        actionBarDrawerToggle.syncState();
     }
 
     @Override
@@ -239,6 +280,10 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
         switch (item.getItemId()) {
             case R.id.action_new_collection:
                 /* AWA:FIXME: Hardcoded value
@@ -297,19 +342,19 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     @Override
     public void onBackStackChanged() {
-        shouldDisplayHomeUp();
+    //    shouldDisplayHomeUp();
     }
 
     public void shouldDisplayHomeUp() {
         //Enable Up button only  if there are entries in the back stack
-        boolean canBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
-        getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
+      //  boolean canBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+      //  getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
         //This method is called when the up button is pressed. Just the pop back stack.
-        getSupportFragmentManager().popBackStack();
+     //   getSupportFragmentManager().popBackStack();
         return true;
     }
 
