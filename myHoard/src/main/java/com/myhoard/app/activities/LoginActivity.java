@@ -18,20 +18,21 @@ import com.myhoard.app.httpengine.ConnectionDetector;
 import com.myhoard.app.model.User;
 import com.myhoard.app.model.UserManager;
 
-/* AWA:FIXME: Brak Autora oraz nagłowka
+/*
+* Crreated by Mateusz Czyszkiewicz
 */
 public class LoginActivity extends ActionBarActivity {
 
 	private EditText email;
 	private EditText password;
 
-    /* AWA:FIXME: Powinny być jako
-    private final static String NAZWA_STALEJ
-    SEE:https://source.android.com/source/code-style.html
-    ->Follow Field Naming Conventions
-    */
-	private String login_fix = "jan";
-	private String password_fix = "aA12#";
+
+	private final static String login_fix = "jan";
+	private final static String password_fix = "aA12#";
+    private final static String savelogin = "saveLogin";
+    private final static String loginprefs = "loginPrefs";
+    private final static String usernames = "username";
+    private final static String passwords = "password";
 	private CheckBox remember_check;
 	private SharedPreferences.Editor editor;
 
@@ -50,17 +51,15 @@ public class LoginActivity extends ActionBarActivity {
 		Button login_button = (Button) findViewById(R.id.button_login);
 		TextView txt = (TextView) findViewById(R.id.registration_text);
 		remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
-		SharedPreferences loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+		SharedPreferences loginPreferences = getSharedPreferences(loginprefs, MODE_PRIVATE);
 		editor = loginPreferences.edit();
-        /* AWA:FIXME: Hardcoded value
-        Wartość saveLogin i inne powinny być w private final static NAZWA_STALEJ
-        */
-		Boolean saveLogin = loginPreferences.getBoolean("saveLogin", false);
+
+		Boolean saveLogin = loginPreferences.getBoolean(savelogin, false);
 
 
 		if (saveLogin) {
-			email.setText(loginPreferences.getString("username", ""));
-			password.setText(loginPreferences.getString("password", ""));
+			email.setText(loginPreferences.getString(usernames, ""));
+			password.setText(loginPreferences.getString(passwords, ""));
 		}
 		txt.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -93,18 +92,18 @@ public class LoginActivity extends ActionBarActivity {
                     new getUserSingleton().execute();
 
 
-                    if (email_ch.equals(login_fix) && password_ch.equals(password_fix)) {
+
                         if (remember_check.isChecked()) {
 
-                            editor.putBoolean("saveLogin", true);
-                            editor.putString("username", email_ch);
-                            editor.putString("password", password_ch);
+                            editor.putBoolean(savelogin, true);
+                            editor.putString(usernames, email_ch);
+                            editor.putString(passwords, password_ch);
                             editor.commit();
                         } else {
                             editor.clear();
                             editor.commit();
                         }
-                    }
+
                 } else {
                     TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
                     incorrectData.setText(getString(R.string.no_internet_connection));
@@ -125,9 +124,8 @@ public class LoginActivity extends ActionBarActivity {
 
         protected void onPostExecute(Boolean result) {
             if (result) {
-                 /* AWA:FIXME: Hardcoded value
-                    Proszę umieścić tekst w strings.xml
-                    */
+
+
                 Toast toast = Toast.makeText(getBaseContext(), getString(R.string.Logged),
                         Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
@@ -136,7 +134,7 @@ public class LoginActivity extends ActionBarActivity {
             }
             else {
                 TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
-                incorrectData.setText(getString(R.string.email_or_password_incorrect));
+               incorrectData.setText(getString(R.string.email_or_password_incorrect));
             }
         }
     }

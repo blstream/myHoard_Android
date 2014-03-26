@@ -119,7 +119,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         }
 
         String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-      int[] images = {R.drawable.kolekcje,R.drawable.anuluj,R.drawable.znajomi,R.drawable.kolekcje,R.drawable.znajomi};
+      int[] images = {R.drawable.kolekcje,R.drawable.kolekcje,R.drawable.anuluj,R.drawable.znajomi,R.drawable.profilpng};
         //wiem ze to slabe, postaram sie niedlugo zrobic lepsze przekazywanie ikonek
 
 
@@ -155,10 +155,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     public void onDrawerClosed(View drawerView) {
                         super.onDrawerClosed(drawerView);
 
-                        switch(i){
+                        int w = i;
+
+                        switch(w){
                             case 0:
                                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                                     startActivity(intent);
+
                                 break;
                             /* AWA:FIXME: Hardcoded value
                             Magiczne numerki co oznaczaja 1, 2, 3....
@@ -190,18 +193,19 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                             case 2:
                                 GeneratorDialog generatorDialog = new GeneratorDialog();
                                 generatorDialog.show(getSupportFragmentManager(), "");
+
                                 break;
                             case 3:
+
                                 break;
                             default:
                                 break;
 
                         }
-
-
                     }
                 });
                 drawerLayout.closeDrawer(navigationList);
+
             }
         });
 

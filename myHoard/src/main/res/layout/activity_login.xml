@@ -100,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/white_border"
-                android:text="@string/incorrect_data"
+                android:text=""
                 android:id="@+id/incorrect_data"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="20dp"/>
