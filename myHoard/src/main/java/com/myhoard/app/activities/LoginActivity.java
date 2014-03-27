@@ -27,8 +27,7 @@ public class LoginActivity extends ActionBarActivity {
 	private EditText password;
 
 
-	private final static String login_fix = "jan";
-	private final static String password_fix = "aA12#";
+
     private final static String savelogin = "saveLogin";
     private final static String loginprefs = "loginPrefs";
     private final static String usernames = "username";
