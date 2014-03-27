@@ -75,6 +75,10 @@ public class RegisterActivityTest extends ActivityInstrumentationTestCase2<Regis
         assertTrue("passwordRegistry field is empty","".equals(String.valueOf(passwordRegistry.getText())));
     }
 
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
 
 
     public void testButtonfillText() throws Throwable {
@@ -88,8 +92,8 @@ public class RegisterActivityTest extends ActivityInstrumentationTestCase2<Regis
             }
         });
         MainActivity mainActivity = (MainActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor,3000);
-        assertNotNull(mainActivity);
-        mainActivity.finish();
+        assertNull(mainActivity);
+        //mainActivity.finish();
 
 
 

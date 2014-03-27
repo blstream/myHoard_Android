@@ -51,8 +51,6 @@ public class LoginActivityTest extends ActivityInstrumentationTestCase2<LoginAct
 
     public void testButtonRegister() throws Throwable {
         Instrumentation.ActivityMonitor activityMonitor = getInstrumentation().addMonitor(RegisterActivity.class.getName(),null,false);
-
-
         runTestOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -92,7 +90,9 @@ public class LoginActivityTest extends ActivityInstrumentationTestCase2<LoginAct
             }
         });
         MainActivity mainActivity = (MainActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor1,3000);
-        assertNull(mainActivity);
+        assertNotNull(mainActivity);
+       // mainActivity.finish();
+
 
 
     }
@@ -113,10 +113,12 @@ public class LoginActivityTest extends ActivityInstrumentationTestCase2<LoginAct
             public void run() {
                 checkBox.requestFocus();
                 checkBox.setChecked(checkbox_test);
+
             }
         });
 
     }
+
     public void testViewVisible()
     {
         ViewAsserts.assertOnScreen(editText1.getRootView(), editText1);
@@ -136,6 +138,25 @@ public class LoginActivityTest extends ActivityInstrumentationTestCase2<LoginAct
         assertNotNull(txt);
         assertNotNull(auth_text);
         assertNotNull(button);
+
+    }
+
+    public void testButtonMainfillTextWrong() throws Throwable {
+        Instrumentation.ActivityMonitor activityMonitor1 = getInstrumentation().addMonitor(MainActivity.class.getName(),null,false);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                editText1.setText("tomasz");
+                editText2.setText("tomasz");
+
+                button.performClick();
+            }
+        });
+        MainActivity mainActivity = (MainActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor1,3000);
+        assertNull(mainActivity);
+        // mainActivity.finish();
+
+
 
     }
 
