@@ -92,7 +92,7 @@ public class RegisterActivityTest extends ActivityInstrumentationTestCase2<Regis
             }
         });
         MainActivity mainActivity = (MainActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor,3000);
-        assertNull(mainActivity);
+        assertNotNull(mainActivity);
         //mainActivity.finish();
 
 

@@ -1,6 +1,6 @@
 package com.myhoard.app.model;
 
-/**
+/*
  * Created by Czyz on 2014-03-26.
  */
 public class RowItem {

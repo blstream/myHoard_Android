@@ -21,7 +21,7 @@ import com.myhoard.app.model.UserManager;
 /*
 * Crreated by Mateusz Czyszkiewicz
 */
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends ActionBarActivity  {
 
 	private EditText email;
 	private EditText password;
@@ -54,9 +54,7 @@ public class LoginActivity extends ActionBarActivity {
 		editor = loginPreferences.edit();
 
 		Boolean saveLogin = loginPreferences.getBoolean(savelogin, false);
-
-
-		if (saveLogin) {
+    	if (saveLogin) {
 			email.setText(loginPreferences.getString(usernames, ""));
 			password.setText(loginPreferences.getString(passwords, ""));
 		}

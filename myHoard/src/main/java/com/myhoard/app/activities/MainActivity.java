@@ -37,7 +37,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.NavDrawerListAdapter;
 import com.myhoard.app.dialogs.GeneratorDialog;
@@ -48,11 +47,11 @@ import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.model.RowItem;
 import com.myhoard.app.model.UserManager;
 import com.myhoard.app.services.SynchronizeService;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /* AWA:FIXME: Brak Autora oraz nagłowka
+Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 */
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     CollectionsListFragment collectionsListFragment;
@@ -62,6 +61,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     //to receive information from service SynchronizeService
     private ResponseReceiver receiver;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+
 
     //variables to progressBar
     ProgressDialog progressBar;
@@ -75,6 +75,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private double maxProgressBarStatus = 10000;
     private static final int MIN_VALUE = 0;
     private static final int MAX_VALUE = 100;
+    private static final String NewCollection = "NewCollection";
+    private static final String Main = "Main";
+    private static final String Wylogowano = "Wylogowano";
+    private static final String NewElement = "NewElement";
+    private static final String ItemsList = "ItemsList";
+    private static final String fragment = "fragment";
+
 
     /* AWA:FIXME: Nazwa handlera jest mylaca
     Handler jest połączony z kolejką wiadomości wątku
@@ -108,27 +115,17 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
             private final static String NAZWA_STALEJ="Main"
                     */
             fm.beginTransaction()
-                    .add(R.id.container, collectionsListFragment, "Main")
+                    .add(R.id.container, collectionsListFragment, Main)
                     .commit();
         } else {
             fm.beginTransaction()
                     .replace(R.id.container,
-                            fm.findFragmentByTag(savedInstanceState.getString("fragment")))
+                            fm.findFragmentByTag(savedInstanceState.getString(fragment)))
                     .commit();
 
         }
+       List<RowItem> list = preparing_navigationDrawer();
 
-        String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-      int[] images = {R.drawable.kolekcje,R.drawable.kolekcje,R.drawable.anuluj,R.drawable.znajomi,R.drawable.profilpng};
-        //wiem ze to slabe, postaram sie niedlugo zrobic lepsze przekazywanie ikonek
-
-
-        List<RowItem>list = new ArrayList<RowItem>();
-        for(int i=0; i < drawerListItems.length ;i++)
-        {
-                RowItem item = new RowItem(drawerListItems[i],images[i]);
-                list.add(item);
-        }
 
         NavDrawerListAdapter navDrawerListAdapter = new NavDrawerListAdapter(this,R.layout.drawer_menu_row,list);
 
@@ -168,15 +165,15 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                             Musze z kodu wyczytac gdzie trafiłem ???
                             */
                             case 1:
-                                if (!getVisibleFragmentTag().equals("NewCollection") &&
-                                        !getVisibleFragmentTag().equals("ItemsList") &&
-                                        !getVisibleFragmentTag().equals("NewElement")) {
+                                if (!getVisibleFragmentTag().equals(NewCollection) &&
+                                        !getVisibleFragmentTag().equals(ItemsList) &&
+                                        !getVisibleFragmentTag().equals(NewElement)) {
                                     //item.setTitle(R.string.action_new_collection);//TODO correct
                                     getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, new CollectionFragment(), "NewCollection")
-                                            .addToBackStack("NewCollection")
+                                            .replace(R.id.container, new CollectionFragment(), NewCollection)
+                                            .addToBackStack(NewCollection)
                                             .commit();
-                                } else if (getVisibleFragmentTag().equals("ItemsList")) {
+                                } else if (getVisibleFragmentTag().equals(ItemsList)) {
                                     //item.setTitle(R.string.action_new_element);//TODO correct
                                     Fragment elementFragment = new ElementFragment();
                                     Bundle b = new Bundle();
@@ -185,8 +182,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                     b.putInt(ElementFragment.ID, -1);
                                     elementFragment.setArguments(b);
                                     getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, elementFragment, "NewElement")
-                                            .addToBackStack("NewElement")
+                                            .replace(R.id.container, elementFragment, NewElement)
+                                            .addToBackStack(NewElement)
                                             .commit();
                                 }
                                 break;
@@ -235,14 +232,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("fragment", getVisibleFragmentTag());
+        outState.putString(fragment, getVisibleFragmentTag());
     }
 
     @Override
     protected void onStop() {
-        if (receiver == null){
-        } else {
-            unregisterReceiver(receiver);
+        if (receiver != null){
+        unregisterReceiver(receiver);
             receiver = null;
         }
         super.onStop();
@@ -250,9 +246,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     @Override
     protected void onDestroy() {
-        if (receiver == null){
-        } else {
-            unregisterReceiver(receiver);
+        if (receiver != null){
+           unregisterReceiver(receiver);
             receiver = null;
         }
         super.onDestroy();
@@ -265,7 +260,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
             if (fragment != null && fragment.isVisible())
                 return fragment.getTag();
         }
-        throw new IllegalStateException("There is no active fragment");
+        throw new IllegalStateException(getString(R.string.no_fragment));
     }
 
     @Override
@@ -294,8 +289,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     */
                 item.setTitle(R.string.action_new_collection);
                 getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, new CollectionFragment(), "NewCollection")
-                    .addToBackStack("NewCollection")
+                    .replace(R.id.container, new CollectionFragment(), NewCollection)
+                    .addToBackStack(NewCollection)
                     .commit();
 
                 break;
@@ -308,7 +303,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     userManager.logout();
                     /* AWA:FIXME: Hardcoded value
                     */
-                    Toast toast = Toast.makeText(getApplicationContext(), "Wylogowano",
+                    Toast toast = Toast.makeText(getBaseContext(), Wylogowano,
                             Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
                     toast.show();
@@ -319,17 +314,16 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 generatorDialog.show(getSupportFragmentManager(), "");
                 break;
             case R.id.action_sort:
-                /* AWA:FIXME: Hardcoded value
-                    */
-                if (!getVisibleFragmentTag().equals("NewCollection") &&
-                        !getVisibleFragmentTag().equals("ItemsList") &&
-                        !getVisibleFragmentTag().equals("NewElement")) {
+
+                if (!getVisibleFragmentTag().equals(NewCollection) &&
+                        !getVisibleFragmentTag().equals(ItemsList) &&
+                        !getVisibleFragmentTag().equals(NewElement)) {
                     //TODO collection list custom sort
 
-                } else if (getVisibleFragmentTag().equals("ItemsList")) {
+                } else if (getVisibleFragmentTag().equals(ItemsList)) {
                     // items list sort order change
                     ItemsListFragment fragment = (ItemsListFragment) getSupportFragmentManager().
-                            findFragmentByTag("ItemsList");
+                            findFragmentByTag(ItemsList);
                     fragment.itemsSortOrderChange(item);
                 }
                 break;
@@ -382,15 +376,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         progressBar.setCancelable(true);
         /* AWA:FIXME: Hardcoded value
                     */
-        progressBar.setMessage("File synchronizing ...");
+        progressBar.setMessage(getString(R.string.file_synchroniznig));
         progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressBar.setProgress(MIN_VALUE);
         progressBar.setMax(MAX_VALUE);
 
         progressBar.setCancelable(false);
-        /* AWA:FIXME: Hardcoded value
-                    */
-        progressBar.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+        progressBar.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -442,5 +434,21 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 }
             }
         }).start();
+    }
+
+    public List<RowItem> preparing_navigationDrawer()
+    {
+        String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+        int[] images = {R.drawable.kolekcje,R.drawable.kolekcje,R.drawable.anuluj,R.drawable.znajomi,R.drawable.profilpng};
+        //wiem ze to slabe, postaram sie niedlugo zrobic lepsze przekazywanie ikonek
+
+
+        List<RowItem>list = new ArrayList<>();
+        for(int i=0; i < drawerListItems.length ;i++)
+        {
+            RowItem item = new RowItem(drawerListItems[i],images[i]);
+            list.add(item);
+        }
+        return list;
     }
 }

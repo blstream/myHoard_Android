@@ -59,6 +59,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
 	private String mTags = "";
 	private EditText etCollectionName, etCollectionDescription, etCollectionTags, etCollectionType;
 
+
 	public CollectionFragment() {
 		super();
 	}
@@ -256,13 +257,13 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                     lub w strings.xml
                     */
     private int getTypeOfCollection() {
-        if (etCollectionType.getText().toString().equals("offline")) {
+        if (String.valueOf(etCollectionType.getText()).equals(getString(R.string.offline))) {
             return DataStorage.TypeOfCollection.OFFLINE.getType();
         }
-        else if (etCollectionType.getText().toString().equals("public")) {
+        else if (String.valueOf(etCollectionType.getText()).equals(getString(R.string.publics))) {
             return DataStorage.TypeOfCollection.PUBLIC.getType();
         }
-        else if (etCollectionType.getText().toString().equals("private")) {
+        else if (String.valueOf(etCollectionType.getText()).equals(getString(R.string.privates))) {
             return DataStorage.TypeOfCollection.PRIVATE.getType();
         }
         return DataStorage.TypeOfCollection.ERROR.getType();

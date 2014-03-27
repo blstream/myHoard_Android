@@ -49,6 +49,9 @@ public class CollectionsListFragment extends Fragment implements
 
 	private static final int DELETE_ID = Menu.FIRST + 1;
 	private static final int EDIT_ID = Menu.FIRST + 2;
+    private static final String ItemsList = "ItemsList";
+    private static final String NewCollection = "NewCollection";
+    private static final String EditCollection = "EditCollection";
 	private GridView gridView;
 	private Context context;
 	private ImageAdapter adapter;
@@ -72,8 +75,8 @@ public class CollectionsListFragment extends Fragment implements
             @Override
             public void onClick(View view) {
                 getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, new CollectionFragment(), "NewCollection")
-                        .addToBackStack("NewCollection")
+                        .replace(R.id.container, new CollectionFragment(), NewCollection)
+                        .addToBackStack(NewCollection)
                         .commit();
             }
         });
@@ -108,8 +111,8 @@ public class CollectionsListFragment extends Fragment implements
 				b.putLong(ItemsListFragment.Selected_Collection_ID, l);
 				newFragment.setArguments(b);
 
-				transaction.replace(R.id.container, newFragment, "ItemsList");
-				transaction.addToBackStack("ItemsList");
+				transaction.replace(R.id.container, newFragment, ItemsList);
+				transaction.addToBackStack(ItemsList);
 
 				transaction.commit();
 			}
@@ -166,8 +169,8 @@ public class CollectionsListFragment extends Fragment implements
 				args.putLong("id", info.id);
 			}
 			getActivity().getSupportFragmentManager().beginTransaction()
-					.replace(R.id.container, new CollectionFragment(args), "EditCollection")
-					.addToBackStack("EditCollection")
+					.replace(R.id.container, new CollectionFragment(args), EditCollection)
+					.addToBackStack(EditCollection)
 					.commit();
 			return true;
 		}

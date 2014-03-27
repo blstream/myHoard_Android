@@ -79,7 +79,7 @@
     <string name="sign_up">Sign Up</string>
     <string name="create_first_collection">Create first collection</string>
     <string name="sharing_succeeded">Sharing succeeded</string>
-    <string name="progress">In progress...</string>
+    <string name="progress">In progress…</string>
     <string name="element_category">Category:</string>
     <string name="no_internet_connection">YOU DON\'T HAVE INTERNET CONNECTION</string>
     <string name="Logged">Zalogowano</string>
@@ -90,6 +90,10 @@
     <string name="email_pattern">.+@.+\.[a-z]+</string>
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Close drawer</string>
+    <string name="no_fragment">There is no active fragment</string>
+    <string name="file_synchroniznig">File synchronizing …</string>
+    <string name="publics">public</string>
+    <string name="privates">private</string>
 
 
 </resources>

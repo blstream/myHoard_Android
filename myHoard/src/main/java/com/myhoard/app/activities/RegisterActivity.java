@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
     */
 public class RegisterActivity extends ActionBarActivity {
 
+
+    private static final String TAG = "REGISTRATION";
     private EditText emailRegistry;
     private EditText passwordRegistry;
 
@@ -84,7 +86,7 @@ public class RegisterActivity extends ActionBarActivity {
         Matcher matcher = pattern.matcher(password);
 
 
-        if (!matcher.matches()) Log.d("REGISTRATION",getString(R.string.invalid_mail));
+        if (!matcher.matches()) Log.d(TAG,getString(R.string.invalid_mail));
         return matcher.matches();
     }
 
@@ -93,7 +95,7 @@ public class RegisterActivity extends ActionBarActivity {
         Pattern p = Pattern.compile((getString(R.string.email_pattern)));
         Matcher m = p.matcher(email);
 
-        if (!m.matches()) Log.d("REGISTRATION",getString(R.string.invalid_password));
+        if (!m.matches()) Log.d(TAG,getString(R.string.invalid_password));
         return m.matches();
     }
 
@@ -114,11 +116,11 @@ public class RegisterActivity extends ActionBarActivity {
                 startActivity(intent);
                 activity.finish();
 
-                Log.d("REGISTRATION","finished");
+                Log.d(TAG,"finished");
                 return;
             }
 
-            Log.d("REGISTRATION","error");
+            Log.d(TAG,"error");
         }
     }
 }

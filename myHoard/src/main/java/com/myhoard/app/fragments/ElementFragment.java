@@ -44,7 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-/**
+/*
  * Created by Sebastian Peryt on 27.02.14.
  */
 public class ElementFragment extends Fragment implements View.OnClickListener {
@@ -172,7 +172,7 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
             imagePicker();
             break;
         case R.id.tvElementLocalisation:
-            if(tvElementPosition.getText().toString().equals("brak")) {
+            if(String.valueOf(tvElementPosition.getText()).equals("brak")) {
                 startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
             }
             break;
@@ -267,7 +267,7 @@ Wypychanie błędów do UI
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == Activity.RESULT_OK) {
 			Bitmap bitmap = null;
-			Uri imgUri = null;
+			Uri imgUri;
 			switch (requestCode) {
 			case REQUEST_IMAGE_CAPTURE:
 				// if image was added by photo
@@ -307,7 +307,7 @@ Wypychanie błędów do UI
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		getActivity().getApplicationContext()
+		getActivity().getBaseContext()
 				.bindService(new Intent(getActivity(),
 								GPSProvider.class), mConnection,
 						Context.BIND_AUTO_CREATE
@@ -329,7 +329,7 @@ Wypychanie błędów do UI
 
 	@Override
 	public void onDestroy() {
-		getActivity().getApplicationContext().unbindService(mConnection);
+		getActivity().getBaseContext().unbindService(mConnection);
 		super.onDestroy();
 	}
 

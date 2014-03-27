@@ -34,7 +34,7 @@
 
     <item
         android:id="@+id/action_login"
-        android:title="Login"
+        android:title="@string/Login"
         android:icon="@drawable/ic_action_phone"
         android:orderInCategory="60"
         app:showAsAction="ifRoom|withText" />
