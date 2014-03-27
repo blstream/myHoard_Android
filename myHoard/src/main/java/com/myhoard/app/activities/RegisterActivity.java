@@ -19,8 +19,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //TODO add username text field
-/* AWA:FIXME: Class header !!!!!!!!!!
-                    */
+    /*
+    Created by Mateusz Czyszkiewicz , modified by Tomasz Nosal
+    */
 public class RegisterActivity extends ActionBarActivity {
 
     private EditText emailRegistry;
@@ -47,13 +48,11 @@ public class RegisterActivity extends ActionBarActivity {
         boolean passwordFound = validatePassword();
         boolean emailFound = validateEmail();
         if (!emailFound) {
-            /* AWA:FIXME: Hardcoded value
-                    */
+
             emailRegistry.setError(getString(R.string.wrong_email_format));
         }
         if (!passwordFound) {
-            /* AWA:FIXME: Hardcoded value
-                    */
+
             passwordRegistry.setError(getString(R.string.password_information));
         }
 
@@ -83,9 +82,7 @@ public class RegisterActivity extends ActionBarActivity {
 
         Pattern pattern = Pattern.compile(getString(R.string.password_pattern));
         Matcher matcher = pattern.matcher(password);
-        /* AWA:FIXME: Hardcoded value
-                    Proszę umieścić tekst w strings.xml
-                    */
+
 
         if (!matcher.matches()) Log.d("REGISTRATION",getString(R.string.invalid_mail));
         return matcher.matches();

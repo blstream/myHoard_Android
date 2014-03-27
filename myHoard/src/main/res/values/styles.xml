@@ -20,4 +20,5 @@
         <item name="background">@color/actionBarBackgroundColor</item>
         <item name="icon">@android:color/transparent</item>
     </style>
+
     </resources>

@@ -25,6 +25,20 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.myhoard.app.activities.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme"
+            android:configChanges="orientation|keyboardHidden"
+            android:windowSoftInputMode="stateHidden"/>
+        <activity
+            android:name="com.myhoard.app.activities.RegisterActivity"
+            android:label="@string/title_activity_register"
+            android:configChanges="orientation|keyboardHidden"/>
+
+        <activity android:name="com.facebook.LoginActivity"/>
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id" />
+
         <provider
             android:name="com.myhoard.app.provider.DataProvider"
             android:authorities="com.myhoard.app.provider"
@@ -33,17 +47,8 @@
 
         <service android:name="com.myhoard.app.gps.GPSProvider"/>
         <service android:name="com.myhoard.app.services.SynchronizeService"
-                 android:exported="false"/>
+            android:exported="false"/>
 
-        <activity
-            android:name="com.myhoard.app.activities.LoginActivity"
-            android:label="@string/title_activity_login"
-            android:theme="@style/Theme.AppCompat"/>
-        <activity
-            android:name="com.myhoard.app.activities.RegisterActivity"
-            android:label="@string/title_activity_register"/>
-        <activity android:name="com.facebook.LoginActivity"/>
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id" />
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
