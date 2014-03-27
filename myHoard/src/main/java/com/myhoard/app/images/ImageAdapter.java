@@ -37,6 +37,11 @@ import com.myhoard.app.provider.DataStorage;
  */
 
 public class ImageAdapter extends CursorAdapter {
+    /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                    */
 	private int width = 200;
     private static final String EMPTY_COLLECTION = "0";
 

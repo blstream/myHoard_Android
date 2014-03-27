@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import com.myhoard.app.provider.DataStorage.Collections;
 
+/* AWA:FIXME: Brak Autora oraz nagłowka
+*/
 public class CollectionsTable extends DatabaseTable {
 
 	private static final String DEFAULT_SORT_ORDER = Collections.NAME + " DESC";

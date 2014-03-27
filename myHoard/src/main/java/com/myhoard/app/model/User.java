@@ -43,6 +43,11 @@ import org.json.JSONObject;
     public JSONObject toJson() throws JSONException {
         JSONObject json = new JSONObject();
 
+
+/* AWA:FIXME: Hardcoded value
+            String "" powinien być jako stała np.
+            private final static String NAZWA_STALEJ="Main"
+                    */
         json.put("username", getUsername());
         json.put("email", getEmail());
         json.put("password", getPassword());

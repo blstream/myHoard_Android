@@ -27,6 +27,10 @@ import com.myhoard.app.httpengine.HttpEngine;
  * @author Tomasz Nosal & Marcin Łasszcz
  *         Date: 18.03.14
  */
+
+/*AWA:FIXME: Nieodpowiednia paczka
+Wydaje mi się że paczka model to nie jest miejsce dla Managera
+ */
 public class UserManager {
     private static UserManager instance = null;
     private static Object mutex = new Object();
@@ -83,6 +87,9 @@ public class UserManager {
         return true;
     }
 
+    /* AWA:FIXME: Używaj String.format
+    lub StringBuilder
+*/
     public boolean register(User user) {
         userHttpEngine = new UserHttpEngine(IP + "/users/");
         return userHttpEngine.create(user, null);
@@ -133,6 +140,17 @@ public class UserManager {
 
             try {
                 HttpPost post = new HttpPost(url);
+
+/* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                    */
+
+/* AWA:FIXME: Hardcoded value
+            String "" powinien być jako stała np.
+            private final static String NAZWA_STALEJ="Main"
+                    */
                 json.put("username", user.getUsername());
                 json.put("password", user.getPassword());
                 json.put("grant_type", "password");
@@ -158,6 +176,9 @@ public class UserManager {
                     }
                 }
             } catch(Exception e) {
+                /* AWA:FIXME: Obsługa błędów
+Wypychanie błędów do UI
+*/
                 e.printStackTrace();
             }
             return null;

@@ -130,6 +130,16 @@ public class Collection implements IModel {
             json.put("tags", arrayTags);
         }
 
+        /* AWA:FIXME: Hardcoded value
+                    Umiesc w private final static String, int, etc....
+                    lub w strings.xml
+                    lub innym *.xml
+                    */
+
+/* AWA:FIXME: Hardcoded value
+            String "" powinien być jako stała np.
+            private final static String NAZWA_STALEJ="Main"
+                    */
         json.put("items_number", getItems_number());
         json.put("created_date", getCreated_date());
         json.put("modified_date", getModified_date());

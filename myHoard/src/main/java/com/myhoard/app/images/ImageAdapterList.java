@@ -54,6 +54,10 @@ public class ImageAdapterList extends CursorAdapter {
 		if (cursor.getString(1) == null) {
 			viewHolder.img.setImageResource(R.drawable.nophoto);
 		} else {
+             /* AWA:FIXME: Dead code
+  Zakomentowany kod
+  Patrz:Ksiazka:Czysty kod:Rozdział 4:Zakomentowany kod
+  */
 			//imageViewCollectionElementAvatar.setImageBitmap(decodeSampledBitmapFromResource(cursor.getString(1), 100, 100));
             //Load bitmap asynchronously
             viewHolder.path = cursor.getString(1);
@@ -77,6 +81,11 @@ public class ImageAdapterList extends CursorAdapter {
 		return BitmapFactory.decodeFile(path, options);
 	}
 
+
+    /* AWA:FIXME: Powtórzenie metody z BitmapWorkerTask
+Metody miają takie same ciało.
+Proszę umieścić je we wspólnej klasie, utilsach etc…
+*/
 	public static int calculateInSampleSize(
 			BitmapFactory.Options options, int reqWidth, int reqHeight) {
 		// Raw height and width of image

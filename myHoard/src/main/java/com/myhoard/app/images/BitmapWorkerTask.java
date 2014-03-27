@@ -75,6 +75,10 @@ public class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
 		return BitmapFactory.decodeFile(imgPath, options);
 	}
 
+    /* AWA:FIXME: Powtórzenie metody z ImageAdapterList
+Metody miają takie same ciało.
+Proszę umieścić je we wspólnej klasie, utilsach etc…
+*/
 	public static int calculateInSampleSize(
 			BitmapFactory.Options options, int reqWidth, int reqHeight) {
 		// Raw height and width of image
