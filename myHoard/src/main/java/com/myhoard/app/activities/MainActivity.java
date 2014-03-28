@@ -75,12 +75,12 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private double maxProgressBarStatus = 10000;
     private static final int MIN_VALUE = 0;
     private static final int MAX_VALUE = 100;
-    private static final String NewCollection = "NewCollection";
-    private static final String Main = "Main";
-    private static final String Wylogowano = "Wylogowano";
-    private static final String NewElement = "NewElement";
-    private static final String ItemsList = "ItemsList";
-    private static final String fragment = "fragment";
+    private static final String NEWCOLLECTION = "NewCollection";
+    private static final String MAIN = "Main";
+    private static final String WYLOGOWANO = "Wylogowano";
+    private static final String NEWELEMNT = "NewElement";
+    private static final String ITEMSLIST = "ItemsList";
+    private static final String FRAGMENT = "fragment";
 
 
     /* AWA:FIXME: Nazwa handlera jest mylaca
@@ -115,12 +115,12 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
             private final static String NAZWA_STALEJ="Main"
                     */
             fm.beginTransaction()
-                    .add(R.id.container, collectionsListFragment, Main)
+                    .add(R.id.container, collectionsListFragment, MAIN)
                     .commit();
         } else {
             fm.beginTransaction()
                     .replace(R.id.container,
-                            fm.findFragmentByTag(savedInstanceState.getString(fragment)))
+                            fm.findFragmentByTag(savedInstanceState.getString(FRAGMENT)))
                     .commit();
 
         }
@@ -165,15 +165,15 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                             Musze z kodu wyczytac gdzie trafiłem ???
                             */
                             case 1:
-                                if (!getVisibleFragmentTag().equals(NewCollection) &&
-                                        !getVisibleFragmentTag().equals(ItemsList) &&
-                                        !getVisibleFragmentTag().equals(NewElement)) {
+                                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
+                                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
+                                        !getVisibleFragmentTag().equals(NEWELEMNT)) {
                                     //item.setTitle(R.string.action_new_collection);//TODO correct
                                     getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, new CollectionFragment(), NewCollection)
-                                            .addToBackStack(NewCollection)
+                                            .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
+                                            .addToBackStack(NEWCOLLECTION)
                                             .commit();
-                                } else if (getVisibleFragmentTag().equals(ItemsList)) {
+                                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
                                     //item.setTitle(R.string.action_new_element);//TODO correct
                                     Fragment elementFragment = new ElementFragment();
                                     Bundle b = new Bundle();
@@ -182,8 +182,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                     b.putInt(ElementFragment.ID, -1);
                                     elementFragment.setArguments(b);
                                     getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, elementFragment, NewElement)
-                                            .addToBackStack(NewElement)
+                                            .replace(R.id.container, elementFragment, NEWELEMNT)
+                                            .addToBackStack(NEWELEMNT)
                                             .commit();
                                 }
                                 break;
@@ -232,7 +232,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(fragment, getVisibleFragmentTag());
+        outState.putString(FRAGMENT, getVisibleFragmentTag());
     }
 
     @Override
@@ -289,8 +289,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     */
                 item.setTitle(R.string.action_new_collection);
                 getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, new CollectionFragment(), NewCollection)
-                    .addToBackStack(NewCollection)
+                    .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
+                    .addToBackStack(NEWCOLLECTION)
                     .commit();
 
                 break;
@@ -303,7 +303,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     userManager.logout();
                     /* AWA:FIXME: Hardcoded value
                     */
-                    Toast toast = Toast.makeText(getBaseContext(), Wylogowano,
+                    Toast toast = Toast.makeText(getBaseContext(), WYLOGOWANO,
                             Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
                     toast.show();
@@ -315,15 +315,15 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 break;
             case R.id.action_sort:
 
-                if (!getVisibleFragmentTag().equals(NewCollection) &&
-                        !getVisibleFragmentTag().equals(ItemsList) &&
-                        !getVisibleFragmentTag().equals(NewElement)) {
+                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
+                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
+                        !getVisibleFragmentTag().equals(NEWELEMNT)) {
                     //TODO collection list custom sort
 
-                } else if (getVisibleFragmentTag().equals(ItemsList)) {
+                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
                     // items list sort order change
                     ItemsListFragment fragment = (ItemsListFragment) getSupportFragmentManager().
-                            findFragmentByTag(ItemsList);
+                            findFragmentByTag(ITEMSLIST);
                     fragment.itemsSortOrderChange(item);
                 }
                 break;

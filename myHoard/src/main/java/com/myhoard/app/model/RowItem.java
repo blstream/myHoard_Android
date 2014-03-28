@@ -1,7 +1,7 @@
 package com.myhoard.app.model;
 
 /*
- * Created by Czyz on 2014-03-26.
+ * Created by Mateusz Czyszkiewicz on 2014-03-26.
  */
 public class RowItem {
 
@@ -9,7 +9,7 @@ public class RowItem {
     private int imageId;
 
 
-    public RowItem(){}
+
 
 
     public RowItem(String title, int icon)
@@ -24,17 +24,13 @@ public class RowItem {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+
 
     public int getImageId() {
         return imageId;
     }
 
-    public void setImageId(int icon) {
-        this.imageId = icon;
-    }
+
 
 
 

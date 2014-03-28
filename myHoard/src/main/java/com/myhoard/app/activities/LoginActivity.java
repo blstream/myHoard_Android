@@ -28,10 +28,10 @@ public class LoginActivity extends ActionBarActivity  {
 
 
 
-    private final static String savelogin = "saveLogin";
-    private final static String loginprefs = "loginPrefs";
-    private final static String usernames = "username";
-    private final static String passwords = "password";
+    private final static String SAVELOGIN = "saveLogin";
+    private final static String LOGINPREFS = "loginPrefs";
+    private final static String USERNAMES = "username";
+    private final static String PASSWORDS = "password";
 	private CheckBox remember_check;
 	private SharedPreferences.Editor editor;
 
@@ -50,13 +50,13 @@ public class LoginActivity extends ActionBarActivity  {
 		Button login_button = (Button) findViewById(R.id.button_login);
 		TextView txt = (TextView) findViewById(R.id.registration_text);
 		remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
-		SharedPreferences loginPreferences = getSharedPreferences(loginprefs, MODE_PRIVATE);
+		SharedPreferences loginPreferences = getSharedPreferences(LOGINPREFS, MODE_PRIVATE);
 		editor = loginPreferences.edit();
 
-		Boolean saveLogin = loginPreferences.getBoolean(savelogin, false);
+		Boolean saveLogin = loginPreferences.getBoolean(SAVELOGIN, false);
     	if (saveLogin) {
-			email.setText(loginPreferences.getString(usernames, ""));
-			password.setText(loginPreferences.getString(passwords, ""));
+			email.setText(loginPreferences.getString(USERNAMES, ""));
+			password.setText(loginPreferences.getString(PASSWORDS, ""));
 		}
 		txt.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -92,9 +92,9 @@ public class LoginActivity extends ActionBarActivity  {
 
                         if (remember_check.isChecked()) {
 
-                            editor.putBoolean(savelogin, true);
-                            editor.putString(usernames, email_ch);
-                            editor.putString(passwords, password_ch);
+                            editor.putBoolean(SAVELOGIN, true);
+                            editor.putString(USERNAMES, email_ch);
+                            editor.putString(PASSWORDS, password_ch);
                             editor.commit();
                         } else {
                             editor.clear();
