@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/scrollView"
+    android:layout_gravity="right" >
+
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/yellow_main">
+
+
+    <Button
+        android:layout_width="165dp"
+        android:layout_height="64dp"
+        android:id="@+id/facebook_button"
+        android:text="@string/log_in_facebook"
+        android:textAlignment="center"
+        android:layout_gravity="center_horizontal"
+        android:background="#278bff"
+        android:textSize="20sp"
+        android:textColor="#ffffff" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
+        android:text="@string/post_on_wall"
+        android:padding="15sp"
+        android:textAlignment="center"
+        android:textSize="25sp"/>
+
+    <EditText
+        android:layout_width="387dp"
+        android:layout_height="108dp"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/post_on_wall" />
+
+    <Button
+        android:layout_width="151dp"
+        android:layout_height="67dp"
+        android:text="@string/menu_share"
+        android:id="@+id/share_button"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
+        android:textSize="25sp"
+        />
+ </LinearLayout>
+</ScrollView>

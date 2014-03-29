@@ -11,7 +11,6 @@
     <string name="Email">Email</string>
     <string name="hello_world">Hello world!</string>
     <string name="Login">Login</string>
-    <string name="logout">Logout</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_edit">Edit</string>
     <string name="noentries">Add a new collection in the upper right corner</string>
@@ -95,6 +94,9 @@
     <string name="file_synchroniznig">File synchronizing …</string>
     <string name="publics">public</string>
     <string name="privates">private</string>
+    <string name="post_on_wall">Post on wall</string>
+    <string name="log_in_facebook">Log in Facebook</string>
+    <string name="log_out_facebook">Log out Facebook</string>
 
 
 </resources>
