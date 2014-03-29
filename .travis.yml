@@ -1,0 +1,33 @@
+language: java
+jdk: oraclejdk7
+env:
+  matrix:
+    - ANDROID_SDKS=android-19,sysimg-19  ANDROID_TARGET=android-19  ANDROID_ABI=armeabi-v7a
+branches:
+  only:
+    - master
+before_install:
+- export ANDROID_HOME=$PWD/android-sdk-linux
+- export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+- chmod +x ./scripts/install_android_tools.sh
+- ./scripts/install_android_tools.sh
+install:
+  - true
+before_script:
+script:
+  - chmod +x gradlew
+  - TERM=dumb ./gradlew assembleRelease
+after_success:
+- ARTEFACT_FILE_NAME="myHoard" #prefiks app name for artefact file
+- BUILD_DIR="$PWD/app/build" #dir where to find artefacts: apk, mapping
+- COMMIT_HASH=`git log --pretty=format:'%h' -n 1` #commit hash id
+- chmod +x ./scripts/prepare_artefacts.sh
+- . ./scripts/prepare_artefacts.sh
+- prepareAndroidArtefacts $BUILD_DIR $ARTEFACT_FILE_NAME $COMMIT_HASH OUT_ARTEFACT_PATH
+- chmod +x ./scripts/google_disk_upload.sh
+- ./scripts/google_disk_upload.sh "$OUT_ARTEFACT_PATH" "$GOOGLE_ACCOUNT_USERNAME" "$GOOGLE_ACCOUNT_PASSWORD" "$GOOGLE_ACCOUNT_FOLDER"
+env:
+   global:
+   - secure: "ivQL5R4Rhk8BP1tTsp53Qe4sZodDvoGKs+QfIYrIngcHpYahgx7sj0jVvU4gcoSM31ZqjFBCVhZqSmzWA5Xaw5jhwu1apqp29icxNCot7I+xNEHJxjse3xdWjKNKpFpUrccrcGRhHIYQCtbxcVNQZRDqgQCspITL3C5ey4k12wA="
+   - secure: "MAbZjBbF9nD6IJAPCNVGIFGkWZZfNsfrPCw+GiCsCG1kwTD+dJ6KyUrKOCz3VUJKpFn4FHKsUOJHZLnRNGlRfV9x5SnWziIS7vsU7Jhg2/k6JQ5HCMrIcoxtWk7NqY3kY4c1Kbc3CdwMcrNXYCEQATy6Q5JZEs5+6GKa1S5I80A="
+   - secure: "X/pxKF5ZbB4AooV945JflBuoQbIMjf00wc+mexWuImYHMHpWxemf3g31sC8JxI4JqdqLLvvdEnyWxKqg1FAhwbREYUDSlwmkiOl7XOzhtuvmWf0Y3RhymY4BBdygVUoWDVCgDdJpQhLCCyRQ257LS/8moyOxqCJcxGwHcCVrHt4="
