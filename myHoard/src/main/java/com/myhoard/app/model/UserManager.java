@@ -18,7 +18,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
-import com.myhoard.app.httpengine.HttpEngine;
+import com.myhoard.app.crudengine.CRUDEngine;
 
 
 /**
@@ -118,7 +118,7 @@ public class UserManager {
     /**
      * Inner class that handles communication with a server using REST
      */
-   public class UserHttpEngine extends HttpEngine<User> {
+   public class UserHttpEngine extends CRUDEngine<User> {
 
         private static final int TIMEOUT_LIMIT = 10000;
 

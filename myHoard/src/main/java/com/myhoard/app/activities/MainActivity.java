@@ -50,7 +50,7 @@ import com.myhoard.app.services.SynchronizeService;
 import java.util.ArrayList;
 import java.util.List;
 
-/* AWA:FIXME: Brak Autora oraz nagłowka
+/*
 Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 */
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
@@ -67,14 +67,12 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     ProgressDialog progressBar;
     private Double progressBarStatusIn = 0.;
     private Double progressBarStatusOut = 0.;
-    /* AWA:FIXME: Powinny być jako
-   private final static String NAZWA_STALEJ
-   SEE:https://source.android.com/source/code-style.html
-   ->Follow Field Naming Conventions
-   */
-    private double maxProgressBarStatus = 10000;
+
+    private double maxProgressBarStatus = Double.POSITIVE_INFINITY;
     private static final int MIN_VALUE = 0;
     private static final int MAX_VALUE = 100;
+    private static final int XOFFSET = 0;
+    private static final int YOFFSET = 0;
     private static final String NEWCOLLECTION = "NewCollection";
     private static final String MAIN = "Main";
     private static final String WYLOGOWANO = "Wylogowano";
@@ -82,15 +80,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private static final String ITEMSLIST = "ItemsList";
     private static final String FRAGMENT = "fragment";
 
-
-    /* AWA:FIXME: Nazwa handlera jest mylaca
-    Handler jest połączony z kolejką wiadomości wątku
-    W tym przypadku jest to handler do  głównego wątku.
-    Proponuję poszukać lepszej nazwy
-    */
-    private Handler progressBarHandler = new Handler();
-
-
+    private Handler handler = new Handler();
+    Thread progressBarThread;
+    NavDrawerListAdapter navDrawerListAdapter;
 
     @Override
     /* AWA:FIXME: Ciało metody jest za dlugie.
@@ -124,24 +116,18 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     .commit();
 
         }
-       List<RowItem> list = preparing_navigationDrawer();
-
-
-        NavDrawerListAdapter navDrawerListAdapter = new NavDrawerListAdapter(this,R.layout.drawer_menu_row,list);
+        List<RowItem> list = preparing_navigationDrawer();
+        navDrawerListAdapter = new NavDrawerListAdapter(this,R.layout.drawer_menu_row,list);
 
         final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         final  ListView navigationList = (ListView)findViewById(R.id.drawer_list);
         navigationList.setAdapter(navDrawerListAdapter);
 
-
         actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.drawable.ic_drawer,R.string.drawer_open,R.string.drawer_close);
-
 
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-
-
 
         navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -154,11 +140,18 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                         int w = i;
 
-                        switch(w){
+                        switch(w) {
                             case 0:
+                                if (!UserManager.getInstance().isLoggedIn()) {
                                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                                     startActivity(intent);
-
+                                } else {
+                                    UserManager.getInstance().logout();
+                                    Toast toast = Toast.makeText(getBaseContext(), WYLOGOWANO,
+                                            Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, XOFFSET, YOFFSET);
+                                    toast.show();
+                                }
                                 break;
                             /* AWA:FIXME: Hardcoded value
                             Magiczne numerki co oznaczaja 1, 2, 3....
@@ -205,7 +198,6 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
             }
         });
-
     }
 
     @Override
@@ -242,6 +234,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
             receiver = null;
         }
         super.onStop();
+        if (progressBarThread!=null) {
+            progressBarThread.interrupt();
+        }
     }
 
     @Override
@@ -285,8 +280,6 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         }
         switch (item.getItemId()) {
             case R.id.action_new_collection:
-                /* AWA:FIXME: Hardcoded value
-                    */
                 item.setTitle(R.string.action_new_collection);
                 getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
@@ -301,11 +294,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     startActivity(intent);
                 } else {
                     userManager.logout();
-                    /* AWA:FIXME: Hardcoded value
-                    */
                     Toast toast = Toast.makeText(getBaseContext(), WYLOGOWANO,
                             Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, XOFFSET, YOFFSET);
                     toast.show();
                 }
                 break;
@@ -374,8 +365,6 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         // prepare for a progress bar dialog
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(true);
-        /* AWA:FIXME: Hardcoded value
-                    */
         progressBar.setMessage(getString(R.string.file_synchroniznig));
         progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressBar.setProgress(MIN_VALUE);
@@ -399,7 +388,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.
         */
-        new Thread(new Runnable() {
+        progressBarThread = new Thread() {
             public void run() {
                 while (progressBarStatusIn < MAX_VALUE) {
 
@@ -407,7 +396,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     progressBarStatusIn = progressBarStatusOut/maxProgressBarStatus*MAX_VALUE;
 
                     // Update the progress bar
-                    progressBarHandler.post(new Runnable() {
+                    handler.post(new Runnable() {
                         public void run() {
                             progressBar.setProgress((int) progressBarStatusIn.doubleValue());
                         }
@@ -416,29 +405,25 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                 // ok, file is downloaded,
                 if (progressBarStatusIn >= MAX_VALUE) {
-
-                    // sleep 1 seconds, so that you can see the 100%
-                    try {
-                        /* AWA:FIXME:
-                        Thread.sleep jednoznacznie powinien byc tutaj zaznaczony ze jest do tesów
-                    */
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    /* AWA:FIXME: Hardcoded value
-                    */
-                    maxProgressBarStatus = 100000;
+                    maxProgressBarStatus = Double.POSITIVE_INFINITY;
                     // close the progress bar dialog
                     progressBar.dismiss();
                 }
+
             }
-        }).start();
+        };
+        progressBarThread.start();
     }
 
     public List<RowItem> preparing_navigationDrawer()
     {
-        String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+        UserManager uM = UserManager.getInstance();
+        String[] drawerListItems = null;
+        if(uM.isLoggedIn()) {
+            drawerListItems = getResources().getStringArray(R.array.drawer_menu_with_logout);
+        } else {
+            drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+        }
         int[] images = {R.drawable.kolekcje,R.drawable.kolekcje,R.drawable.anuluj,R.drawable.znajomi,R.drawable.profilpng};
         //wiem ze to slabe, postaram sie niedlugo zrobic lepsze przekazywanie ikonek
 

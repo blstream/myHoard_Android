@@ -11,6 +11,7 @@
     <string name="Email">Email</string>
     <string name="hello_world">Hello world!</string>
     <string name="Login">Login</string>
+    <string name="logout">Logout</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_edit">Edit</string>
     <string name="noentries">Add a new collection in the upper right corner</string>

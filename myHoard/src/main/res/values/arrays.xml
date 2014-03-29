@@ -12,7 +12,14 @@
         <item>@string/action_generate</item>
         <item>@string/friends</item>
         <item>@string/profile</item>
+    </string-array>
 
+    <string-array name="drawer_menu_with_logout">
+        <item>@string/logout</item>
+        <item>@string/collection</item>
+        <item>@string/action_generate</item>
+        <item>@string/friends</item>
+        <item>@string/profile</item>
     </string-array>
 
     <integer-array name="nav_drawer_icons">

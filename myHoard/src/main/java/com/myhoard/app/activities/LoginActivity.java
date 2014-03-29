@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
-import com.myhoard.app.httpengine.ConnectionDetector;
+import com.myhoard.app.crudengine.ConnectionDetector;
 import com.myhoard.app.model.User;
 import com.myhoard.app.model.UserManager;
 
