@@ -1,6 +1,4 @@
-package com.myhoard.app.model;
-
-import android.util.Log;
+package com.myhoard.app.Managers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -18,7 +16,11 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
-import com.myhoard.app.crudengine.CRUDEngine;
+
+import com.myhoard.app.crudengine.CrudEngine;
+import com.myhoard.app.crudengine.ICrudEngine;
+import com.myhoard.app.model.Token;
+import com.myhoard.app.model.User;
 
 
 /**
@@ -26,10 +28,6 @@ import com.myhoard.app.crudengine.CRUDEngine;
  *
  * @author Tomasz Nosal & Marcin Łasszcz
  *         Date: 18.03.14
- */
-
-/*AWA:FIXME: Nieodpowiednia paczka
-Wydaje mi się że paczka model to nie jest miejsce dla Managera
  */
 public class UserManager {
     private static UserManager instance = null;
@@ -41,6 +39,13 @@ public class UserManager {
 
     //TODO add support for more servers and removed fixed ip address from code
     private static final String IP = "http://78.133.154.18:8080";
+    private static final String USER_PATH = "/users/";
+    private static final String TOKEN_PATH = "/oauth/token/";
+    private static final String API_USERNAME = "username";
+    private static final String API_PASSWORD = "password";
+    private static final String API_GRANT_TYPE = "grant_type";
+    private static final String ERROR_STRING = "error_code";
+    private static final String CONTENT_TYPE = "application/json";
 
     private UserManager() {
 
@@ -59,12 +64,9 @@ public class UserManager {
         return instance;
     }
 
-    //TODO create more advanced interface for user's token e.g. refreshing
     public Token getToken() {
         return token;
     }
-
-    //Should be removed in the final version of the class
     public User getUser() {
         return user;
     }
@@ -75,7 +77,7 @@ public class UserManager {
      * @return true if logged successfully otherwise returns false
      */
     public boolean login(User user) {
-        userHttpEngine = new UserHttpEngine(IP + "/oauth/token/");
+        userHttpEngine = new UserHttpEngine(IP + TOKEN_PATH);
         token = userHttpEngine.getToken(user);
 
         if (token == null) {
@@ -87,12 +89,9 @@ public class UserManager {
         return true;
     }
 
-    /* AWA:FIXME: Używaj String.format
-    lub StringBuilder
-*/
     public boolean register(User user) {
-        userHttpEngine = new UserHttpEngine(IP + "/users/");
-        return userHttpEngine.create(user, null);
+        userHttpEngine = new UserHttpEngine(IP + USER_PATH);
+        return userHttpEngine.create(user, null) == ICrudEngine.ERROR_CODE ? false : true;
     }
 
     /**
@@ -118,7 +117,7 @@ public class UserManager {
     /**
      * Inner class that handles communication with a server using REST
      */
-   public class UserHttpEngine extends CRUDEngine<User> {
+   public class UserHttpEngine extends CrudEngine<User> {
 
         private static final int TIMEOUT_LIMIT = 10000;
 
@@ -134,28 +133,18 @@ public class UserManager {
         public Token getToken(User user) {
             HttpClient httpClient = new DefaultHttpClient();
 
-            HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), TIMEOUT_LIMIT); //Timeout Limit
+            HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), TIMEOUT_LIMIT);
             HttpResponse response;
             JSONObject json = new JSONObject();
 
             try {
                 HttpPost post = new HttpPost(url);
 
-/* AWA:FIXME: Hardcoded value
-                    Umiesc w private final static String, int, etc....
-                    lub w strings.xml
-                    lub innym *.xml
-                    */
-
-/* AWA:FIXME: Hardcoded value
-            String "" powinien być jako stała np.
-            private final static String NAZWA_STALEJ="Main"
-                    */
-                json.put("username", user.getUsername());
-                json.put("password", user.getPassword());
-                json.put("grant_type", "password");
+                json.put(API_USERNAME, user.getUsername());
+                json.put(API_PASSWORD, user.getPassword());
+                json.put(API_GRANT_TYPE, API_PASSWORD);
                 StringEntity se = new StringEntity( json.toString());
-                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, CONTENT_TYPE));
                 post.setEntity(se);
                 response = httpClient.execute(post);
 
@@ -164,22 +153,17 @@ public class UserManager {
                     HttpEntity responseEntity = response.getEntity();
                     String HTTP_response = null;
                     HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
-                    Log.d("TAG", "Jsontext = " + HTTP_response);
-                    //jezeli odpowiedz zawiera kod OK
-                    if (HTTP_response.contains("error_code")){
+
+                    if (HTTP_response.contains(ERROR_STRING)){
                         return null;
                     } else {
                         Type tokenType = new TypeToken<Token>(){}.getType();
                         Token token = new Gson().fromJson( HTTP_response , tokenType);
-                        Log.d("TAG",token.getAccess_token());
                         return token;
                     }
                 }
             } catch(Exception e) {
-                /* AWA:FIXME: Obsługa błędów
-Wypychanie błędów do UI
-*/
-                e.printStackTrace();
+                return null;
             }
             return null;
         }

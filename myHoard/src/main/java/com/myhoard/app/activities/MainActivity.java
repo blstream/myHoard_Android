@@ -45,7 +45,7 @@ import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.model.RowItem;
-import com.myhoard.app.model.UserManager;
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.services.SynchronizeService;
 import java.util.ArrayList;
 import java.util.List;

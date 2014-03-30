@@ -33,7 +33,7 @@ import com.facebook.SessionState;
 import com.myhoard.app.R;
 import com.myhoard.app.dialogs.FacebookShareDialog;
 import com.myhoard.app.images.ImageAdapterList;
-import com.myhoard.app.model.UserManager;
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.provider.DataStorage;
 
 /**

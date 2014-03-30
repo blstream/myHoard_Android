@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 import com.myhoard.app.R;
 import com.myhoard.app.model.User;
-import com.myhoard.app.model.UserManager;
+import com.myhoard.app.Managers.UserManager;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

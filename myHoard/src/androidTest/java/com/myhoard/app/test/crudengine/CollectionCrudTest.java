@@ -1,15 +1,13 @@
 package com.myhoard.app.test.crudengine;
 
-import com.myhoard.app.crudengine.CRUDEngine;
+import com.myhoard.app.crudengine.CrudEngine;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.Token;
 import com.myhoard.app.model.User;
-import com.myhoard.app.model.UserManager;
-import com.myhoard.app.provider.DataStorage;
+import com.myhoard.app.Managers.UserManager;
 
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -25,7 +23,7 @@ public class CollectionCrudTest extends TestCase {
     private static final String EMAIL = "tomek";
     private static final String PASSWORD = "tomek";
     private Token token;
-    private CRUDEngine<Collection> collectionEngine;
+    private CrudEngine<Collection> collectionEngine;
     public static final String URL = "http://78.133.154.18:8080/collections/";
 
 
@@ -39,7 +37,7 @@ public class CollectionCrudTest extends TestCase {
         UserManager uM = UserManager.getInstance();
         uM.login(new User(EMAIL,PASSWORD));
         token = uM.getToken();
-        collectionEngine = new CRUDEngine<Collection>(URL);
+        collectionEngine = new CrudEngine<Collection>(URL);
     }
 
     protected void tearDown() throws Exception {

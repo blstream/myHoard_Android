@@ -8,30 +8,16 @@ public class RowItem {
     private String title;
     private int imageId;
 
-
-
-
-
     public RowItem(String title, int icon)
     {
         this.title = title;
         this.imageId = icon;
     }
 
-
-
     public String getTitle() {
         return title;
     }
-
-
-
     public int getImageId() {
         return imageId;
     }
-
-
-
-
-
 }
