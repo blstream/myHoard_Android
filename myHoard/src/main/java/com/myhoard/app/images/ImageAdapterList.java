@@ -26,10 +26,11 @@ public class ImageAdapterList extends CursorAdapter {
         ImageView img;
         String path;
     }
-
+    private ImageLoader mImageLoader;
 	public ImageAdapterList(Context context, Cursor c, int flags) {
-		super(context, c, flags);
-	}
+	    super(context, c, flags);
+	    mImageLoader = new ImageLoader();
+    }
 
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -61,7 +62,8 @@ public class ImageAdapterList extends CursorAdapter {
 			//imageViewCollectionElementAvatar.setImageBitmap(decodeSampledBitmapFromResource(cursor.getString(1), 100, 100));
             //Load bitmap asynchronously
             viewHolder.path = cursor.getString(1);
-		    loadBitmap(viewHolder);
+            //Use LazyLoading for elements list
+		    mImageLoader.DisplayImage(viewHolder.path,viewHolder.img);
         }
 
 	}
@@ -106,35 +108,5 @@ Proszę umieścić je we wspólnej klasie, utilsach etc…
 
 		return inSampleSize;
 	}
-    public void loadBitmap(ViewHolder viewHolder) {
-        BitmapWorkerTask task = new BitmapWorkerTask();
-        task.execute(viewHolder);
-    }
-    class BitmapWorkerTask extends AsyncTask<ViewHolder, Void, Bitmap> {
-        //private final WeakReference<ImageView> imageViewReference;
-        private ViewHolder data;
-
-        /*public BitmapWorkerTask(ImageView imageView) {
-            // Use a WeakReference to ensure the ImageView can be garbage collected
-            imageViewReference = new WeakReference<>(imageView);
-        }*/
-
-        // Decode image in background.
-        @Override
-        protected Bitmap doInBackground(ViewHolder... params) {
-            data = params[0];
-            return decodeSampledBitmapFromResource(data.path, 100, 100);
-        }
-
-        // Once complete, see if ImageView is still around and set bitmap.
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            if (bitmap != null) {
-                if (data.img != null) {
-                    data.img.setImageBitmap(bitmap);
-                }
-            }
-        }
-    }
 }
 
