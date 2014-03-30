@@ -1,5 +1,6 @@
 
 package com.myhoard.app.fragments;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -10,6 +11,8 @@ import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -19,6 +22,7 @@ import android.widget.Toast;
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapterList;
 import com.myhoard.app.provider.DataStorage;
+
 
 /**
  * Created by Piotr Brzozowski on 01.03.14.
@@ -37,6 +41,7 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_search, container, false);
+        setHasOptionsMenu(true);
         Bundle b = this.getArguments();
         mCollectionId = b.getLong("SearchFragment");
         mContext = getActivity();
@@ -106,6 +111,12 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
                 }
                 break;
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
     }
 
     @Override
