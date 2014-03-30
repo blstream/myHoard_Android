@@ -97,6 +97,6 @@
     <string name="post_on_wall">Post on wall</string>
     <string name="log_in_facebook">Log in Facebook</string>
     <string name="log_out_facebook">Log out Facebook</string>
-
+	<string name="logout">Logout</string>
 
 </resources>
