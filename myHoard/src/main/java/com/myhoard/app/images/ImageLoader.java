@@ -20,7 +20,7 @@ public class ImageLoader {
     Handler handler = new Handler();//handler to display images in UI thread
 
     public ImageLoader() {
-        executorService = Executors.newFixedThreadPool(5);
+        executorService = Executors.newFixedThreadPool(3);
     }
 
     final int stub_id = R.drawable.nophoto;

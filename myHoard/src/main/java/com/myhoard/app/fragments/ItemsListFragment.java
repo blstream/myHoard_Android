@@ -219,6 +219,18 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         //Set search option visible in the ItemsListFragment
         item = menu.findItem(R.id.action_search);
         if(item!=null) item.setVisible(true);
+        //Set new_collection option invisible in the ItemsListFragment
+        item = menu.findItem(R.id.action_new_collection);
+        if(item!=null) item.setVisible(false);
+        //Set generator option invisible in the ItemsListFragment
+        item = menu.findItem(R.id.action_generate);
+        if(item!=null) item.setVisible(false);
+        //Set camera option invisible in the ItemsListFragment
+        item = menu.findItem(R.id.action_camera);
+        if(item!=null) item.setVisible(false);
+        //Set login option invisible in the ItemsListFragment
+        item = menu.findItem(R.id.action_login);
+        if(item!=null) item.setVisible(false);
         //set proper menu option title depending on the sort order
         if (sortOrder.equals(sortByDate)) {
 
