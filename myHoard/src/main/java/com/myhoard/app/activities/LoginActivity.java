@@ -122,7 +122,7 @@ public class LoginActivity extends ActionBarActivity  {
         protected void onPostExecute(Boolean result) {
             if (result) {
 
-
+                startActivity(new Intent(getApplicationContext(),MainActivity.class));
                 Toast toast = Toast.makeText(getBaseContext(), getString(R.string.Logged),
                         Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);

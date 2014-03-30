@@ -3,6 +3,7 @@
 
     <string name="action_new_collection">New Collection</string>
     <string name="action_search">"Search"</string>
+    <string name="search">Search</string>
     <string name="action_settings">Settings</string>
     <string name="app_name">MyHoard</string>
     <string name="collection_add">ADD COLLECTION</string>
@@ -60,6 +61,7 @@
     <string name="offline">offline</string>
     <string name="action_sort_by_name">Sort by Name</string>
     <string name="action_sort_by_date">Sort by Date</string>
+    <string name="sort">Sort</string>
     <string name="first_collection_button_description">Empty image with plus</string>
     <string name="first_collection_image_description">Create your first collection</string>
     <string name="action_generate">Generate collections and elements</string>
@@ -98,5 +100,8 @@
     <string name="log_in_facebook">Log in Facebook</string>
     <string name="log_out_facebook">Log out Facebook</string>
 	<string name="logout">Logout</string>
+    <string name="continue_offline">continue offline</string>
+    <string name="my">my</string>
+    <string name="Hoard">Hoard</string>
 
 </resources>
