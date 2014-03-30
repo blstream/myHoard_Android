@@ -98,5 +98,6 @@
     <string name="log_in_facebook">Log in Facebook</string>
     <string name="log_out_facebook">Log out Facebook</string>
 	<string name="logout">Logout</string>
+    <string name="name_with_space_at_end">Name can not end with a space</string>
 
 </resources>

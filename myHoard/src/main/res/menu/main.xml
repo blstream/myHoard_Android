@@ -26,13 +26,6 @@
         app:showAsAction="ifRoom|withText" />
 
     <item
-        android:id="@+id/action_camera"
-        android:title="@string/action_camera"
-        android:icon="@drawable/ic_action_camera"
-        android:orderInCategory="10"
-        app:showAsAction="ifRoom|withText" />
-
-    <item
         android:id="@+id/action_login"
         android:title="@string/Login"
         android:icon="@drawable/ic_action_phone"

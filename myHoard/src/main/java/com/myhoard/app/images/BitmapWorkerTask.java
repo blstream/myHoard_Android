@@ -28,12 +28,12 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Rafał Soudani on 21.02.2014
  */
+@SuppressWarnings("WeakerAccess")
 public class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
 	private final WeakReference<ImageButton> imageViewReference;
-	Context context;
-	private String data = "";
+	private final Context context;
 
-	public BitmapWorkerTask(ImageButton imageButton, Context context) {
+    public BitmapWorkerTask(ImageButton imageButton, Context context) {
 		this.context = context;
 
 		// Use a WeakReference to ensure the ImageView can be garbage collected
@@ -44,7 +44,7 @@ public class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
 	// Decode image in background.
 	@Override
 	protected Bitmap doInBackground(String... params) {
-		data = params[0];
+        String data = params[0];
 		return decodeSampledBitmapFromResource(context.getResources(), data, 100, 100);
 	}
 
@@ -59,8 +59,8 @@ public class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
 		}
 	}
 
-	public static Bitmap decodeSampledBitmapFromResource(Resources res, String imgPath,
-	                                                     int reqWidth, int reqHeight) {
+	private static Bitmap decodeSampledBitmapFromResource(Resources res, String imgPath,
+                                                          int reqWidth, int reqHeight) {
 
 		// First decode with inJustDecodeBounds=true to check dimensions
 		final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -79,8 +79,8 @@ public class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
 Metody miają takie same ciało.
 Proszę umieścić je we wspólnej klasie, utilsach etc…
 */
-	public static int calculateInSampleSize(
-			BitmapFactory.Options options, int reqWidth, int reqHeight) {
+	private static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
 		// Raw height and width of image
 		final int height = options.outHeight;
 		final int width = options.outWidth;

@@ -17,8 +17,10 @@ import com.myhoard.app.R;
  * Created by Rafał Soudani on 14.03.2014
  */
 public class TypeDialog extends DialogFragment implements View.OnClickListener {
-    RadioGroup rgType;
-    RadioButton rbPrivate, rbPublic, rbOffline;
+    private RadioGroup rgType;
+    private RadioButton rbPrivate;
+    private RadioButton rbPublic;
+    private RadioButton rbOffline;
 
 
     @Override

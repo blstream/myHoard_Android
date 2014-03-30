@@ -118,7 +118,7 @@ public class CollectionsListFragment extends Fragment implements
 			}
 		});
 		registerForContextMenu(gridView);
-		adapter = new ImageAdapter(context, null, 0);
+		adapter = new ImageAdapter(context);
 		gridView.setAdapter(adapter);
 	}
 
@@ -148,12 +148,9 @@ public class CollectionsListFragment extends Fragment implements
 					.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
 							if (info != null) {
-                                /* AWA:FIXME: Używaj String.format
-*/
-
                                 getActivity().getContentResolver().delete(
 										DataStorage.Collections.CONTENT_URI,
-										DataStorage.Collections._ID + " = " + info.id, null);
+                                        String.format("%s = %s",DataStorage.Collections._ID,info.id), null);
 								fillGridView();
 							}
 						}
@@ -186,7 +183,7 @@ public class CollectionsListFragment extends Fragment implements
         getActivity().setTitle(context.getString(R.string.app_name));
     }
 
-	public void fillGridView() {
+	void fillGridView() {
 		getLoaderManager().restartLoader(0, null, this);
 	}
 

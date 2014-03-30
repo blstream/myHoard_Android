@@ -37,6 +37,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.NavDrawerListAdapter;
 import com.myhoard.app.dialogs.GeneratorDialog;
@@ -47,6 +48,7 @@ import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.model.RowItem;
 import com.myhoard.app.model.UserManager;
 import com.myhoard.app.services.SynchronizeService;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,8 +56,8 @@ import java.util.List;
 Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 */
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
-    CollectionsListFragment collectionsListFragment;
-    UserManager userManager;
+    private CollectionsListFragment collectionsListFragment;
+    private UserManager userManager;
 
 
     //to receive information from service SynchronizeService
@@ -64,7 +66,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
 
     //variables to progressBar
-    ProgressDialog progressBar;
+    private ProgressDialog progressBar;
     private Double progressBarStatusIn = 0.;
     private Double progressBarStatusOut = 0.;
 
@@ -81,46 +83,29 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private static final String FRAGMENT = "fragment";
 
     private Handler handler = new Handler();
-    Thread progressBarThread;
-    NavDrawerListAdapter navDrawerListAdapter;
+    private Thread progressBarThread;
+    private NavDrawerListAdapter navDrawerListAdapter;
 
     @Override
-    /* AWA:FIXME: Ciało metody jest za dlugie.
-    Mozna je podzielic na "krótsze" metody
-    Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
-    */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        FragmentManager fm = getSupportFragmentManager();
+
         //Listen for changes in the back stack
-        getSupportFragmentManager().addOnBackStackChangedListener(this);
+        fm.addOnBackStackChangedListener(this);
         shouldDisplayHomeUp();
 
-        collectionsListFragment = new CollectionsListFragment();
-        FragmentManager fm = getSupportFragmentManager();
-        if (savedInstanceState == null) {
+        setVariables();
+        openFragment(savedInstanceState, fm);
+        setDrawer();
 
+    }
 
-            /* AWA:FIXME: Hardcoded value
-            String "" powinien być jako stała np.
-            private final static String NAZWA_STALEJ="Main"
-                    */
-            fm.beginTransaction()
-                    .add(R.id.container, collectionsListFragment, MAIN)
-                    .commit();
-        } else {
-            fm.beginTransaction()
-                    .replace(R.id.container,
-                            fm.findFragmentByTag(savedInstanceState.getString(FRAGMENT)))
-                    .commit();
-
-        }
-        List<RowItem> list = preparing_navigationDrawer();
-        navDrawerListAdapter = new NavDrawerListAdapter(this,R.layout.drawer_menu_row,list);
-
+    private void setDrawer() {
         final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        final  ListView navigationList = (ListView)findViewById(R.id.drawer_list);
+        final ListView navigationList = (ListView)findViewById(R.id.drawer_list);
         navigationList.setAdapter(navDrawerListAdapter);
 
         actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.drawable.ic_drawer,R.string.drawer_open,R.string.drawer_close);
@@ -200,6 +185,28 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         });
     }
 
+    private void openFragment(Bundle savedInstanceState, FragmentManager fm) {
+        if (savedInstanceState == null) {
+
+            fm.beginTransaction()
+                    .add(R.id.container, collectionsListFragment, MAIN)
+                    .commit();
+        } else {
+            fm.beginTransaction()
+                    .replace(R.id.container,
+                            fm.findFragmentByTag(savedInstanceState.getString(FRAGMENT)))
+                    .commit();
+
+        }
+    }
+
+    private void setVariables() {
+        collectionsListFragment = new CollectionsListFragment();
+        List<RowItem> list = preparing_navigationDrawer();
+        navDrawerListAdapter = new NavDrawerListAdapter(this,R.layout.drawer_menu_row,list);
+
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -248,7 +255,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         super.onDestroy();
     }
 
-    public String getVisibleFragmentTag() {
+    String getVisibleFragmentTag() {
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
         List<Fragment> fragments = fragmentManager.getFragments();
         for (Fragment fragment : fragments) {
@@ -334,7 +341,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     //    shouldDisplayHomeUp();
     }
 
-    public void shouldDisplayHomeUp() {
+    void shouldDisplayHomeUp() {
         //Enable Up button only  if there are entries in the back stack
       //  boolean canBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
       //  getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
@@ -415,7 +422,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         progressBarThread.start();
     }
 
-    public List<RowItem> preparing_navigationDrawer()
+    List<RowItem> preparing_navigationDrawer()
     {
         UserManager uM = UserManager.getInstance();
         String[] drawerListItems = null;

@@ -4,13 +4,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.myhoard.app.R;
 
 
@@ -26,7 +26,7 @@ public class ImageAdapterList extends CursorAdapter {
         ImageView img;
         String path;
     }
-    private ImageLoader mImageLoader;
+    private final ImageLoader mImageLoader;
 	public ImageAdapterList(Context context, Cursor c, int flags) {
 	    super(context, c, flags);
 	    mImageLoader = new ImageLoader();

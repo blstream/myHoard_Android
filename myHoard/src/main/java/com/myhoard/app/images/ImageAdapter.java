@@ -37,16 +37,11 @@ import com.myhoard.app.provider.DataStorage;
  */
 
 public class ImageAdapter extends CursorAdapter {
-    /* AWA:FIXME: Hardcoded value
-                    Umiesc w private final static String, int, etc....
-                    lub w strings.xml
-                    lub innym *.xml
-                    */
 	private int width = 200;
     private static final String EMPTY_COLLECTION = "0";
 
-	public ImageAdapter(Context context, Cursor c, int flags) {
-		super(context, c, flags);
+	public ImageAdapter(Context context) {
+		super(context, null, 0);
 
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
