@@ -92,8 +92,7 @@ public class UserManager {
 
     public boolean register(User user) {
         userHttpEngine = new UserHttpEngine(IP + USER_PATH);
-        return true;
-        // return userHttpEngine.create(user, null) == ICRUDEngine.ERROR_CODE ? false : true;
+        return userHttpEngine.create(user, null) == null ? false : true;
     }
 
     /**

@@ -24,7 +24,7 @@ import java.util.List;
      * @param token token uwierzytelniający
      * @return id dodanego obiektu lub ERROR_CODE w przypadku błędu
      */
-    public String create(IModel t, Token token);
+    public IModel create(IModel t, Token token);
 
     public void update(IModel t, String id, Token token);
 

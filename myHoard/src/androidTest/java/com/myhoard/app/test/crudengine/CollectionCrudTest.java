@@ -2,6 +2,7 @@ package com.myhoard.app.test.crudengine;
 
 import com.myhoard.app.crudengine.CRUDEngine;
 import com.myhoard.app.model.Collection;
+import com.myhoard.app.model.IModel;
 import com.myhoard.app.model.Token;
 import com.myhoard.app.model.User;
 import com.myhoard.app.Managers.UserManager;
@@ -15,13 +16,13 @@ import java.util.List;
 /**
  * Description
  *
- * @author gohilukk
+ * @author Tomasz Nosal
  *         Date: 30.03.14
  */
 public class CollectionCrudTest extends TestCase {
 
-    private static final String EMAIL = "tomek@tomek.pl";
-    private static final String PASSWORD = "tomek";
+    private static final String EMAIL = UserCurdTest.UserExample.EMAIL;
+    private static final String PASSWORD = UserCurdTest.UserExample.PASSWORD;
     private Token token;
     private CRUDEngine<Collection> collectionEngine;
     public static final String URL = "http://78.133.154.39:2080/collections/";
@@ -56,7 +57,8 @@ public class CollectionCrudTest extends TestCase {
                 null,
                 null);
 
-        String returnedId = collectionEngine.create(collection,token);
+        IModel imodel = collectionEngine.create(collection, token);
+        String returnedId = imodel.getId();
         assertNotNull(returnedId);
     }
 
