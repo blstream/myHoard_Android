@@ -33,6 +33,7 @@ public class ItemsTable extends DatabaseTable {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE " + tableName + " (")
                 .append(Items._ID + " INTEGER PRIMARY KEY, ")
+                .append(Items.ID_SERVER + " TEXT, ")
                 .append(Items.ID_COLLECTION + " INTEGER, ")
                 .append(Items.NAME + " TEXT, ")
                 .append(Items.DESCRIPTION + " TEXT, ")
