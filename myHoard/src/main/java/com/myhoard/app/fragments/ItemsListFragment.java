@@ -12,6 +12,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,10 +33,10 @@ import com.facebook.RequestAsyncTask;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.dialogs.FacebookShareDialog;
 import com.myhoard.app.images.ImageAdapterList;
-import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -92,6 +94,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+        setSortTabs();
 
         // Lifecycle Facebook session
         Session session = Session.getActiveSession();
@@ -155,6 +158,66 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 		registerForContextMenu(mGridView);
 	}
 
+    private void setSortTabs() {
+        //getting the action bar from the MainActivity
+        final ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+        //adding tabs to the action bar
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        //tab sort by name
+        String labelByName = getResources().getString(R.string.by_name);
+        ActionBar.Tab tabSortByName = actionBar.newTab();
+        tabSortByName.setText(labelByName);
+        ActionBar.TabListener sortByNameTabListener = new ActionBar.TabListener() {
+            @Override
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByName();
+            }
+
+            @Override
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+            }
+
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+            }
+        };
+        tabSortByName.setTabListener(sortByNameTabListener);
+        actionBar.addTab(tabSortByName);
+
+        //tab sort by date
+        String labelByDate = getResources().getString(R.string.by_date);
+        ActionBar.Tab tabSortByDate = actionBar.newTab();
+        tabSortByDate.setText(labelByDate);
+        ActionBar.TabListener sortByDateTabListener = new ActionBar.TabListener() {
+            @Override
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByDate();
+            }
+
+            @Override
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+            }
+
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+            }
+        };
+        tabSortByDate.setTabListener(sortByDateTabListener);
+        actionBar.addTab(tabSortByDate);
+    }
+
+    private void resetActionBarNavigationMode() {
+        //getting the action bar from the MainActivity
+        final ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+        actionBar.removeAllTabs();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+    }
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -171,6 +234,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onStop() {
         super.onStop();
         Session.getActiveSession().removeCallback(statusCallback);
+        resetActionBarNavigationMode();
     }
 
     @Override
@@ -215,7 +279,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         MenuItem item;
         //set sort option visible in the ItemsListFragment
         item = menu.findItem(R.id.action_sort);
-        if(item!=null) item.setVisible(true);
+        if (item != null) item.setVisible(false);
         //Set search option visible in the ItemsListFragment
         item = menu.findItem(R.id.action_search);
         if(item!=null) item.setVisible(true);
@@ -375,7 +439,18 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         }
 	}
 
-    public void itemsSortOrderChange(MenuItem item) {
+    private void sortByName() {
+        sortOrder = sortByName;
+        getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
+    }
+
+    private void sortByDate() {
+        sortOrder = sortByDate;
+        getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
+    }
+
+    //Mplewko: usunę jak ostatecznie zakończę sortowanie
+    /*public void itemsSortOrderChange(MenuItem item) {
         if (sortOrder.equals(sortByName)) {
             sortOrder = sortByDate;
             Toast.makeText(mContext, "ITEMS SORTED BY DATE", Toast.LENGTH_SHORT).show();
@@ -386,7 +461,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             item.setTitle(R.string.action_sort_by_date);
         }
         getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
-    }
+    }*/
 
     /*
     * Sharing on Facebook name/description/photos/location
