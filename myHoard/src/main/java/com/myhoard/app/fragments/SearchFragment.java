@@ -29,6 +29,7 @@ import com.myhoard.app.provider.DataStorage;
  * SearchFragment class used to search concrete sentence in table of elements
  */
 public class SearchFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String SEARCH_COLLECTION_ID = "SearchCollection";
     private EditText mSearchText;
     private Context mContext;
     private ImageAdapterList mImageAdapterList;
@@ -43,7 +44,7 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
         final View v = inflater.inflate(R.layout.fragment_search, container, false);
         setHasOptionsMenu(true);
         Bundle b = this.getArguments();
-        mCollectionId = b.getLong("SearchFragment");
+        mCollectionId = b.getLong(SEARCH_COLLECTION_ID);
         mContext = getActivity();
         //Create adapter to adapt data to individual list row
         mImageAdapterList = new ImageAdapterList(mContext, null, 0);

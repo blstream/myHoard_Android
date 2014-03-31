@@ -293,6 +293,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         CursorLoader cursorLoader = null;
         switch(i){
+             /* AWA:FIXME: Używaj String.format
+*/
             //Get all elements from collection
             case 0:
                 cursorLoader =  new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
