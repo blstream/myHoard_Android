@@ -26,7 +26,7 @@ import java.util.List;
      */
     public IModel create(IModel t, Token token);
 
-    public void update(IModel t, String id, Token token);
+    public T update(IModel t, String id, Token token);
 
-    public void remove(String id, Token token);
+    public boolean remove(String id, Token token);
 }

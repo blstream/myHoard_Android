@@ -25,8 +25,9 @@ public class CollectionCrudTest extends TestCase {
     private String password;
     private Token token;
     private CRUDEngine<Collection> collectionEngine;
-    public static final String URL = "http://78.133.154.39:2080/collections/";
-
+    TestCollections testCollections;
+    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2080/",
+            "http://78.133.154.39:1080/");
 
     public CollectionCrudTest(String name) {
         super(name);
@@ -34,15 +35,9 @@ public class CollectionCrudTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        email = "tom"+Calendar.getInstance().getTimeInMillis()+"@op.pl";
+        testCollections = new TestCollections();
+        email = "android" + Calendar.getInstance().getTimeInMillis() + "@op.pl";
         password = "haselko";
-        UserManager uM = UserManager.getInstance();
-        //rejestracja
-        uM.register(new User(email, password));
-        //pobranie tokena = logowanie
-        uM.login(new User(email,password));
-        token = uM.getToken();
-        collectionEngine = new CRUDEngine<Collection>(URL,Collection.class);
     }
 
     protected void tearDown() throws Exception {
@@ -53,38 +48,87 @@ public class CollectionCrudTest extends TestCase {
      * Tests
      */
     public final void testCrudForCollections() {
-        /**
-         * Create
-         */
-        Collection collection = new Collection(TestCollections.NAME,
-                TestCollections.DESCRIPTION,
-                TestCollections.TAGS,
-                null,
-                null,
-                null,
-                null);
+        for (String url : URLS) {
+            registerAndGetToken(url);
+            /**
+             * Create
+             */
+            Collection collection = new Collection(testCollections.NAME,
+                    testCollections.DESCRIPTION,
+                    testCollections.TAGS,
+                    null,
+                    null,
+                    null,
+                    null);
 
-        IModel imodel = collectionEngine.create(collection, token);
-        String returnedId = imodel.getId();
-        assertNotNull(returnedId);
+            IModel imodel = collectionEngine.create(collection, token);
+            String returnedId = imodel.getId();
+            assertNotNull(returnedId);
 
-        /**
-         * Read
-         */
-        Collection c = collectionEngine.get(returnedId,token);
-        assertEquals(c.getId(),TestCollections.NAME);
-        assertEquals(c.getDescription(),TestCollections.DESCRIPTION);
-        assertEquals(c.getTags(),TestCollections.TAGS);
+            /**
+             * Read
+             */
+            Collection c = collectionEngine.get(returnedId, token);
+            assertEquals(c.getName(), testCollections.NAME);
+            assertEquals(c.getDescription(), testCollections.DESCRIPTION);
+            for (String s : testCollections.TAGS) {
+                assertTrue(c.getTags().contains(s));
+            }
 
-        /**
-         * Update
-         */
+            /**
+             * Update
+             */
+            Collection collectionToUpdate = new Collection(testCollections.UPDATED_NAME,
+                    testCollections.UPDATED_DESCRIPTION,
+                    testCollections.UPDATED_TAGS,
+                    null,
+                    null,
+                    null,
+                    null);
+            collectionToUpdate.setId(returnedId);
+            c = collectionEngine.update(collectionToUpdate, returnedId, token);
+            assertEquals(c.getName(), testCollections.UPDATED_NAME);
+            assertEquals(c.getDescription(), testCollections.UPDATED_DESCRIPTION);
+            for (String s : testCollections.UPDATED_TAGS) {
+                assertTrue(c.getTags().contains(s));
+            }
+
+            /**
+             * Delete
+             */
+            assertTrue(collectionEngine.remove(returnedId, token));
+        }
+    }
+
+    private void registerAndGetToken(String url) {
+        UserManager uM = UserManager.getInstance();
+        //rejestracja
+        uM.setIp(url);
+        uM.register(new User(email, password));
+        //pobranie tokena = logowanie
+        uM.login(new User(email, password));
+        token = uM.getToken();
+        collectionEngine = new CRUDEngine<Collection>(url+"collections/", Collection.class);
     }
 
 
     private static final class TestCollections {
-        public static final String NAME = "testName" + Calendar.getInstance().getTime().toString();
-        public static final String DESCRIPTION = "testDescription" + Calendar.getInstance().getTime().toString();
-        public static final List<String> TAGS = Arrays.asList("Buenos Aires", "Cordoba", "La Plata");
+        public final String NAME;
+        public final String DESCRIPTION;
+        public final List<String> TAGS;
+
+        public final String UPDATED_NAME;
+        public final String UPDATED_DESCRIPTION;
+        public final List<String> UPDATED_TAGS;
+
+        public TestCollections() {
+            NAME = "testName" + Calendar.getInstance().getTime().toString();
+            DESCRIPTION = "testDescription" + Calendar.getInstance().getTime().toString();
+            TAGS = Arrays.asList("Buenos Aires", "Cordoba", "La Plata");
+
+            UPDATED_NAME = "testNameUpdated" + Calendar.getInstance().getTimeInMillis();
+            UPDATED_DESCRIPTION = "testDescriptionUpdated" + Calendar.getInstance().getTimeInMillis();
+            UPDATED_TAGS = Arrays.asList("Barcelona", "Valencia");
+        }
     }
 }

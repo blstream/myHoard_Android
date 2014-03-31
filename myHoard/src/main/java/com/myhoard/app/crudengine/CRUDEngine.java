@@ -50,6 +50,9 @@ import java.util.List;
     private static final String AUTHORIZATION = "Authorization";
     private static final String APPLICATION_JSON = "application/json";
     private static final int STATUS_CREATED = 201;
+    private static final int STATUS_OK = 200;
+    private static final int STATUS_NO_CONTENT = 204;
+
 
     public CRUDEngine(String url,Class<T> clazz) {
         this.url = url;
@@ -152,7 +155,7 @@ import java.util.List;
     }
 
     @Override
-    public void update(IModel item, String id, Token token) {
+    public T update(IModel item, String id, Token token) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpResponse response;
@@ -173,13 +176,11 @@ import java.util.List;
             /*Checking response */
             if (response != null) {
                 HttpEntity responseEntity = response.getEntity();
-                String HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
-                Log.d("TAG", "Jsontext = " + HTTP_response);
-                //jezeli odpowiedz zawiera kod Created
-                if (HTTP_response.contains("error_code")) {
-                    Log.d("TAG", "blad");
-                } else {
-                    Log.d("TAG", "zupdatowano id=" + id);
+                if (response.getStatusLine().getStatusCode()==STATUS_OK) {
+                    String HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
+                    T model = (T) new Gson().fromJson(HTTP_response, item.getClass());
+                    Log.d("TAG", "Jsontext = " + HTTP_response);
+                    return model;
                 }
             }
         } catch (Exception e) {
@@ -188,23 +189,30 @@ import java.util.List;
             */
             e.printStackTrace();
         }
+        return null;
     }
 
     @Override
-    public void remove(String id, Token token) {
+    public boolean remove(String id, Token token) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpDelete httpDelete = new HttpDelete(url + id);
+        HttpResponse response;
 
         //httpDelete.setHeader("Accept", "application/json");
         httpDelete.setHeader(AUTHORIZATION, token.getAccess_token());
 
         try {
-            httpClient.execute(httpDelete);
+            response = httpClient.execute(httpDelete);
+            if (response != null) {
+                if (response.getStatusLine().getStatusCode() == STATUS_NO_CONTENT) {
+                    return true;
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        return false;
     }
 
     protected String getASCIIContentFromEntity(HttpEntity entity) throws IllegalStateException, IOException {
