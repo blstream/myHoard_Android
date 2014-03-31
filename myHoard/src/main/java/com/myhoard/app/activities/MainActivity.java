@@ -46,7 +46,7 @@ import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.model.RowItem;
-import com.myhoard.app.model.UserManager;
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.services.SynchronizeService;
 
 import java.util.ArrayList;
@@ -127,16 +127,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                         switch(w) {
                             case 0:
-                                if (!UserManager.getInstance().isLoggedIn()) {
-                                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                                    startActivity(intent);
-                                } else {
-                                    UserManager.getInstance().logout();
-                                    Toast toast = Toast.makeText(getBaseContext(), WYLOGOWANO,
-                                            Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, XOFFSET, YOFFSET);
-                                    toast.show();
-                                }
+
                                 break;
                             /* AWA:FIXME: Hardcoded value
                             Magiczne numerki co oznaczaja 1, 2, 3....
@@ -424,13 +415,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     List<RowItem> preparing_navigationDrawer()
     {
-        UserManager uM = UserManager.getInstance();
-        String[] drawerListItems = null;
-        if(uM.isLoggedIn()) {
-            drawerListItems = getResources().getStringArray(R.array.drawer_menu_with_logout);
-        } else {
-            drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-        }
+        String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
         int[] images = {R.drawable.kolekcje,R.drawable.kolekcje,R.drawable.anuluj,R.drawable.znajomi,R.drawable.profilpng};
         //wiem ze to slabe, postaram sie niedlugo zrobic lepsze przekazywanie ikonek
 

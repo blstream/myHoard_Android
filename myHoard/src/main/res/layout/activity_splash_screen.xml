@@ -1,0 +1,80 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/gray_background"
+    android:layout_gravity="bottom"
+    android:id="@+id/scrollView">
+
+
+
+    <LinearLayout
+        android:layout_gravity="top"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="1">
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_marginBottom="60dp">
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="70sp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:layout_marginTop="60dp"
+                android:text="@string/my"
+                android:id="@+id/textView2" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="70sp"
+                android:textColor="@color/yellow_text"
+                android:layout_marginTop="60dp"
+                android:text="@string/Hoard"
+                android:id="@+id/textView3"/>
+
+            </LinearLayout>
+
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="@color/yellow_main"
+            android:text="@string/Login"
+            android:id="@+id/login_button"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="15dp"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="@color/yellow_main"
+            android:text="@string/sign_up"
+            android:id="@+id/sing_up_button"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="15dp"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="@color/yellow_main"
+            android:text="@string/continue_offline"
+            android:id="@+id/continue_offline_button"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="15dp"/>
+
+    </LinearLayout>
+
+</ScrollView>

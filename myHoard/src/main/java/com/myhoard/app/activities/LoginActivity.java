@@ -16,7 +16,7 @@ import android.widget.Toast;
 import com.myhoard.app.R;
 import com.myhoard.app.crudengine.ConnectionDetector;
 import com.myhoard.app.model.User;
-import com.myhoard.app.model.UserManager;
+import com.myhoard.app.Managers.UserManager;
 
 /*
 * Crreated by Mateusz Czyszkiewicz
@@ -122,7 +122,7 @@ public class LoginActivity extends ActionBarActivity  {
         protected void onPostExecute(Boolean result) {
             if (result) {
 
-
+                startActivity(new Intent(getApplicationContext(),MainActivity.class));
                 Toast toast = Toast.makeText(getBaseContext(), getString(R.string.Logged),
                         Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);

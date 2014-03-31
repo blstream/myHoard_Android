@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.facebook.Session;
 import com.myhoard.app.R;
-import com.myhoard.app.httpengine.ConnectionDetector;
+import com.myhoard.app.crudengine.ConnectionDetector;
 
 /**
  * Created by Dawid Graczyk on 2014-03-29.

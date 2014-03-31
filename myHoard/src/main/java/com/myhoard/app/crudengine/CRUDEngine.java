@@ -33,18 +33,18 @@ import java.util.List;
 /**
  * Description
  *
- * @author Tomasz Nosal
+ * @author Tomasz Nosal & Marcin Łaszcz
  *         Date: 17.03.14
  */
- public class CRUDEngine<T> implements ICRUDEngine<T> {
+ public class CrudEngine<T> implements ICrudEngine<T> {
 
     protected String url;
 
     private static final String AUTHORIZATION = "Authorization";
-    private static final String APPLICATIONJSON = "application/json";
-    private static final String ERROR_CODE = "error_code";
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String ERROR_STRING = "error_code";
 
-    public CRUDEngine(String url) {
+    public CrudEngine(String url) {
         this.url = url;
     }
 
@@ -80,7 +80,7 @@ import java.util.List;
     }
 
     @Override
-    public boolean create(IModel item, Token token) {
+    public int create(IModel item, Token token) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpResponse response;
@@ -95,7 +95,7 @@ import java.util.List;
             json = item.toJson();
 
             StringEntity se = new StringEntity(json.toString());
-            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, APPLICATIONJSON));
+            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, APPLICATION_JSON));
             httpPost.setEntity(se);
             response = httpClient.execute(httpPost);
 
@@ -104,15 +104,12 @@ import java.util.List;
                 HttpEntity responseEntity = response.getEntity();
                 String HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                 Log.d("TAG", "Jsontext = " + HTTP_response);
-                return !HTTP_response.contains(ERROR_CODE);
+                return HTTP_response.contains(ERROR_STRING) ? ERROR_CODE  : 1;
             }
         } catch (Exception e) {
-            /* AWA:FIXME: Obsługa błędów
-Wypychanie błędów do UI
-*/
-            e.printStackTrace();
+            return ERROR_CODE;
         }
-        return false;
+        return ERROR_CODE;
     }
 
     @Override
@@ -130,7 +127,7 @@ Wypychanie błędów do UI
             JSONObject json = item.toJson();
 
             StringEntity se = new StringEntity(json.toString());
-            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, APPLICATIONJSON));
+            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, APPLICATION_JSON));
             httpPut.setEntity(se);
             response = httpClient.execute(httpPut);
 
@@ -171,8 +168,6 @@ Wypychanie błędów do UI
 
     }
 
-    /* AWA:FIXME: Magic numbers
-*/
     protected String getASCIIContentFromEntity(HttpEntity entity) throws IllegalStateException, IOException {
         Integer ONE = 1;
         Integer ZERO = 0;

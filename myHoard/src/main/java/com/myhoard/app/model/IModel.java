@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Description
+ * Interface dla klas korzystających z CRUD-a
  *
  * @author Marcin Łaszcz
  *         Date: 18.03.14
