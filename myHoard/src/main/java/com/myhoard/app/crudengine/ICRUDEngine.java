@@ -17,7 +17,7 @@ import java.util.List;
 
     public List<T> getList(Token token);
 
-    public T get(int id);
+    public T get(String id, Token token);
 
     /**
      * @param t obiekt wysyłany na serwer

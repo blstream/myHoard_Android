@@ -39,14 +39,21 @@ import java.util.List;
  */
  public class CRUDEngine<T> implements ICRUDEngine<T> {
 
+    private final Class<T> clazz;
+
+    public Class<T> getClazz() {
+        return clazz;
+    }
+
     protected String url;
 
     private static final String AUTHORIZATION = "Authorization";
     private static final String APPLICATION_JSON = "application/json";
     private static final int STATUS_CREATED = 201;
 
-    public CRUDEngine(String url) {
+    public CRUDEngine(String url,Class<T> clazz) {
         this.url = url;
+        this.clazz = clazz;
     }
 
     @Override
@@ -62,9 +69,9 @@ import java.util.List;
                 HttpEntity entity = response.getEntity();
                 stringResponse = getASCIIContentFromEntity(entity);
 
-                Type collectionType = new TypeToken<List<Collection>>() {
-                }.getType();
-                List<T> items = (List<T>) new Gson().fromJson(stringResponse, collectionType);
+                //Type collectionType = new TypeToken<List<Collection>>() {
+                //}.getType();
+                List<T> items = (List<T>) new Gson().fromJson(stringResponse, IModel.class);
 
                 return items;
             } catch (Exception e) {
@@ -76,7 +83,28 @@ import java.util.List;
     }
 
     @Override
-    public T get(int id) {
+    public T get(String id, Token token) {
+        if (token != null) {
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpContext localContext = new BasicHttpContext();
+            HttpGet httpGet = new HttpGet(url+id);
+            httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
+            String stringResponse;
+            try {
+                HttpResponse response = httpClient.execute(httpGet, localContext);
+                HttpEntity entity = response.getEntity();
+                stringResponse = getASCIIContentFromEntity(entity);
+
+                Type collectionType = new TypeToken<List<Collection>>() {
+                }.getType();
+                T iModel = new Gson().fromJson(stringResponse, clazz);
+
+                return (T)iModel;
+            } catch (Exception e) {
+                //return e.getLocalizedMessage();
+                return null;
+            }
+        }
         return null;
     }
 

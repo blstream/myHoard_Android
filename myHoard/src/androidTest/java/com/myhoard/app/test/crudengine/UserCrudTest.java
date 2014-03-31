@@ -15,6 +15,8 @@ import java.util.Calendar;
  */
 public class UserCrudTest extends TestCase {
 
+    private String email;
+    private String password;
     public static final String URL = "http://78.133.154.39:2080/users/";
 
     public UserCrudTest(String name) {
@@ -23,19 +25,21 @@ public class UserCrudTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
+        email = "tom"+Calendar.getInstance().getTimeInMillis()+"@op.pl";
+        password = "haselko";
     }
 
     protected void tearDown() throws Exception {
         super.tearDown();
     }
 
+    /**
+     * Tests: registration and getting token
+     */
     public void testRegistrationUser() {
         UserManager uM = UserManager.getInstance();
-        assertTrue(uM.register(new User(UserExample.EMAIL, UserExample.PASSWORD)));
-    }
-
-    public static final class UserExample {
-        public static final String EMAIL = "tom5@op.pl";
-        public static final String PASSWORD = "haselko";
+        assertTrue(uM.register(new User(email, password)));
+        uM.login(new User(email,password));
+        assertNotNull(uM.getToken());
     }
 }

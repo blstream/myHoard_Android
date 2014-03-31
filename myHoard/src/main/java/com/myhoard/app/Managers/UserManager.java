@@ -123,7 +123,7 @@ public class UserManager {
         private static final int TIMEOUT_LIMIT = 10000;
 
         public UserHttpEngine(String url) {
-            super(url);
+            super(url,User.class);
         }
 
         /**

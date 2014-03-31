@@ -21,8 +21,8 @@ import java.util.List;
  */
 public class CollectionCrudTest extends TestCase {
 
-    private static final String EMAIL = UserCurdTest.UserExample.EMAIL;
-    private static final String PASSWORD = UserCurdTest.UserExample.PASSWORD;
+    private String email;
+    private String password;
     private Token token;
     private CRUDEngine<Collection> collectionEngine;
     public static final String URL = "http://78.133.154.39:2080/collections/";
@@ -34,11 +34,15 @@ public class CollectionCrudTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        //pobranie tokena = logowanie
+        email = "tom"+Calendar.getInstance().getTimeInMillis()+"@op.pl";
+        password = "haselko";
         UserManager uM = UserManager.getInstance();
-        uM.login(new User(EMAIL,PASSWORD));
+        //rejestracja
+        uM.register(new User(email, password));
+        //pobranie tokena = logowanie
+        uM.login(new User(email,password));
         token = uM.getToken();
-        collectionEngine = new CRUDEngine<Collection>(URL);
+        collectionEngine = new CRUDEngine<Collection>(URL,Collection.class);
     }
 
     protected void tearDown() throws Exception {
@@ -48,7 +52,10 @@ public class CollectionCrudTest extends TestCase {
     /**
      * Tests
      */
-    public final void testCreate() {
+    public final void testCrudForCollections() {
+        /**
+         * Create
+         */
         Collection collection = new Collection(TestCollections.NAME,
                 TestCollections.DESCRIPTION,
                 TestCollections.TAGS,
@@ -60,6 +67,18 @@ public class CollectionCrudTest extends TestCase {
         IModel imodel = collectionEngine.create(collection, token);
         String returnedId = imodel.getId();
         assertNotNull(returnedId);
+
+        /**
+         * Read
+         */
+        Collection c = collectionEngine.get(returnedId,token);
+        assertEquals(c.getId(),TestCollections.NAME);
+        assertEquals(c.getDescription(),TestCollections.DESCRIPTION);
+        assertEquals(c.getTags(),TestCollections.TAGS);
+
+        /**
+         * Update
+         */
     }
 
 
