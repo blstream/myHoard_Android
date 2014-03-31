@@ -1,6 +1,6 @@
 package com.myhoard.app.test.crudengine;
 
-import com.myhoard.app.crudengine.CrudEngine;
+import com.myhoard.app.crudengine.CRUDEngine;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.Token;
 import com.myhoard.app.model.User;
@@ -23,7 +23,7 @@ public class CollectionCrudTest extends TestCase {
     private static final String EMAIL = "tomek";
     private static final String PASSWORD = "tomek";
     private Token token;
-    private CrudEngine<Collection> collectionEngine;
+    private CRUDEngine<Collection> collectionEngine;
     public static final String URL = "http://78.133.154.18:8080/collections/";
 
 
@@ -37,7 +37,7 @@ public class CollectionCrudTest extends TestCase {
         UserManager uM = UserManager.getInstance();
         uM.login(new User(EMAIL,PASSWORD));
         token = uM.getToken();
-        collectionEngine = new CrudEngine<Collection>(URL);
+        collectionEngine = new CRUDEngine<Collection>(URL);
     }
 
     protected void tearDown() throws Exception {

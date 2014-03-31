@@ -36,7 +36,7 @@ import java.util.List;
  * @author Tomasz Nosal & Marcin Łaszcz
  *         Date: 17.03.14
  */
- public class CrudEngine<T> implements ICrudEngine<T> {
+ public class CRUDEngine<T> implements ICRUDEngine<T> {
 
     protected String url;
 
@@ -44,7 +44,7 @@ import java.util.List;
     private static final String APPLICATION_JSON = "application/json";
     private static final String ERROR_STRING = "error_code";
 
-    public CrudEngine(String url) {
+    public CRUDEngine(String url) {
         this.url = url;
     }
 

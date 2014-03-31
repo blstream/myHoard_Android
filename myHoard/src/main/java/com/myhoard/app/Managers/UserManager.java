@@ -17,8 +17,8 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 
-import com.myhoard.app.crudengine.CrudEngine;
-import com.myhoard.app.crudengine.ICrudEngine;
+import com.myhoard.app.crudengine.CRUDEngine;
+import com.myhoard.app.crudengine.ICRUDEngine;
 import com.myhoard.app.model.Token;
 import com.myhoard.app.model.User;
 
@@ -91,7 +91,7 @@ public class UserManager {
 
     public boolean register(User user) {
         userHttpEngine = new UserHttpEngine(IP + USER_PATH);
-        return userHttpEngine.create(user, null) == ICrudEngine.ERROR_CODE ? false : true;
+        return userHttpEngine.create(user, null) == ICRUDEngine.ERROR_CODE ? false : true;
     }
 
     /**
@@ -117,7 +117,7 @@ public class UserManager {
     /**
      * Inner class that handles communication with a server using REST
      */
-   public class UserHttpEngine extends CrudEngine<User> {
+   public class UserHttpEngine extends CRUDEngine<User> {
 
         private static final int TIMEOUT_LIMIT = 10000;
 

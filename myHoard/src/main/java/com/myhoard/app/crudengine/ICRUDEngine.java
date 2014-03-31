@@ -1,9 +1,9 @@
 package com.myhoard.app.crudengine;
 
-import java.util.List;
-
 import com.myhoard.app.model.IModel;
 import com.myhoard.app.model.Token;
+
+import java.util.List;
 
 /**
  * Description
@@ -11,7 +11,7 @@ import com.myhoard.app.model.Token;
  * @author Tomasz Nosal & Marcin Łaszcz
  *         Date: 17.03.14
  */
- public interface ICrudEngine<T> {
+ public interface ICRUDEngine<T> {
 
     final public static int ERROR_CODE = -1;
 

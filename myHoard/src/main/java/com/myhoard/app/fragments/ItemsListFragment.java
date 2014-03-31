@@ -225,9 +225,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         //Set generator option invisible in the ItemsListFragment
         item = menu.findItem(R.id.action_generate);
         if(item!=null) item.setVisible(false);
-        //Set camera option invisible in the ItemsListFragment
-        item = menu.findItem(R.id.action_camera);
-        if(item!=null) item.setVisible(false);
         //Set login option invisible in the ItemsListFragment
         item = menu.findItem(R.id.action_login);
         if(item!=null) item.setVisible(false);

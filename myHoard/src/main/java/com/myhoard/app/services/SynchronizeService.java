@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.myhoard.app.activities.MainActivity;
-import com.myhoard.app.crudengine.CrudEngine;
+import com.myhoard.app.crudengine.CRUDEngine;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.provider.DataProvider;
@@ -48,7 +48,7 @@ public class SynchronizeService extends IntentService {
 
         userManager = UserManager.getInstance();
         if (userManager.isLoggedIn()) {
-            CrudEngine<Collection> collections = new CrudEngine<>(URL);
+            CRUDEngine<Collection> collections = new CRUDEngine<>(URL);
 
 
             List<Collection> localCollections = new ArrayList<Collection>();
