@@ -86,6 +86,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private Thread progressBarThread;
     private NavDrawerListAdapter navDrawerListAdapter;
 
+    public static long collectionSelected = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,8 +148,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                     //item.setTitle(R.string.action_new_element);//TODO correct
                                     Fragment elementFragment = new ElementFragment();
                                     Bundle b = new Bundle();
-                                    //TODO Add collection id
-                                    //b.putLong(ElementFragment.COLLECTION_ID,collectionID);
+                                    b.putLong(ElementFragment.COLLECTION_ID,collectionSelected);
                                     b.putInt(ElementFragment.ID, -1);
                                     elementFragment.setArguments(b);
                                     getSupportFragmentManager().beginTransaction()

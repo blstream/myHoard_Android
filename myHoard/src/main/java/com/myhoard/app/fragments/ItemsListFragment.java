@@ -127,6 +127,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 Bundle b = new Bundle();
                 b.putLong(ElementFragment.ID,id);
                 b.putLong(ElementFragment.COLLECTION_ID,collectionID);
+                b.putString(ElementFragment.NAME,"Name");
+                b.putString(ElementFragment.DESCRIPTION,"Description");
                 newFragment.setArguments(b);
 
                 // Replace whatever is in the fragment_container view with this fragment,
