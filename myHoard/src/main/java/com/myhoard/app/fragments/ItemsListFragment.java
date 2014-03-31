@@ -1,6 +1,7 @@
 package com.myhoard.app.fragments;
 
 import android.app.ProgressDialog;
+import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -60,6 +61,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private int mItemPositionOnList;
     private String mMessageOnFb;
 
+    private Cursor globalCursor;
 
     private Context mContext;
     private GridView mGridView;
@@ -128,8 +130,15 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
                 // Add arguments to opened fragment element
                 Bundle b = new Bundle();
+                b.putBoolean(ElementFragment.EDITION, false);
                 b.putLong(ElementFragment.ID,id);
                 b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
+                globalCursor.moveToPosition(position);
+                String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
+                String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
+                b.putString(ElementFragment.NAME,name);
+                b.putString(ElementFragment.DESCRIPTION,description);
+
                 newFragment.setArguments(b);
 
                 // Replace whatever is in the fragment_container view with this fragment,
@@ -279,6 +288,37 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                     facebookShareDialog.show(getFragmentManager(),null);
                 }
                 return true;
+            case EDIT_ID:
+                Fragment newFragment = new ElementFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+                // Add arguments to opened fragment element
+                Bundle b = new Bundle();
+                b.putBoolean(ElementFragment.EDITION,true);
+                globalCursor.moveToPosition(info.position);
+                b.putLong(ElementFragment.ID,info.id);
+                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
+                String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
+                String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
+                b.putString(ElementFragment.NAME,name);
+                b.putString(ElementFragment.DESCRIPTION,description);
+
+                newFragment.setArguments(b);
+
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack
+                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
+                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
+
+                // Commit the transaction
+                transaction.commit();
+                return true;
+            case DELETE_ID:
+                AsyncQueryHandler asyncHandler =
+                        new AsyncQueryHandler(getActivity().getContentResolver()) { };
+                asyncHandler.startDelete(0, null, DataStorage.Items.CONTENT_URI,
+                        DataStorage.Items._ID + " = ?", new String[]{String.valueOf(info.id)});
+                return true;
         }
 
         return super.onContextItemSelected(item);
@@ -325,6 +365,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         else {
             mImageAdapterList.swapCursor(data);
         }
+        globalCursor = data;
     }
 
 	@Override
