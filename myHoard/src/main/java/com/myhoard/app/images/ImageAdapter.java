@@ -39,15 +39,18 @@ import com.myhoard.app.provider.DataStorage;
 public class ImageAdapter extends CursorAdapter {
 	private int width = 200;
     private static final String EMPTY_COLLECTION = "0";
+    private final ImageLoader mImageLoader;
 
 	public ImageAdapter(Context context) {
 		super(context, null, 0);
+        mImageLoader = new ImageLoader();
 
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
 		//noinspection deprecation
 		width = display.getWidth() / 2;  // deprecated from api 13
 	}
+
 
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
@@ -94,17 +97,8 @@ public class ImageAdapter extends CursorAdapter {
         } else {
             holder.count.setText(cursor.getString(holder.countIndex));
         }
-
-		Drawable d;
-		if (cursor.getString(holder.imgIndex) == null) {
-			d = context.getResources().getDrawable(R.drawable.nophoto);
-		} else {
-			d = new BitmapDrawable(context.getResources(), cursor.getString(holder.imgIndex));
-			//d = new BitmapDrawable(context.getResources(), cursor.getString(cursor.getColumnIndex(DataStorage.Collections.AVATAR_FILE_NAME)));
-			//noinspection SuspiciousNameCombination
-			d = resizeImage(context, d, width);
-		}
-		holder.img.setImageDrawable(d);
+        
+        mImageLoader.DisplayImage(cursor.getString(holder.imgIndex),holder.img);
 
 	}
 
