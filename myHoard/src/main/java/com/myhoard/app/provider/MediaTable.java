@@ -31,6 +31,7 @@ public class MediaTable extends DatabaseTable {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + " (")
 				.append(Media._ID + " INTEGER PRIMARY KEY, ")
+                .append(Media.ID_SERVER + " TEXT, ")
 				.append(Media.ID_ITEM + " INTEGER, ")
 				.append(Media.AVATAR + " BOOLEAN, ")
 				.append(Media.FILE_NAME + " TEXT, ")

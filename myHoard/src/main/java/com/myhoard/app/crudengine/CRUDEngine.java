@@ -80,7 +80,7 @@ import java.util.List;
     }
 
     @Override
-    public int create(IModel item, Token token) {
+    public String create(IModel item, Token token) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpResponse response;
@@ -103,13 +103,19 @@ import java.util.List;
             if (response != null) {
                 HttpEntity responseEntity = response.getEntity();
                 String HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
+                IModel imodel = new Gson().fromJson(HTTP_response, item.getClass());
                 Log.d("TAG", "Jsontext = " + HTTP_response);
-                return HTTP_response.contains(ERROR_STRING) ? ERROR_CODE  : 1;
+                String id = imodel.getId();
+                return id;
+                //return HTTP_response.contains(ERROR_STRING) ? ERROR_CODE  : 1;
             }
         } catch (Exception e) {
-            return ERROR_CODE;
+            //return ERROR_CODE;
+            return e.toString();
+            //return null;
         }
-        return ERROR_CODE;
+        //return ERROR_CODE;
+        return null;
     }
 
     @Override

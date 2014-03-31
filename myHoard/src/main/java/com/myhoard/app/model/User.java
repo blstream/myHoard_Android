@@ -48,6 +48,16 @@ import org.json.JSONObject;
     }
 
     @Override
+    public String getId() {
+        return null;
+    }
+
+    @Override
+    public void setId(String id) {
+
+    }
+
+    @Override
     public JSONObject toJson() throws JSONException {
         JSONObject json = new JSONObject();
 

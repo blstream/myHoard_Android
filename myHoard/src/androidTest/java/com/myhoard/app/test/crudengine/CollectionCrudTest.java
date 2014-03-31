@@ -20,11 +20,11 @@ import java.util.List;
  */
 public class CollectionCrudTest extends TestCase {
 
-    private static final String EMAIL = "tomek";
+    private static final String EMAIL = "tomek@tomek.pl";
     private static final String PASSWORD = "tomek";
     private Token token;
     private CRUDEngine<Collection> collectionEngine;
-    public static final String URL = "http://78.133.154.18:8080/collections/";
+    public static final String URL = "http://78.133.154.39:2080/collections/";
 
 
     public CollectionCrudTest(String name) {
@@ -56,13 +56,14 @@ public class CollectionCrudTest extends TestCase {
                 null,
                 null);
 
-        assertFalse(collectionEngine.create(collection,token));
+        String returnedId = collectionEngine.create(collection,token);
+        assertNotNull(returnedId);
     }
 
 
     private static final class TestCollections {
         public static final String NAME = "testName" + Calendar.getInstance().getTime().toString();
         public static final String DESCRIPTION = "testDescription" + Calendar.getInstance().getTime().toString();
-        public static final List<String> TAGS = Arrays.asList("Buenos Aires", "Córdoba", "La Plata");
+        public static final List<String> TAGS = Arrays.asList("Buenos Aires", "Cordoba", "La Plata");
     }
 }
