@@ -37,6 +37,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.myhoard.app.R;
+import com.myhoard.app.activities.MainActivity;
 import com.myhoard.app.images.ImageAdapter;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.provider.DataStorage;
@@ -110,6 +111,7 @@ public class CollectionsListFragment extends Fragment implements
 				Bundle b = new Bundle();
 				b.putLong(ItemsListFragment.Selected_Collection_ID, l);
 				newFragment.setArguments(b);
+                MainActivity.collectionSelected = l;
 
 				transaction.replace(R.id.container, newFragment, ItemsList);
 				transaction.addToBackStack(ItemsList);
