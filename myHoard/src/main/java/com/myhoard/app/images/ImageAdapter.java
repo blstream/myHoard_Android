@@ -97,7 +97,7 @@ public class ImageAdapter extends CursorAdapter {
         } else {
             holder.count.setText(cursor.getString(holder.countIndex));
         }
-        
+
         mImageLoader.DisplayImage(cursor.getString(holder.imgIndex),holder.img);
 
 	}
