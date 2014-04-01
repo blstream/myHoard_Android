@@ -125,12 +125,12 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         //Get text to search from args object
         String collectionElementText = args.getString(TEXT_TO_SEARCH);
+        String selection = String.format("%s = %s AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
+                mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.DESCRIPTION,collectionElementText,DataStorage.Items.NAME,collectionElementText);
         //CursorLoader used to get data from user query
-        /* AWA:FIXME: Używaj String.format
-*/
         return new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
                 new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID},
-                mCollectionId + " = " + DataStorage.Items.ID_COLLECTION + " AND ("+ DataStorage.Items.DESCRIPTION + " LIKE '%" + collectionElementText + "%' OR " + DataStorage.Items.NAME + " = '" + collectionElementText + "')", null, null);
+                selection, null, null);
     }
 
     @Override

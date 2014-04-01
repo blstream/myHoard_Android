@@ -396,22 +396,22 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	@Override
 	public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         CursorLoader cursorLoader = null;
+        String selection;
         switch(i){
-             /* AWA:FIXME: Używaj String.format
-*/
             //Get all elements from collection
             case 0:
+                selection = String.format("%s = %s",mCollectionID,DataStorage.Items.ID_COLLECTION);
                 cursorLoader =  new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
                         new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR,
                                 DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,DataStorage.Items.DESCRIPTION},
-                        mCollectionID + " = " + DataStorage.Items.ID_COLLECTION, null, sortOrder);
+                        selection, null, sortOrder);
                 break;
             //Get name and description of elements collection
             case 2:
-                //CursorLoader used to get data from user query
+                selection = String.format("%s = %s",mCollectionID,DataStorage.Collections._ID);
                 cursorLoader = new CursorLoader(mContext, DataStorage.Collections.CONTENT_URI,
                         new String[]{DataStorage.Collections.DESCRIPTION,DataStorage.Collections.TAGS,DataStorage.Collections.NAME},
-                        mCollectionID + " = " + DataStorage.Collections._ID, null, null);
+                        selection, null, null);
                 break;
         }
         return cursorLoader;
