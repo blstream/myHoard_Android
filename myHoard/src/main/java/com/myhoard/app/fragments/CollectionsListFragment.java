@@ -36,9 +36,9 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapter;
-import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.provider.DataStorage;
 
 /**

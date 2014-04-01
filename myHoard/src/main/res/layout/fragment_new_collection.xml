@@ -49,10 +49,12 @@
                 android:padding="10dp"
                 android:singleLine="true"
                 android:textSize="20sp"
+                android:maxLength="64"
                 android:background="@drawable/edittext_background_color"
                 android:textColor="@color/yellow_main"
                 android:textCursorDrawable="@null"
-                android:layout_gravity="center_horizontal" />
+                android:layout_gravity="center_horizontal"
+                android:inputType="text"/>
 
             <TextView
                 android:id="@+id/tvCollectionType"
@@ -74,7 +76,9 @@
                 android:focusable="false"
                 android:textColor="@color/yellow_main"
                 android:text="@string/offline"
-                android:layout_gravity="center_horizontal" />
+                android:layout_gravity="center_horizontal"
+                android:inputType="text"
+                />
 
 
             <TextView
@@ -120,7 +124,8 @@
                 android:background="@drawable/edittext_background_color"
                 android:textColor="@color/yellow_main"
                 android:textCursorDrawable="@null"
-                android:layout_gravity="center_horizontal" />
+                android:layout_gravity="center_horizontal"
+                android:inputType="text"/>
 
         </LinearLayout>
     </ScrollView>

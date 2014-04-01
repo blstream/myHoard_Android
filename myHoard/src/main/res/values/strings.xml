@@ -104,5 +104,6 @@
     <string name="my">my</string>
     <string name="Hoard">Hoard</string>
     <string name="name_with_space_at_end">Name can not end with a space</string>
+    <string name="name_with_space_at_start">Name can not start with a space</string>
 
 </resources>

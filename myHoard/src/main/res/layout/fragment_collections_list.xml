@@ -5,6 +5,7 @@
     android:padding="10dp"
     android:background="@color/gray_background">
 
+
     <GridView
         android:id="@+id/gridview"
         android:layout_width="match_parent"
@@ -12,7 +13,7 @@
         android:verticalSpacing="0dp"
         android:horizontalSpacing="0dp"
         android:stretchMode="columnWidth"
-        android:numColumns="2" />
+        android:numColumns="2"/>
 
    <RelativeLayout
        android:layout_width="wrap_content"

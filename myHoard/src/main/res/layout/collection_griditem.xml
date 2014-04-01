@@ -57,6 +57,7 @@
                 android:id="@+id/tvSquareName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:textStyle="bold"
                 android:textColor="@color/yellow_main" />
 
@@ -64,6 +65,7 @@
                 android:id="@+id/tvSquareTags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:textColor="@color/gray_text" />
         </LinearLayout>
     </RelativeLayout>

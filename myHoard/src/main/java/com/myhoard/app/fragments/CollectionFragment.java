@@ -57,6 +57,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
     private final ArrayList<String> mNamesList = new ArrayList<>();
     private String mTags = "";
     private EditText etCollectionName, etCollectionDescription, etCollectionTags, etCollectionType;
+    Toast toast;
 
 
     public CollectionFragment() {
@@ -150,25 +151,32 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
             strCollectionName = etCollectionName.getText().toString();
         }
         if (TextUtils.isEmpty(etCollectionName.getText())) {
-            Toast.makeText(getActivity(), getString(R.string.required_name_collection),
-                    Toast.LENGTH_SHORT).show();
+            showAToast(getString(R.string.required_name_collection), Toast.LENGTH_SHORT);
         } else if (isWhiteSpaces(strCollectionName)) {
-            Toast.makeText(getActivity(), getString(R.string.required_name_collection),
-                    Toast.LENGTH_SHORT).show();
+            showAToast(getString(R.string.required_name_collection), Toast.LENGTH_SHORT);
         } else if (strCollectionName.length() < MIN_NUMBER_OF_CHARAKCTERS) {
-            Toast.makeText(getActivity(), getString(R.string.name_too_short),
-                    Toast.LENGTH_SHORT).show();
+            showAToast(getString(R.string.name_too_short), Toast.LENGTH_SHORT);
         } else if (mNamesList.contains(strCollectionName)) {
-            Toast.makeText(getActivity(), getString(R.string.name_already_exist),
-                    Toast.LENGTH_SHORT).show();
+            showAToast(getString(R.string.name_already_exist), Toast.LENGTH_SHORT);
         } else if (strCollectionName.charAt(strCollectionName.length() - 1) == ' ') {
-            Toast.makeText(getActivity(), getString(R.string.name_with_space_at_end),
-                    Toast.LENGTH_SHORT).show();
+            showAToast(getString(R.string.name_with_space_at_end), Toast.LENGTH_SHORT);
+        } else if (strCollectionName.charAt(0) == ' ') {
+            showAToast(getString(R.string.name_with_space_at_start), Toast.LENGTH_SHORT);
         } else {
             return true;
         }
         return false;
 
+    }
+
+    public void showAToast(String toastText, int toastDuration) {
+        try {
+            toast.getView().isShown();     // true if visible
+            toast.setText(toastText);
+        } catch (Exception e) {         // invisible if exception
+            toast = Toast.makeText(getActivity(), toastText, toastDuration);
+        }
+        toast.show();  //finally display it
     }
 
     private void saveDataInDataBase() {
