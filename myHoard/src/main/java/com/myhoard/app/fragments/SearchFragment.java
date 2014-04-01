@@ -17,8 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.Toast;
 import com.myhoard.app.R;
 import com.myhoard.app.images.ImageAdapterList;
 import com.myhoard.app.provider.DataStorage;
@@ -28,7 +26,7 @@ import com.myhoard.app.provider.DataStorage;
  * Created by Piotr Brzozowski on 01.03.14.
  * SearchFragment class used to search concrete sentence in table of elements
  */
-public class SearchFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String SEARCH_COLLECTION_ID = "SearchCollection";
     private static final String TEXT_TO_SEARCH = "TextSearch";
     private static final int LOAD_ELEMENTS_TO_SEARCH = 0;
@@ -38,10 +36,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Lo
     private ImageAdapterList mImageAdapterList;
     private Long mCollectionId;
 
-    /* AWA:FIXME: Ciało metody jest za dlugie.
-Mozna je podzielic na "krótsze" metody
-Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
-*/
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_search, container, false);
@@ -55,10 +49,13 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
         GridView mSearchList = (GridView) v.findViewById(R.id.gridViewSearch);
         //Set adapter for ListView
         mSearchList.setAdapter(mImageAdapterList);
-        ImageButton imButtonSearch = (ImageButton) v.findViewById(R.id.imageButtonSearch);
-        imButtonSearch.setOnClickListener(this);
         mSearchText = (EditText) v.findViewById(R.id.editTextSearch);
         //Use text changed listener by mSearchTest EditText object to find elements in real time of search
+        textListener();
+        return v;
+    }
+
+    public void textListener(){
         mSearchText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -72,16 +69,7 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
                 collectionElementText = collectionElementText.trim();
                 collectionElementText = collectionElementText.toLowerCase();
                 //Search element when text to search have more than two characters
-                if (collectionElementText.length() >= TEXT_TO_SEARCH_MIN_LENGTH) {
-                    Bundle args = new Bundle();
-                    //Put text to search to Bundle object
-                    args.putString(TEXT_TO_SEARCH, collectionElementText);
-                    //Restart to load data when user query is changed
-                    getLoaderManager().restartLoader(LOAD_ELEMENTS_TO_SEARCH, args, SearchFragment.this);
-                } else {
-                    //Clear screen
-                    mImageAdapterList.swapCursor(null);
-                }
+                checkText(collectionElementText);
             }
 
             @Override
@@ -89,29 +77,18 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
 
             }
         });
-        return v;
     }
 
-    @Override
-    public void onClick(View v) {
-        //Get interact with one of button in layout by id
-        switch (v.getId()) {
-            case R.id.imageButtonSearch:
-                assert mSearchText.getText() != null;
-                String collectionElementText = mSearchText.getText().toString();
-                collectionElementText = collectionElementText.trim();
-                collectionElementText = collectionElementText.toLowerCase();
-                //Search element when text to search have more than two characters
-                if (collectionElementText.length() >= 2) {
-                    Bundle args = new Bundle();
-                    //Put text to search to Bundle object
-                    args.putString(TEXT_TO_SEARCH, collectionElementText);
-                    //Restart to load data when user query is changed
-                    getLoaderManager().restartLoader(0, args, this);
-                } else {
-                    Toast.makeText(getActivity(), "Please type 2 characters to start search!", Toast.LENGTH_SHORT).show();
-                }
-                break;
+    public void checkText(String collectionElementText){
+        if (collectionElementText.length() >= TEXT_TO_SEARCH_MIN_LENGTH) {
+            Bundle args = new Bundle();
+            //Put text to search to Bundle object
+            args.putString(TEXT_TO_SEARCH, collectionElementText);
+            //Restart to load data when user query is changed
+            getLoaderManager().restartLoader(LOAD_ELEMENTS_TO_SEARCH, args, SearchFragment.this);
+        } else {
+            //Clear screen
+            mImageAdapterList.swapCursor(null);
         }
     }
 
