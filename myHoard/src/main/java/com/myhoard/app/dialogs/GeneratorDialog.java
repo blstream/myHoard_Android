@@ -27,24 +27,25 @@ import java.util.Random;
  */
 public class GeneratorDialog extends DialogFragment implements View.OnClickListener {
 
+    private final static String[] ASSETS_LIST = new String[]{"flower1.jpg","flower2.jpg","beer1.jpg","snack1.jpg",
+            "ball1.jpg","coins1.jpg","pizza1.jpg","pizza2.jpg","snack2.jpg"};
+    private final static String SET_OF_CHARACTERS = "abcdefgijklmnouprstwuxyz";
+    private final static int MAX_BYTE_TABLE_LENGTH = 2048;
     private EditText collectionNumber;
     private EditText elementNumber;
     private String collection_id;
     private String element_id;
+    private int mNumberOfCollection;
+    private int mNumberOfElements;
+    private Context mAppContext;
 
-    /* AWA:FIXME:Proponuje zmienic nazwe na mAppContext
-
-    Natomiast uwazac na trzymanie referencji na Context Activity:
-    http://android-developers.blogspot.com/2009/01/avoiding-memory-leaks.html
-    */
-    private Context mContext;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         //Create dialog to generate data
         Dialog dialog = new Dialog(getActivity());
         dialog.setContentView(R.layout.generator_dialog);
         //Set mContext
-        mContext = getActivity().getApplicationContext();
+        mAppContext = getActivity().getApplicationContext();
         //Set EditText for dialog
         collectionNumber = (EditText)dialog.findViewById(R.id.editTextGeneratorDialog);
         elementNumber = (EditText)dialog.findViewById(R.id.editText2GeneratorDialog);
@@ -72,165 +73,22 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
                 break;
         }
     }
-
-    /* AWA:FIXME: Ciało metody jest za dlugie.
-   Mozna je podzielic na "krótsze" metody
-   Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
-   */
+    
     public void generateData() {
-        /* AWA:FIXME: Nadużycie assertów.
-        W przypadku gdy weryfikuje na poziomie UI poprawność wpisanych danych to proponuję
-        sprawdzać w if else i  wyświetlać komunikat lub exception do UI.
-        Asserty proponuję używać do zweryfikowania czy inni programiści poprawnie wykorzystują
-        nasze klasy, metody etc..
-        Mogę to szerzej opowiedzieć na spotkaniu. Proszę się przypomnieć.
-         */
-        assert collectionNumber.getText() != null;
-        //Get text from Collection number label
-        int collection_number = Integer.parseInt(collectionNumber.getText().toString());
-        assert elementNumber.getText() != null;
-        //Get text from Element number label
-        int element_number = Integer.parseInt(elementNumber.getText().toString());
-        InputStream is = null;
-         /* AWA:FIXME: Hardcoded value
-                    Umiesc w private final static String ....
-                    lub w strings.xml
-                    */
-        //List of jpg images in assets folder
-        String[] list = new String[]{"flower1.jpg","flower2.jpg","beer1.jpg","snack1.jpg",
-                "ball1.jpg","coins1.jpg","pizza1.jpg","pizza2.jpg","snack2.jpg"};
-        OutputStream file_stream = null;
+        AssetManager am = mAppContext.getAssets();
+        if(collectionNumber.getText() != null){
+            //Get text from Collection number label
+            mNumberOfCollection = Integer.parseInt(collectionNumber.getText().toString());
+        }
+        if(elementNumber.getText() != null){
+            //Get text from Element number label
+            mNumberOfElements = Integer.parseInt(elementNumber.getText().toString());
+        }
         //asyncHandler use to do insert, asynchronous
         AsyncQueryHandler asyncHandler =
                 new AsyncQueryHandler(getActivity().getContentResolver()) {
                 };
-        //Generate collection and element of this collection
-        for (int i = 0; i < collection_number; i++) {
-            ContentValues valuesCollection = new ContentValues();
-            String collection_name;
-            /* AWA:FIXME: Hardcoded value
-            String "" powinien być jako stała np.
-            private final static String NAZWA_STALEJ="Main"
-                    */
-            //Put value about collection to valuesCollection
-            valuesCollection.put(DataStorage.Collections.NAME, collection_name = generateString(new Random(), "abcdefgijklmnouprstwuxyz", 10));
-            valuesCollection.put(DataStorage.Collections.DESCRIPTION, generateString(new Random(), "abcdefgijklmnouprstwuxyz", 20));
-            //AssetManager used to get data from image in assets folder
-            AssetManager am = getActivity().getAssets();
-            Random r = new Random();
-            int random_number = r.nextInt(list.length);
-            //Get random image from assets folder
-            try {
-                is = am.open(list[random_number]);
-            } catch (IOException e) {
-                /* AWA:FIXME: Obsługa błędów
-                Wypychanie błędów do UI
-                Patrz:Ksiazka:Czysty kod:Rozdział 7:Obsługa błędów
-                */
-                e.printStackTrace();
-            }
-
-             /* AWA:FIXME: Stream brak zamknięcia
-             Proszę zamykać Output/InputStream w bloku finally
-             try..catch..finally
-             Przykład: http://stackoverflow.com/questions/156508/closing-a-java-fileinputstream
-             http://www.ibm.com/developerworks/java/library/j-jtp03216/index.html
-                    */
-            //Create new file in mContext.getFilesDir() path
-            File file = new File(mContext.getFilesDir(), list[random_number]);
-            try {
-                //New stream used to write data in file
-                file_stream = new FileOutputStream(file);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            /* AWA:FIXME: Hardcoded value
-            String "" powinien być jako stała np.
-            private final static String NAZWA_STALEJ="Main"
-                    */
-            byte[] b = new byte[2048];
-            int length;
-            try {
-                assert is != null;
-                while ((length = is.read(b)) != -1) {
-                    assert file_stream != null;
-                    //Write byte structure to file
-                    file_stream.write(b, 0, length);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            assert getActivity().getFilesDir() != null;
-            //Put avatar file path to contentValues object
-            valuesCollection.put(DataStorage.Collections.AVATAR_FILE_NAME, getActivity().getFilesDir().getPath() + "/" + list[random_number]);
-            //Insert data of collection to database asynchronously
-            asyncHandler.startInsert(-1, null, DataStorage.Collections.CONTENT_URI, valuesCollection);
-            for (int j = 0; j < element_number; j++) {
-                ContentValues valuesElement = new ContentValues();
-                //Get id of last collection added to database
-                Cursor cursor = mContext.getContentResolver().query(DataStorage.Collections.CONTENT_URI,
-                        new String[]{DataStorage.Collections._ID},
-                        DataStorage.Collections.NAME+" = '"+ collection_name +"'",null,null);
-                assert cursor != null;
-                cursor.moveToFirst();
-                while(!cursor.isAfterLast()){
-                    collection_id=cursor.getString(0);
-                    cursor.moveToNext();
-                }
-                String element_name;
-                //Put values about element to valuesElement object
-                valuesElement.put(DataStorage.Items.NAME, element_name = generateString(new Random(), "abcdefgijklmnouprstwuxyz", 6));
-                valuesElement.put(DataStorage.Items.DESCRIPTION, generateString(new Random(), "abcdefgijklmnouprstwuxyz", 15));
-                valuesElement.put(DataStorage.Items.ID_COLLECTION, collection_id);
-                //Insert data of collection element to database asynchronously
-                asyncHandler.startInsert(1, null, DataStorage.Items.CONTENT_URI, valuesElement);
-                //Get id of added element to database
-                Cursor cursor1 = mContext.getContentResolver().query(DataStorage.Items.CONTENT_URI,
-                        new String[]{DataStorage.Items.TABLE_NAME+"."+DataStorage.Items._ID,DataStorage.Media.AVATAR},
-                        DataStorage.Items.NAME+" = '"+ element_name +"'",null,null);
-                assert cursor1 != null;
-                cursor1.moveToFirst();
-                while(!cursor1.isAfterLast()){
-                    element_id=cursor1.getString(0);
-                    cursor1.moveToNext();
-                }
-                am = mContext.getAssets();
-                r = new Random();
-                //Get random image from assets folder
-                random_number = r.nextInt(list.length);
-                try {
-                    //Open image
-                    is = am.open(list[random_number]);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                //Create new file in mContext.getFilesDir() path
-                file = new File(mContext.getFilesDir(), list[random_number]);
-                try {
-                    //New stream used to write data in file
-                    file_stream = new FileOutputStream(file);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    while ((length = is.read(b)) != -1) {
-                        assert file_stream != null;
-                        //Write byte structure to file
-                        file_stream.write(b, 0, length);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                ContentValues valuesMedia = new ContentValues();
-                //Put data of media to valuesMedia object
-                valuesMedia.put(DataStorage.Media.ID_ITEM,element_id);
-                assert mContext.getFilesDir() !=null;
-                valuesMedia.put(DataStorage.Media.AVATAR,mContext.getFilesDir().getPath() + "/" + list[random_number]);
-                //Insert data of element media to database asynchronously
-                asyncHandler.startInsert(-1,null,DataStorage.Media.CONTENT_URI,valuesMedia);
-            }
-        }
+        createCollections(asyncHandler,am);
     }
 
     public String generateString(Random rng, String characters, int length)
@@ -242,5 +100,122 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             text[i] = characters.charAt(rng.nextInt(characters.length()));
         }
         return new String(text);
+    }
+
+    public void createFile(AssetManager am,int random_number){
+        InputStream is = null;
+        OutputStream file_stream = null;
+        try {
+            is = am.open(ASSETS_LIST[random_number]);
+        } catch (IOException e) {
+                /* AWA:FIXME: Obsługa błędów
+                Wypychanie błędów do UI
+                Patrz:Ksiazka:Czysty kod:Rozdział 7:Obsługa błędów
+                */
+            e.printStackTrace();
+        }
+        //Create new file in mContext.getFilesDir() path
+        File file = new File(mAppContext.getFilesDir(), ASSETS_LIST[random_number]);
+        try {
+            //New stream used to write data in file
+            file_stream = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        //TODO - fix problem with close stream
+        /*finally {
+            try{
+                if(file_stream!=null) file_stream.close();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }*/
+        byte[] b = new byte[MAX_BYTE_TABLE_LENGTH];
+        int length;
+        try {
+            if(is != null){
+                while ((length = is.read(b)) != -1) {
+                    if(file_stream != null){
+                        //Write byte structure to file
+                        file_stream.write(b, 0, length);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createCollections(AsyncQueryHandler asyncHandler,AssetManager am){
+        int random_number;
+        Random r = new Random();
+        //Generate collection and element of this collection
+        for (int i = 0; i < mNumberOfCollection; i++) {
+            ContentValues valuesCollection = new ContentValues();
+            //Put value about collection to valuesCollection
+            String mCollectionName;
+            valuesCollection.put(DataStorage.Collections.NAME, mCollectionName = generateString(new Random(), SET_OF_CHARACTERS, 10));
+            valuesCollection.put(DataStorage.Collections.DESCRIPTION, generateString(new Random(), SET_OF_CHARACTERS, 20));
+            random_number = r.nextInt(ASSETS_LIST.length);
+            //Get random image from assets folder
+            createFile(am,random_number);
+            if(getActivity().getFilesDir() != null){
+                //Put avatar file path to contentValues object
+                valuesCollection.put(DataStorage.Collections.AVATAR_FILE_NAME,
+                        getActivity().getFilesDir().getPath() + "/" + ASSETS_LIST[random_number]);
+                //Insert data of collection to database asynchronously
+                asyncHandler.startInsert(-1, null, DataStorage.Collections.CONTENT_URI, valuesCollection);
+            }
+            createElements(asyncHandler,mCollectionName,am);
+        }
+    }
+
+    public void createElements(AsyncQueryHandler asyncHandler,String mCollectionName,AssetManager am){
+        int random_number;
+        Random r;
+        for (int j = 0; j < mNumberOfElements; j++) {
+            ContentValues valuesElement = new ContentValues();
+            //Get id of last collection added to database
+            Cursor cursor = mAppContext.getContentResolver().query(DataStorage.Collections.CONTENT_URI,
+                    new String[]{DataStorage.Collections._ID},
+                    DataStorage.Collections.NAME+" = '"+ mCollectionName +"'",null,null);
+            if(cursor!=null){
+                cursor.moveToFirst();
+                while(!cursor.isAfterLast()){
+                    collection_id=cursor.getString(0);
+                    cursor.moveToNext();
+                }
+            }
+            String element_name;
+            //Put values about element to valuesElement object
+            valuesElement.put(DataStorage.Items.NAME, element_name = generateString(new Random(), SET_OF_CHARACTERS, 6));
+            valuesElement.put(DataStorage.Items.DESCRIPTION, generateString(new Random(), SET_OF_CHARACTERS, 15));
+            valuesElement.put(DataStorage.Items.ID_COLLECTION, collection_id);
+            //Insert data of collection element to database asynchronously
+            asyncHandler.startInsert(1, null, DataStorage.Items.CONTENT_URI, valuesElement);
+            //Get id of added element to database
+            Cursor cursor1 = mAppContext.getContentResolver().query(DataStorage.Items.CONTENT_URI,
+                    new String[]{DataStorage.Items.TABLE_NAME+"."+DataStorage.Items._ID,DataStorage.Media.AVATAR},
+                    DataStorage.Items.NAME+" = '"+ element_name +"'",null,null);
+            if(cursor1 != null){
+                cursor1.moveToFirst();
+                while(!cursor1.isAfterLast()){
+                    element_id=cursor1.getString(0);
+                    cursor1.moveToNext();
+                }
+            }
+            r = new Random();
+            //Get random image from assets folder
+            random_number = r.nextInt(ASSETS_LIST.length);
+            createFile(am,random_number);
+            ContentValues valuesMedia = new ContentValues();
+            //Put data of media to valuesMedia object
+            valuesMedia.put(DataStorage.Media.ID_ITEM,element_id);
+            if(mAppContext.getFilesDir() !=null){
+                valuesMedia.put(DataStorage.Media.AVATAR,mAppContext.getFilesDir().getPath() + "/" + ASSETS_LIST[random_number]);
+                //Insert data of element media to database asynchronously
+                asyncHandler.startInsert(-1,null,DataStorage.Media.CONTENT_URI,valuesMedia);
+            }
+        }
     }
 }
