@@ -26,6 +26,7 @@ public class CollectionsTable extends DatabaseTable {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + " (")
 				.append(Collections._ID + " INTEGER PRIMARY KEY, ")
+				.append(Collections.ID_SERVER + " TEXT, ")
 				.append(Collections.NAME + " TEXT, ")
 				.append(Collections.DESCRIPTION + " TEXT, ")
 				.append(Collections.AVATAR_FILE_NAME + " TEXT, ")

@@ -56,6 +56,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 	public static final String CREATED_DATE = "elementCreatedDate";
 	public static final String MODIFIED_DATE = "elementModifiedDate";
 	public static final String TAGS = "elementTags";
+    public static final String EDITION = "edition";
 
 	private static final String TAG = "ElementFragment";
 	private static final boolean D = false;
@@ -129,7 +130,7 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
 
         context = getActivity();
 
-        tvElementName = (TextView) v.findViewById(R.id.tvElemntName);
+        tvElementName = (TextView) v.findViewById(R.id.tvElementName);
         tvElementDescription = (TextView) v.findViewById(R.id.tvElementDescription);
         tvElementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
         etElementName = (EditText) v.findViewById(R.id.etElementName);
@@ -149,17 +150,27 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
         iCollectionId = 0;
 
         Bundle b = getArguments();
-        if (b != null && (b.getInt(ElementFragment.ID)!=-1)) {
-            etElementName.setVisibility(View.INVISIBLE);
-            etElementDescription.setVisibility(View.INVISIBLE);
-            tvElementName.setVisibility(View.VISIBLE);
-            tvElementDescription.setVisibility(View.VISIBLE);
-            tvElementName.setText(b.getString(ElementFragment.NAME));
-            tvElementDescription.setText(b.getString(ElementFragment.DESCRIPTION));
-            elementId = b.getInt(ElementFragment.ID);
+        if (b != null) {
             iCollectionId = (int) b.getLong(ElementFragment.COLLECTION_ID);
+            if (b.getInt(ElementFragment.ID) != -1) {
+                if(!b.getBoolean(ElementFragment.EDITION)) {
+                    etElementName.setVisibility(View.GONE);
+                    etElementDescription.setVisibility(View.GONE);
+                    tvElementName.setVisibility(View.VISIBLE);
+                    tvElementDescription.setVisibility(View.VISIBLE);
+                    tvElementName.setText(b.getString(ElementFragment.NAME));
+                    tvElementDescription.setText(b.getString(ElementFragment.DESCRIPTION));
+                } else {
+                    etElementName.setVisibility(View.VISIBLE);
+                    etElementDescription.setVisibility(View.VISIBLE);
+                    tvElementName.setVisibility(View.GONE);
+                    tvElementDescription.setVisibility(View.GONE);
+                    etElementName.setText(b.getString(ElementFragment.NAME));
+                    etElementDescription.setText(b.getString(ElementFragment.DESCRIPTION));
+                }
+                elementId = b.getInt(ElementFragment.ID);
+            }
         }
-
         ivElementPhoto.setOnClickListener(this);
 
         return v;
@@ -404,27 +415,20 @@ Wypychanie błędów do UI
                     values.put(DataStorage.Items.NAME, sName);
                     values.put(DataStorage.Items.DESCRIPTION, sDescription);
                     values.put(DataStorage.Items.ID_COLLECTION, iCollectionId);
-                     /* AWA:FIXME: Dead code
-                    Zakomentowany kod
-                    Patrz:Ksiazka:Czysty kod:Rozdział 4:Zakomentowany kod
-                    */
-                    //values.put(DataStorage.Items.AVATAR_FILE_NAME, sImagePath);
-                    // TODO fix after explanation
-                    //values.put(DataStorage.Elements.TAGS);
+                    Log.d("TAG","collection id: " + iCollectionId);
                     AsyncQueryHandler asyncHandler =
                             new AsyncQueryHandler(getActivity().getContentResolver()) {};
                     if (elementId != -1) {
                         values.put(DataStorage.Items.MODIFIED_DATE, Calendar.getInstance()
                                 .getTime().getTime());
-//                        asyncHandler.startUpdate(0, null, DataStorage.Items.CONTENT_URI, values,
-//                                DataStorage.Items._ID + " = " + elementId, null);
+                        asyncHandler.startUpdate(0, null, DataStorage.Items.CONTENT_URI, values,
+                                DataStorage.Items._ID + " = ?", new String[]{String.valueOf(elementId)});
                     } else {
                         values.put(DataStorage.Items.CREATED_DATE, Calendar.getInstance()
                                 .getTime().getTime());
-//                        asyncHandler.startInsert(0, null, DataStorage
-//                                .Items.CONTENT_URI, values);
+                        asyncHandler.startInsert(0, null, DataStorage
+                                .Items.CONTENT_URI, values);
                     }
-                    Toast.makeText(context,"In development",Toast.LENGTH_SHORT).show();
                     getFragmentManager().popBackStackImmediate();
                 }
                 break;

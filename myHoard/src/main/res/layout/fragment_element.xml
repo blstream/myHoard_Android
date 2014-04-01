@@ -29,7 +29,7 @@
             android:background="@color/gray_background">
 
             <TextView
-                android:id="@+id/tvElemntName"
+                android:id="@+id/tvElementNameLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/gray_text"
@@ -48,6 +48,14 @@
                 android:textColor="@color/yellow_main"
                 android:textCursorDrawable="@null"
                 android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/tvElementName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/yellow_main"
+                android:textSize="24sp"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/tvElementCategoryLabel"
@@ -87,7 +95,7 @@
 
 
             <TextView
-                android:id="@+id/tvElementDescription"
+                android:id="@+id/tvElementDescriptionLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/gray_text"
@@ -108,6 +116,14 @@
                 android:minLines="4"
                 android:textCursorDrawable="@null"
                 android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/tvElementDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/yellow_main"
+                android:textSize="24sp"
+                android:visibility="gone"/>
 
         </LinearLayout>
         </LinearLayout>

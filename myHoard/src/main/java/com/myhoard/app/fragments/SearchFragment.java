@@ -29,6 +29,10 @@ import com.myhoard.app.provider.DataStorage;
  * SearchFragment class used to search concrete sentence in table of elements
  */
 public class SearchFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String SEARCH_COLLECTION_ID = "SearchCollection";
+    private static final String TEXT_TO_SEARCH = "TextSearch";
+    private static final int LOAD_ELEMENTS_TO_SEARCH = 0;
+    private static final int TEXT_TO_SEARCH_MIN_LENGTH = 2;
     private EditText mSearchText;
     private Context mContext;
     private ImageAdapterList mImageAdapterList;
@@ -43,7 +47,7 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
         final View v = inflater.inflate(R.layout.fragment_search, container, false);
         setHasOptionsMenu(true);
         Bundle b = this.getArguments();
-        mCollectionId = b.getLong("SearchFragment");
+        mCollectionId = b.getLong(SEARCH_COLLECTION_ID);
         mContext = getActivity();
         //Create adapter to adapt data to individual list row
         mImageAdapterList = new ImageAdapterList(mContext, null, 0);
@@ -68,12 +72,12 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
                 collectionElementText = collectionElementText.trim();
                 collectionElementText = collectionElementText.toLowerCase();
                 //Search element when text to search have more than two characters
-                if (collectionElementText.length() >= 2) {
+                if (collectionElementText.length() >= TEXT_TO_SEARCH_MIN_LENGTH) {
                     Bundle args = new Bundle();
                     //Put text to search to Bundle object
-                    args.putString("fragmentElement", collectionElementText);
+                    args.putString(TEXT_TO_SEARCH, collectionElementText);
                     //Restart to load data when user query is changed
-                    getLoaderManager().restartLoader(0, args, SearchFragment.this);
+                    getLoaderManager().restartLoader(LOAD_ELEMENTS_TO_SEARCH, args, SearchFragment.this);
                 } else {
                     //Clear screen
                     mImageAdapterList.swapCursor(null);
@@ -98,12 +102,10 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
                 collectionElementText = collectionElementText.trim();
                 collectionElementText = collectionElementText.toLowerCase();
                 //Search element when text to search have more than two characters
-                /* AWA:FIXME: Magic numbers
-*/
                 if (collectionElementText.length() >= 2) {
                     Bundle args = new Bundle();
                     //Put text to search to Bundle object
-                    args.putString("fragmentElement", collectionElementText);
+                    args.putString(TEXT_TO_SEARCH, collectionElementText);
                     //Restart to load data when user query is changed
                     getLoaderManager().restartLoader(0, args, this);
                 } else {
@@ -122,7 +124,7 @@ Patrz:Ksiazka:Czysty kod:Rozdział 3:Funkcje
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         //Get text to search from args object
-        String collectionElementText = args.getString("fragmentElement");
+        String collectionElementText = args.getString(TEXT_TO_SEARCH);
         //CursorLoader used to get data from user query
         /* AWA:FIXME: Używaj String.format
 */

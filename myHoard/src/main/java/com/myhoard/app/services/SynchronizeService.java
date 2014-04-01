@@ -48,7 +48,7 @@ public class SynchronizeService extends IntentService {
 
         userManager = UserManager.getInstance();
         if (userManager.isLoggedIn()) {
-            CRUDEngine<Collection> collections = new CRUDEngine<>(URL);
+            CRUDEngine<Collection> collections = new CRUDEngine<>(URL,Collection.class);
 
 
             List<Collection> localCollections = new ArrayList<Collection>();

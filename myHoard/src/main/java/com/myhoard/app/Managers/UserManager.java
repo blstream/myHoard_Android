@@ -38,10 +38,11 @@ public class UserManager {
     private UserHttpEngine userHttpEngine;
 
     //TODO add support for more servers and removed fixed ip address from code
-    private static final String IP = "http://78.133.154.18:8080";
-    private static final String USER_PATH = "/users/";
-    private static final String TOKEN_PATH = "/oauth/token/";
+    private String ip;
+    private static final String USER_PATH = "users/";
+    private static final String TOKEN_PATH = "oauth/token/";
     private static final String API_USERNAME = "username";
+    private static final String API_EMAIL = "email";
     private static final String API_PASSWORD = "password";
     private static final String API_GRANT_TYPE = "grant_type";
     private static final String ERROR_STRING = "error_code";
@@ -70,14 +71,16 @@ public class UserManager {
     public User getUser() {
         return user;
     }
-
+    public void setIp(String ip){
+        this.ip = ip;
+    }
     /**
      * Login to a server
      * @param user login information
      * @return true if logged successfully otherwise returns false
      */
     public boolean login(User user) {
-        userHttpEngine = new UserHttpEngine(IP + TOKEN_PATH);
+        userHttpEngine = new UserHttpEngine(ip + TOKEN_PATH);
         token = userHttpEngine.getToken(user);
 
         if (token == null) {
@@ -90,8 +93,8 @@ public class UserManager {
     }
 
     public boolean register(User user) {
-        userHttpEngine = new UserHttpEngine(IP + USER_PATH);
-        return userHttpEngine.create(user, null) == ICRUDEngine.ERROR_CODE ? false : true;
+        userHttpEngine = new UserHttpEngine(ip + USER_PATH);
+        return userHttpEngine.create(user, null) == null ? false : true;
     }
 
     /**
@@ -122,7 +125,7 @@ public class UserManager {
         private static final int TIMEOUT_LIMIT = 10000;
 
         public UserHttpEngine(String url) {
-            super(url);
+            super(url,User.class);
         }
 
         /**
@@ -140,7 +143,7 @@ public class UserManager {
             try {
                 HttpPost post = new HttpPost(url);
 
-                json.put(API_USERNAME, user.getUsername());
+                json.put(API_EMAIL, user.getEmail());
                 json.put(API_PASSWORD, user.getPassword());
                 json.put(API_GRANT_TYPE, API_PASSWORD);
                 StringEntity se = new StringEntity( json.toString());

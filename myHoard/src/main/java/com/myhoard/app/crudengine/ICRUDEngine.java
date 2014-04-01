@@ -17,16 +17,16 @@ import java.util.List;
 
     public List<T> getList(Token token);
 
-    public T get(int id);
+    public T get(String id, Token token);
 
     /**
      * @param t obiekt wysyłany na serwer
      * @param token token uwierzytelniający
      * @return id dodanego obiektu lub ERROR_CODE w przypadku błędu
      */
-    public int create(IModel t, Token token);
+    public IModel create(IModel t, Token token);
 
-    public void update(IModel t, String id, Token token);
+    public T update(IModel t, String id, Token token);
 
-    public void remove(String id, Token token);
+    public boolean remove(String id, Token token);
 }

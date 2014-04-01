@@ -38,15 +38,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.NavDrawerListAdapter;
 import com.myhoard.app.dialogs.GeneratorDialog;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
-import com.myhoard.app.fragments.ItemsListFragment;
 import com.myhoard.app.model.RowItem;
-import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.services.SynchronizeService;
 
 import java.util.ArrayList;
@@ -85,6 +84,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private Handler handler = new Handler();
     private Thread progressBarThread;
     private NavDrawerListAdapter navDrawerListAdapter;
+
+    public static long collectionSelected = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,8 +147,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                     //item.setTitle(R.string.action_new_element);//TODO correct
                                     Fragment elementFragment = new ElementFragment();
                                     Bundle b = new Bundle();
-                                    //TODO Add collection id
-                                    //b.putLong(ElementFragment.COLLECTION_ID,collectionID);
+                                    b.putLong(ElementFragment.COLLECTION_ID,collectionSelected);
                                     b.putInt(ElementFragment.ID, -1);
                                     elementFragment.setArguments(b);
                                     getSupportFragmentManager().beginTransaction()
@@ -261,7 +261,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         //setting sort option unvisible
-        menu.findItem(R.id.action_sort).setVisible(false);
+        //Mplewko: usunę jak ostatecznie zakończę sortowanie
+        //menu.findItem(R.id.action_sort).setVisible(false);
         //set search option unvisible
         menu.findItem(R.id.action_search).setVisible(false);
         return super.onCreateOptionsMenu(menu);
@@ -302,7 +303,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 GeneratorDialog generatorDialog = new GeneratorDialog();
                 generatorDialog.show(getSupportFragmentManager(), "");
                 break;
-            case R.id.action_sort:
+            //MPLewko: usunę jak ostatecznie zakończę sortowanie
+            /*case R.id.action_sort:
 
                 if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
                         !getVisibleFragmentTag().equals(ITEMSLIST) &&
@@ -315,7 +317,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                             findFragmentByTag(ITEMSLIST);
                     fragment.itemsSortOrderChange(item);
                 }
-                break;
+                break;*/
             case R.id.action_synchronize:
                 startProgressBar();
                 Intent synchronize = new Intent(this, SynchronizeService.class);

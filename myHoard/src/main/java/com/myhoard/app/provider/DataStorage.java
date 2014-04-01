@@ -23,6 +23,12 @@ public final class DataStorage {
 	 * Columns from Collections table.
 	 */
 	protected interface CollectionsColumns {
+        /**
+         * Id on server. Column name.
+         * <p>Type: TEXT</p>
+         */
+        public static final String ID_SERVER = "idServer";
+
 		/**
 		 * Name. Column name.
 		 * <p>Type: TEXT</p>
@@ -79,6 +85,12 @@ public final class DataStorage {
 	}
 
 	protected interface ItemsColumns {
+        /**
+         * Id on server. Column name.
+         * <p>Type: TEXT</p>
+         */
+        public static final String ID_SERVER = "idServer";
+
 		/**
 		 * Collection id to which the element belongs. Column name.
 		 * <p>Type: INTEGER</p>
@@ -129,6 +141,12 @@ public final class DataStorage {
 	}
 
 	protected interface MediaColumns {
+        /**
+         * Id on server. Column name.
+         * <p>Type: TEXT</p>
+         */
+        public static final String ID_SERVER = "idServer";
+
 		/**
 		 * Item id to which the media belongs. Column name.
 		 * <p>Type: INTEGER</p>
@@ -158,6 +176,7 @@ public final class DataStorage {
 		public static final String TABLE_NAME = "collections";
 		public static final String[] TABLE_COLUMNS = new String[]{
 				_ID,
+                ID_SERVER,
 				NAME,
 				DESCRIPTION,
 				AVATAR_FILE_NAME,
@@ -180,6 +199,7 @@ public final class DataStorage {
 		public static final String TABLE_NAME = "items";
 		public static final String[] TABLE_COLUMNS = new String[]{
 				_ID,
+                ID_SERVER,
 				ID_COLLECTION,
 				NAME,
 				DESCRIPTION,
@@ -196,6 +216,7 @@ public final class DataStorage {
 		public static final String TABLE_NAME = "media";
 		public static final String[] TABLE_COLUMNS = new String[]{
 				_ID,
+                ID_SERVER,
 				ID_ITEM,
 				AVATAR,
 				FILE_NAME,

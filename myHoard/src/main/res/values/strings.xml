@@ -99,11 +99,13 @@
     <string name="post_on_wall">Post on wall</string>
     <string name="log_in_facebook">Log in Facebook</string>
     <string name="log_out_facebook">Log out Facebook</string>
-	<string name="logout">Logout</string>
+    <string name="logout">Logout</string>
     <string name="continue_offline">continue offline</string>
     <string name="my">my</string>
     <string name="Hoard">Hoard</string>
     <string name="name_with_space_at_end">Name can not end with a space</string>
-    <string name="name_with_space_at_start">Name can not start with a space</string>
+    <string name="name_with_space_at_start">Name can not start with a space</string>    
+    <string name="by_name">A-Z</string>
+    <string name="by_date">DATE</string>
 
 </resources>
