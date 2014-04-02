@@ -264,7 +264,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         //Mplewko: usunę jak ostatecznie zakończę sortowanie
         //menu.findItem(R.id.action_sort).setVisible(false);
         //set search option unvisible
-        menu.findItem(R.id.action_search).setVisible(false);
+        //menu.findItem(R.id.action_search).setVisible(false);
         return super.onCreateOptionsMenu(menu);
     }
 

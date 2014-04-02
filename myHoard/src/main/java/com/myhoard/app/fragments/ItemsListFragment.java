@@ -41,7 +41,7 @@ import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Maciej Plewko on 04.03.14.
- * Modified by Piotr Brzozowski, Dawid Graczyk
+ * Modified by Piotr Brzozowski, Dawid Graczyk, Rafal Soudani
  * List of items of collection
  */
 public class ItemsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
@@ -276,7 +276,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     //create options menu with a MenuInflater to have all needed options visible in this fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.item_list, menu);
         MenuItem item;
+/* //TODO: delete all comment block
         //set sort option visible in the ItemsListFragment
         item = menu.findItem(R.id.action_sort);
         if (item != null) item.setVisible(false);
@@ -292,7 +296,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         //Set login option invisible in the ItemsListFragment
         item = menu.findItem(R.id.action_login);
         if(item!=null) item.setVisible(false);
-        //set proper menu option title depending on the sort order
+        //set proper menu option title depending on the sort order*/
+  /*//TODO: sprawdzic to czy to jest od sortowania na tabach
         if (sortOrder.equals(sortByDate)) {
 
            item = menu.findItem(R.id.action_sort);
@@ -301,7 +306,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             item = menu.findItem(R.id.action_sort);
             if(item!=null) item.setTitle(R.string.action_sort_by_name);
 
-        }
+        }*/
         super.onCreateOptionsMenu(menu, inflater);
     }
 

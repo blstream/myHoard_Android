@@ -37,3 +37,22 @@ dependencies {
     compile project(':libraries:facebook')
 	compile files('libs/gson-2.2.4.jar')
 }
+
+android {
+    signingConfigs {
+        release {
+            storeFile file("4blstream.jks")
+            storePassword "4blstream"
+            keyAlias "4blstream"
+            keyPassword "4blstream"
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+    lintOptions{
+        abortOnError false
+    }
+}

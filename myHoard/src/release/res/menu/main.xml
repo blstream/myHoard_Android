@@ -6,41 +6,36 @@
 
 
     <item
-        android:id="@+id/action_sort"
-        android:title="@string/action_sort_by_date"
-        android:visible="false"
-        android:orderInCategory="0"
-        app:showAsAction="ifRoom|withText" />
-
-
-    <item
         android:id="@+id/action_synchronize"
         android:title="@string/action_synchronize"
         android:orderInCategory="100"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_new_collection"
         android:title="@string/action_new_collection"
         android:icon="@drawable/ic_action_new"
         android:orderInCategory="20"
-        app:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom|withText"/>
 
     <item
         android:id="@+id/action_login"
         android:title="@string/Login"
         android:icon="@drawable/ic_action_phone"
         android:orderInCategory="60"
-        app:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom|withText"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_generate"
-        android:title="release"/>
+        android:title="@string/action_generate"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_search"
         android:title="@string/action_search"
         android:icon="@drawable/abc_ic_search"
-        android:visible="false"
-        app:showAsAction="ifRoom|withText"/>
+        app:showAsAction="ifRoom|withText"
+        android:visible="false"/>
 </menu>
