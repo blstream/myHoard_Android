@@ -55,12 +55,6 @@ public class ImageAdapterList extends CursorAdapter {
 		if (cursor.getString(1) == null) {
 			viewHolder.img.setImageResource(R.drawable.nophoto);
 		} else {
-             /* AWA:FIXME: Dead code
-  Zakomentowany kod
-  Patrz:Ksiazka:Czysty kod:Rozdział 4:Zakomentowany kod
-  */
-			//imageViewCollectionElementAvatar.setImageBitmap(decodeSampledBitmapFromResource(cursor.getString(1), 100, 100));
-            //Load bitmap asynchronously
             viewHolder.path = cursor.getString(1);
             //Use LazyLoading for elements list
 		    mImageLoader.DisplayImage(viewHolder.path,viewHolder.img);

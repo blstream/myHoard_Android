@@ -122,14 +122,6 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        //TODO - fix problem with close stream
-        /*finally {
-            try{
-                if(file_stream!=null) file_stream.close();
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-        }*/
         byte[] b = new byte[MAX_BYTE_TABLE_LENGTH];
         int length;
         try {
@@ -143,6 +135,12 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try{
+                if(file_stream!=null) file_stream.close();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         }
     }
 

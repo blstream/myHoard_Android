@@ -60,15 +60,6 @@ public class MemoryCache {
         }
     }
 
-    public void clear() {
-        try{
-            cache.clear();
-            size=0;
-        }catch(NullPointerException ex){
-            ex.printStackTrace();
-        }
-    }
-
     long getSizeInBytes(Bitmap bitmap) {
         if(bitmap==null)
             return 0;
