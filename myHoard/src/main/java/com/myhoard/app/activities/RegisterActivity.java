@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 //TODO add username text field
     /*
-    Created by Mateusz Czyszkiewicz , modified by Tomasz Nosal
+    Created by Mateusz Czyszkiewicz , modified by Marcin Laszcz, Tomasz Nosal
     */
 public class RegisterActivity extends ActionBarActivity {
 
@@ -62,7 +62,7 @@ public class RegisterActivity extends ActionBarActivity {
         if (passwordFound && emailFound) {
             User user = new User();
             user.setEmail(String.valueOf(emailRegistry.getText()));
-            user.setUsername(String.valueOf(emailRegistry.getText())); //TODO replace with value from username text field that will be added in near future
+            //user.setUsername(String.valueOf(emailRegistry.getText())); //TODO replace with value from username text field that will be added in near future
             user.setPassword(String.valueOf(passwordRegistry.getText()));
 
 
@@ -106,6 +106,7 @@ public class RegisterActivity extends ActionBarActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
+            UserManager.getInstance().setIp(getString(R.string.serverJava2));
             return UserManager.getInstance().register(user);
         }
 

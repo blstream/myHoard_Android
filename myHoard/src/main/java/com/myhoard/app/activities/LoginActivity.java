@@ -77,7 +77,7 @@ public class LoginActivity extends ActionBarActivity  {
                     String password_ch = String.valueOf(password.getText());
 
                     user = new User();
-                    user.setUsername(email_ch);
+                    user.setEmail(email_ch);
                     user.setPassword(password_ch);
 
                     /* AWA:FIXME: AsyncTask canceling
@@ -116,6 +116,7 @@ public class LoginActivity extends ActionBarActivity  {
 
         @Override
         protected Boolean doInBackground(Void... params) {
+            UserManager.getInstance().setIp(getString(R.string.serverJava2));
             return UserManager.getInstance().login(user);
         }
 
