@@ -107,7 +107,8 @@ public class RegisterActivity extends ActionBarActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             UserManager.getInstance().setIp(getString(R.string.serverJava2));
-            return UserManager.getInstance().register(user);
+            UserManager.getInstance().register(user);
+            return UserManager.getInstance().login(user);
         }
 
         protected void onPostExecute(Boolean result) {
