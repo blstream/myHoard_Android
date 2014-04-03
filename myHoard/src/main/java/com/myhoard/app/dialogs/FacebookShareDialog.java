@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.Session;
+import com.facebook.SessionState;
 import com.myhoard.app.R;
 import com.myhoard.app.crudengine.ConnectionDetector;
 
@@ -26,9 +27,6 @@ public class FacebookShareDialog extends DialogFragment implements View.OnClickL
     private Dialog dialog;
     private String mPostOnFB;
 
-    public FacebookShareDialog(String message) {
-        mPostOnFB = message;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -59,7 +57,7 @@ public class FacebookShareDialog extends DialogFragment implements View.OnClickL
             if(isUserLogIn()) {
                 mFacebookButton.setVisibility(View.INVISIBLE);
                 Session session = Session.getActiveSession();
-                if (!session.isClosed()) session.closeAndClearTokenInformation();
+                session.closeAndClearTokenInformation();
             }
         }
         if(v.getId() == R.id.share_button) {
@@ -81,6 +79,10 @@ public class FacebookShareDialog extends DialogFragment implements View.OnClickL
 
     }
 
+    public void setDefaultPostOnFb(String message) {
+        mPostOnFB = message;
+    }
+
     private void backToTheItemsListFragment(String value) {
         Intent intent = new Intent();
         intent.putExtra(GET_RESULT,value);
@@ -90,7 +92,11 @@ public class FacebookShareDialog extends DialogFragment implements View.OnClickL
 
     private boolean isUserLogIn() {
         Session session = Session.getActiveSession();
-        return  (session != null && session.isOpened());
+        return ((session!=null && !session.getState().equals(SessionState.CLOSED_LOGIN_FAILED)) && isSessionCreated(session));
+    }
+
+    private boolean isSessionCreated(Session session) {
+        return (session.getState().equals(SessionState.CREATED_TOKEN_LOADED) || session.isOpened());
     }
 
 
