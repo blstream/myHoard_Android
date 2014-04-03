@@ -30,6 +30,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,6 +58,7 @@ Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     private CollectionsListFragment collectionsListFragment;
     private UserManager userManager;
+    private Menu actionBarMenu;
 
 
     //to receive information from service SynchronizeService
@@ -105,11 +107,11 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     }
 
     private void setDrawer() {
-        final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        final ListView navigationList = (ListView)findViewById(R.id.drawer_list);
+        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        final ListView navigationList = (ListView) findViewById(R.id.drawer_list);
         navigationList.setAdapter(navDrawerListAdapter);
 
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.drawable.ic_drawer,R.string.drawer_open,R.string.drawer_close);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
 
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -117,8 +119,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
         navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, final int i,final long l) {
-                drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener(){
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, final long l) {
+                drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
 
                     @Override
                     public void onDrawerClosed(View drawerView) {
@@ -126,9 +128,11 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                         int w = i;
 
-                        switch(w) {
+                        switch (w) {
                             case 0:
-
+                                if (getVisibleFragmentTag() == MAIN) {
+                                    search();
+                                }
                                 break;
                             /* AWA:FIXME: Hardcoded value
                             Magiczne numerki co oznaczaja 1, 2, 3....
@@ -147,7 +151,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                     //item.setTitle(R.string.action_new_element);//TODO correct
                                     Fragment elementFragment = new ElementFragment();
                                     Bundle b = new Bundle();
-                                    b.putLong(ElementFragment.COLLECTION_ID,collectionSelected);
+                                    b.putLong(ElementFragment.COLLECTION_ID, collectionSelected);
                                     b.putInt(ElementFragment.ID, -1);
                                     elementFragment.setArguments(b);
                                     getSupportFragmentManager().beginTransaction()
@@ -176,6 +180,30 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         });
     }
 
+    private void search() {
+        //Set zgodnie z grafikami oparty na drawerze, jesli bedzie zmiana i przeniesienie
+        //na action bar to zrobie na actionbarze ;)
+        MenuItem search = actionBarMenu.findItem(R.id.action_search);
+        if (search != null) {
+            search.setVisible(true);
+            search.expandActionView();
+            search.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                    SearchView search = (SearchView) menuItem;
+                    //TODO: search logic here
+                    return true;
+                }
+
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                    menuItem.setVisible(false);
+                    return true;
+                }
+            });
+        }
+    }
+
     private void openFragment(Bundle savedInstanceState, FragmentManager fm) {
         if (savedInstanceState == null) {
 
@@ -194,7 +222,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private void setVariables() {
         collectionsListFragment = new CollectionsListFragment();
         List<RowItem> list = preparing_navigationDrawer();
-        navDrawerListAdapter = new NavDrawerListAdapter(this,R.layout.drawer_menu_row,list);
+        navDrawerListAdapter = new NavDrawerListAdapter(this, R.layout.drawer_menu_row, list);
 
     }
 
@@ -227,20 +255,20 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     @Override
     protected void onStop() {
-        if (receiver != null){
-        unregisterReceiver(receiver);
+        if (receiver != null) {
+            unregisterReceiver(receiver);
             receiver = null;
         }
         super.onStop();
-        if (progressBarThread!=null) {
+        if (progressBarThread != null) {
             progressBarThread.interrupt();
         }
     }
 
     @Override
     protected void onDestroy() {
-        if (receiver != null){
-           unregisterReceiver(receiver);
+        if (receiver != null) {
+            unregisterReceiver(receiver);
             receiver = null;
         }
         super.onDestroy();
@@ -265,6 +293,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         //menu.findItem(R.id.action_sort).setVisible(false);
         //set search option unvisible
         //menu.findItem(R.id.action_search).setVisible(false);
+
+        actionBarMenu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -281,9 +311,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
             case R.id.action_new_collection:
                 item.setTitle(R.string.action_new_collection);
                 getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
-                    .addToBackStack(NEWCOLLECTION)
-                    .commit();
+                        .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
+                        .addToBackStack(NEWCOLLECTION)
+                        .commit();
 
                 break;
             case R.id.action_login:
@@ -331,19 +361,19 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     @Override
     public void onBackStackChanged() {
-    //    shouldDisplayHomeUp();
+        //    shouldDisplayHomeUp();
     }
 
     void shouldDisplayHomeUp() {
         //Enable Up button only  if there are entries in the back stack
-      //  boolean canBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
-      //  getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
+        //  boolean canBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        //  getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
         //This method is called when the up button is pressed. Just the pop back stack.
-     //   getSupportFragmentManager().popBackStack();
+        //   getSupportFragmentManager().popBackStack();
         return true;
     }
 
@@ -393,7 +423,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 while (progressBarStatusIn < MAX_VALUE) {
 
                     // calculate progress bar status
-                    progressBarStatusIn = progressBarStatusOut/maxProgressBarStatus*MAX_VALUE;
+                    progressBarStatusIn = progressBarStatusOut / maxProgressBarStatus * MAX_VALUE;
 
                     // Update the progress bar
                     handler.post(new Runnable() {
@@ -415,17 +445,15 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         progressBarThread.start();
     }
 
-    List<RowItem> preparing_navigationDrawer()
-    {
+    List<RowItem> preparing_navigationDrawer() {
         String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-        int[] images = {R.drawable.kolekcje,R.drawable.kolekcje,R.drawable.anuluj,R.drawable.znajomi,R.drawable.profilpng};
+        int[] images = {R.drawable.kolekcje, R.drawable.kolekcje, R.drawable.anuluj, R.drawable.znajomi, R.drawable.profilpng};
         //wiem ze to slabe, postaram sie niedlugo zrobic lepsze przekazywanie ikonek
 
 
-        List<RowItem>list = new ArrayList<>();
-        for(int i=0; i < drawerListItems.length ;i++)
-        {
-            RowItem item = new RowItem(drawerListItems[i],images[i]);
+        List<RowItem> list = new ArrayList<>();
+        for (int i = 0; i < drawerListItems.length; i++) {
+            RowItem item = new RowItem(drawerListItems[i], images[i]);
             list.add(item);
         }
         return list;
