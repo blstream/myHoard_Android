@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 
 /**
@@ -36,19 +38,30 @@ public class TypeDialog extends DialogFragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+        UserManager uM = UserManager.getInstance();
         switch (view.getId()) {
             case R.id.rbOffline:
                 //TODO: Collection type offline
                 dismiss();
                 break;
             case R.id.rbPublic:
-                //TODO: sprawdzić czy użytkownik jest zalogowany
-                NoAccountDialog noAccountDialog = new NoAccountDialog();
-                noAccountDialog.show(getFragmentManager(), "");
+                if (uM.isLoggedIn()){
+                    //TODO: logika przy pyblic dla usera zalogowanego
+                    Toast.makeText(getActivity(), getActivity().getString(R.string.synchronization_not_implement), Toast.LENGTH_SHORT).show();
+                }else {
+                    NoAccountDialog noAccountDialog = new NoAccountDialog();
+                    noAccountDialog.show(getFragmentManager(), "");
+                }
                 dismiss();
                 break;
             case R.id.rbPrivate:
-                //TODO: sprawdzić czy użytkownik jest zalogowany
+                if (uM.isLoggedIn()){
+                    //TODO: logika przy private dla usera zalogowanego
+                    Toast.makeText(getActivity(), getActivity().getString(R.string.synchronization_not_implement), Toast.LENGTH_SHORT).show();
+                }else {
+                    NoAccountDialog noAccountDialog = new NoAccountDialog();
+                    noAccountDialog.show(getFragmentManager(), "");
+                }
                 NoAccountDialog noAccountDialog2 = new NoAccountDialog();
                 noAccountDialog2.show(getFragmentManager(), "");
                 dismiss();

@@ -26,6 +26,30 @@
         android:textColor="@color/gray_background"
         android:textSize="25sp" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:background="@color/gray_background"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/have_account"
+        android:textColor="@color/yellow_main"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/bLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/yellow_main"
+        android:gravity="center"
+        android:padding="20dp"
+        android:text="@string/Login"
+        android:textColor="@color/gray_background"
+        android:textSize="25sp" />
+
+
+    <!--Rozciąga cały layout, bez tego jest wąski (nie rozumiem czemu)-->
     <View
         android:background="@color/gray_background"
         android:layout_width="match_parent"
