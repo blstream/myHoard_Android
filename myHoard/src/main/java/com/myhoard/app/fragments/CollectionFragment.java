@@ -213,7 +213,6 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mEditId != null) outState.putLong("editId", mEditId);
-        //TODO: delete outState.putString("tags", mTags);
     }
 
     @Override

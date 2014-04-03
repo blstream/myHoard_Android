@@ -279,34 +279,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
         inflater.inflate(R.menu.item_list, menu);
-        MenuItem item;
-/* //TODO: delete all comment block
-        //set sort option visible in the ItemsListFragment
-        item = menu.findItem(R.id.action_sort);
-        if (item != null) item.setVisible(false);
-        //Set search option visible in the ItemsListFragment
-        item = menu.findItem(R.id.action_search);
-        if(item!=null) item.setVisible(true);
-        //Set new_collection option invisible in the ItemsListFragment
-        item = menu.findItem(R.id.action_new_collection);
-        if(item!=null) item.setVisible(false);
-        //Set generator option invisible in the ItemsListFragment
-        item = menu.findItem(R.id.action_generate);
-        if(item!=null) item.setVisible(false);
-        //Set login option invisible in the ItemsListFragment
-        item = menu.findItem(R.id.action_login);
-        if(item!=null) item.setVisible(false);
-        //set proper menu option title depending on the sort order*/
-  /*//TODO: sprawdzic to czy to jest od sortowania na tabach
-        if (sortOrder.equals(sortByDate)) {
-
-           item = menu.findItem(R.id.action_sort);
-           if(item!=null) item.setTitle(R.string.action_sort_by_name);
-
-            item = menu.findItem(R.id.action_sort);
-            if(item!=null) item.setTitle(R.string.action_sort_by_name);
-
-        }*/
         super.onCreateOptionsMenu(menu, inflater);
     }
 

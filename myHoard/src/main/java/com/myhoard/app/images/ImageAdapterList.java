@@ -77,11 +77,6 @@ public class ImageAdapterList extends CursorAdapter {
 		return BitmapFactory.decodeFile(path, options);
 	}
 
-
-    /* AWA:FIXME: Powtórzenie metody z BitmapWorkerTask
-Metody miają takie same ciało.
-Proszę umieścić je we wspólnej klasie, utilsach etc…
-*/
 	public static int calculateInSampleSize(
 			BitmapFactory.Options options, int reqWidth, int reqHeight) {
 		// Raw height and width of image
