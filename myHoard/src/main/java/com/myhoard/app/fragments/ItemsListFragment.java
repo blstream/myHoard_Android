@@ -1,5 +1,6 @@
 package com.myhoard.app.fragments;
 
+import android.app.Notification;
 import android.app.ProgressDialog;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -32,6 +34,7 @@ import com.facebook.Request;
 import com.facebook.RequestAsyncTask;
 import com.facebook.Response;
 import com.facebook.Session;
+import com.facebook.SessionLoginBehavior;
 import com.facebook.SessionState;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
@@ -62,6 +65,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private ProgressDialog mProgressDialog; //Facebook
     private int mItemPositionOnList;
     private String mMessageOnFb;
+    private RequestAsyncTask mFacebookTask;
 
     private Cursor globalCursor;
 
@@ -324,7 +328,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             case SHARE_ID:
                 if(info!=null) {
                     mItemPositionOnList = info.position;
-                    FacebookShareDialog facebookShareDialog = new FacebookShareDialog(setDefaultPostOnFb());
+                    FacebookShareDialog facebookShareDialog = new FacebookShareDialog();
+                    facebookShareDialog.setDefaultPostOnFb(setDefaultPostOnFb());
                     facebookShareDialog.setTargetFragment(this,FacebookShareDialog.DIALOG_ID);
                     facebookShareDialog.show(getFragmentManager(),null);
                 }
@@ -478,8 +483,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.
         */
-            RequestAsyncTask task = new RequestAsyncTask(postRequest);
-            task.execute();
+            mFacebookTask = new RequestAsyncTask(postRequest);
+            mFacebookTask.execute();
 
         }
 
@@ -490,7 +495,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             Toast.makeText(
                     getActivity().getApplicationContext(),
                     message,
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
             ).show();
         }
     }
@@ -502,10 +507,18 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         Session session = Session.getActiveSession();
         Session.OpenRequest request = new Session.OpenRequest(this).setCallback(statusCallback);
         request.setPermissions(PERMISSIONS);
-
+        request.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
         if (!session.isOpened() && !session.isClosed()) {
             session.openForPublish(request);
-        } else {
+        } else if (session.getState().equals(SessionState.CLOSED_LOGIN_FAILED) || session.isClosed()) {
+            session.close();
+
+            session = new Session.Builder(getActivity()).build();
+            session.addCallback(statusCallback);
+            Session.setActiveSession(session);
+            session.openForPublish(request);
+        }
+        else {
             Session.openActiveSession(getActivity(), this, true, statusCallback);
         }
     }
