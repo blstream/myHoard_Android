@@ -38,4 +38,9 @@
 
     </style>
 
+    <!-- Type Dialog styles -->
+    <style name="TypeDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowIsFloating">true</item>
+    </style>
+
     </resources>
