@@ -5,7 +5,7 @@
     </style>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.Base.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:actionBarStyle" tools:ignore="NewApi">@style/MyActionBar</item>
         <item name="android:actionBarTabTextStyle">@style/TabTextStyle</item>
         <item name="android:actionBarTabStyle">@style/TabBackgroundStyle</item>
