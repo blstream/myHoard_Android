@@ -19,12 +19,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,6 +65,19 @@ public class CollectionsListFragment extends Fragment implements
     private Context context;
     private ImageAdapter adapter;
 
+    private static final String LABEL_BY_NAME_ASC = "A-Z";
+    private static final String LABEL_BY_NAME_DESC = "Z-A";
+    private static final String LABEL_BY_DATE_ASC = "< DATE";
+    private static final String LABEL_BY_DATE_DESC = "> DATE";
+    private static final String UNSORTED = "unsorted";
+    private static String sortByNameAscending = DataStorage.Collections.NAME + " ASC";
+    private static String sortByDateAscending = DataStorage.Collections.TABLE_NAME + "." +
+            DataStorage.Collections.CREATED_DATE + " ASC";
+    private static String sortByNameDescending = DataStorage.Collections.NAME + " DESC";
+    private static String sortByDateDescending = DataStorage.Collections.TABLE_NAME + "." +
+            DataStorage.Collections.CREATED_DATE + " DESC";
+    private static String sortOrder = UNSORTED;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -72,6 +89,7 @@ public class CollectionsListFragment extends Fragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setSortTabs();
         gridView = (GridView) view.findViewById(R.id.gridview);
         gridView.setEmptyView(view.findViewById(R.id.tvEmpty));
 
@@ -130,10 +148,77 @@ public class CollectionsListFragment extends Fragment implements
         gridView.setAdapter(adapter);
     }
 
+    private void setSortTabs() {
+        //getting the action bar from the MainActivity
+        final ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+        //adding tabs to the action bar
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        //tab sort by name
+        ActionBar.Tab tabSortByName = actionBar.newTab();
+        tabSortByName.setText(LABEL_BY_NAME_DESC);
+        ActionBar.TabListener sortByNameTabListener = new ActionBar.TabListener() {
+            @Override
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByName(tab);
+            }
+
+            @Override
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByNameTabUnselected(tab);
+            }
+
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByName(tab);
+            }
+        };
+        tabSortByName.setTabListener(sortByNameTabListener);
+        actionBar.addTab(tabSortByName);
+
+        //tab sort by date
+        ActionBar.Tab tabSortByDate = actionBar.newTab();
+        tabSortByDate.setText(LABEL_BY_DATE_ASC);
+        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.BLUE));
+        ActionBar.TabListener sortByDateTabListener = new ActionBar.TabListener() {
+            @Override
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByDate(tab);
+                //Toast.makeText(getActivity().getApplicationContext(),Integer.toString(tab.getPosition()), 1).show();
+            }
+
+            @Override
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByDateTabUnselected(tab);
+
+            }
+
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByDate(tab);
+            }
+        };
+        tabSortByDate.setTabListener(sortByDateTabListener);
+        actionBar.addTab(tabSortByDate);
+    }
+
+    private void resetActionBarNavigationMode() {
+        //getting the action bar from the MainActivity
+        final ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+        actionBar.removeAllTabs();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         fillGridView(null);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        resetActionBarNavigationMode();
     }
 
     @Override
@@ -198,7 +283,38 @@ public class CollectionsListFragment extends Fragment implements
         }else{
             getLoaderManager().restartLoader(0, args, this);
         }
+    }
 
+    private void sortByName(ActionBar.Tab tab) {
+        if (sortOrder == sortByNameAscending) {
+            sortOrder = sortByNameDescending;
+            tab.setText(LABEL_BY_NAME_DESC);
+        } else {
+            sortOrder = sortByNameAscending;
+            tab.setText(LABEL_BY_NAME_ASC);
+        }
+        getLoaderManager().restartLoader(0, null, this);
+    }
+
+    private void sortByDate(ActionBar.Tab tab) {
+        if (sortOrder == sortByDateAscending) {
+            sortOrder = sortByDateDescending;
+            tab.setText(LABEL_BY_DATE_DESC);
+        } else {
+            sortOrder = sortByDateAscending;
+            tab.setText(LABEL_BY_DATE_ASC);
+        }
+        getLoaderManager().restartLoader(0, null, this);
+    }
+
+    private void sortByNameTabUnselected(ActionBar.Tab tab) {
+        tab.setText(LABEL_BY_NAME_ASC);
+        sortOrder = UNSORTED;
+    }
+
+    private void sortByDateTabUnselected(ActionBar.Tab tab) {
+        tab.setText(LABEL_BY_DATE_ASC);
+        sortOrder = UNSORTED;
     }
 
     @Override
@@ -210,7 +326,7 @@ public class CollectionsListFragment extends Fragment implements
         }
 
         return new CursorLoader(context, DataStorage.Collections.CONTENT_URI,
-                projection, selection, null, DataStorage.Collections.NAME);
+                projection, selection, null, sortOrder);
     }
 
     @Override
