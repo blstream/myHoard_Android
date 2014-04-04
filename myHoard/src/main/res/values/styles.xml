@@ -5,24 +5,40 @@
     </style>
 
     <!-- Base application theme. -->
-    <style name="AppTheme"
-        parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.Base.AppCompat.Light">
         <item name="android:actionBarStyle" tools:ignore="NewApi">@style/MyActionBar</item>
-
+        <item name="android:actionBarTabTextStyle">@style/TabTextStyle</item>
+        <item name="android:actionBarTabStyle">@style/TabBackgroundStyle</item>
+        <item name="android:actionBarTabBarStyle">@style/TabBarBackgroundStyle</item>
 
         <!-- Support library compatibility -->
         <item name="actionBarStyle">@style/MyActionBar</item>
+        <item name="actionBarTabTextStyle">@style/TabTextStyle</item>
+        <item name="actionBarTabStyle">@style/TabBackgroundStyle</item>
+        <item name="actionBarTabBarStyle">@style/TabBarBackgroundStyle</item>
     </style>
 
     <!-- ActionBar styles -->
-    <style name="MyActionBar"
-        parent="@style/Widget.AppCompat.Light.ActionBar">
+    <style name="MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar">
         <item name="android:background">@color/actionBarBackgroundColor</item>
         <item name="android:icon">@android:color/transparent</item>
 
         <!-- Support library compatibility -->
         <item name="background">@color/actionBarBackgroundColor</item>
         <item name="icon">@android:color/transparent</item>
+    </style>
+
+    <style name="TabTextStyle" parent="@style/Widget.AppCompat.ActionBar.TabText">
+        <item name="android:textColor">@color/selected_tab_text_color</item>
+    </style>
+
+    <style name="TabBackgroundStyle" parent="@style/Widget.AppCompat.ActionBar.TabView">
+        <item name="android:background">@color/gray_edit_text</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="TabBarBackgroundStyle" parent="@style/Widget.AppCompat.ActionBar.TabBar">
+        <item name="android:background">@color/gray_edit_text</item>
     </style>
 
     <!-- Facebook Dialog styles -->
@@ -43,4 +59,4 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    </resources>
+</resources>

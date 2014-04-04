@@ -1,17 +1,17 @@
 package com.myhoard.app.fragments;
 
-import android.app.Notification;
 import android.app.ProgressDialog;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -76,10 +76,18 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private TextView mItemsDescription;
     private TextView mItemsTags;
 
-    private static String sortByName = DataStorage.Items.NAME + " ASC";
-    private static String sortByDate = DataStorage.Items.TABLE_NAME + "." +
+    private static final String LABEL_BY_NAME_ASC = "A-Z";
+    private static final String LABEL_BY_NAME_DESC = "Z-A";
+    private static final String LABEL_BY_DATE_ASC = "< DATE";
+    private static final String LABEL_BY_DATE_DESC = "> DATE";
+    private static final String UNSORTED = "unsorted";
+    private static String sortByNameAscending = DataStorage.Items.NAME + " ASC";
+    private static String sortByDateAscending = DataStorage.Items.TABLE_NAME + "." +
             DataStorage.Items.CREATED_DATE + " ASC";
-    private static String sortOrder = sortByName;
+    private static String sortByNameDescending = DataStorage.Items.NAME + " DESC";
+    private static String sortByDateDescending = DataStorage.Items.TABLE_NAME + "." +
+            DataStorage.Items.CREATED_DATE + " DESC";
+    private static String sortOrder = UNSORTED;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_items_list, container, false);
@@ -98,6 +106,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+
         setSortTabs();
 
         // Lifecycle Facebook session
@@ -169,46 +178,47 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         //tab sort by name
-        String labelByName = getResources().getString(R.string.by_name);
         ActionBar.Tab tabSortByName = actionBar.newTab();
-        tabSortByName.setText(labelByName);
+        tabSortByName.setText(LABEL_BY_NAME_DESC);
         ActionBar.TabListener sortByNameTabListener = new ActionBar.TabListener() {
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByName();
+                sortByName(tab);
             }
 
             @Override
             public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-
+                sortByNameTabUnselected(tab);
             }
 
             @Override
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-
+                sortByName(tab);
             }
         };
         tabSortByName.setTabListener(sortByNameTabListener);
         actionBar.addTab(tabSortByName);
 
         //tab sort by date
-        String labelByDate = getResources().getString(R.string.by_date);
         ActionBar.Tab tabSortByDate = actionBar.newTab();
-        tabSortByDate.setText(labelByDate);
+        tabSortByDate.setText(LABEL_BY_DATE_ASC);
+        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.BLUE));
         ActionBar.TabListener sortByDateTabListener = new ActionBar.TabListener() {
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByDate();
+                sortByDate(tab);
+                //Toast.makeText(getActivity().getApplicationContext(),Integer.toString(tab.getPosition()), 1).show();
             }
 
             @Override
             public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+                sortByDateTabUnselected(tab);
 
             }
 
             @Override
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-
+                sortByDate(tab);
             }
         };
         tabSortByDate.setTabListener(sortByDateTabListener);
@@ -421,14 +431,36 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         }
 	}
 
-    private void sortByName() {
-        sortOrder = sortByName;
+    private void sortByName(ActionBar.Tab tab) {
+        if (sortOrder == sortByNameAscending) {
+            sortOrder = sortByNameDescending;
+            tab.setText(LABEL_BY_NAME_DESC);
+        } else {
+            sortOrder = sortByNameAscending;
+            tab.setText(LABEL_BY_NAME_ASC);
+        }
         getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
     }
 
-    private void sortByDate() {
-        sortOrder = sortByDate;
+    private void sortByDate(ActionBar.Tab tab) {
+        if (sortOrder == sortByDateAscending) {
+            sortOrder = sortByDateDescending;
+            tab.setText(LABEL_BY_DATE_DESC);
+        } else {
+            sortOrder = sortByDateAscending;
+            tab.setText(LABEL_BY_DATE_ASC);
+        }
         getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
+    }
+
+    private void sortByNameTabUnselected(ActionBar.Tab tab) {
+        tab.setText(LABEL_BY_NAME_ASC);
+        sortOrder = UNSORTED;
+    }
+
+    private void sortByDateTabUnselected(ActionBar.Tab tab) {
+        tab.setText(LABEL_BY_DATE_ASC);
+        sortOrder = UNSORTED;
     }
 
     //Mplewko: usunę jak ostatecznie zakończę sortowanie
