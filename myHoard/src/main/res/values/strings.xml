@@ -5,7 +5,7 @@
     <string name="action_search">"Search"</string>
     <string name="search">Search</string>
     <string name="action_settings">Settings</string>
-    <string name="app_name">MyHoard</string>
+    <string name="app_name">myHoard</string>
     <string name="collection_add">ADD COLLECTION</string>
     <string name="collection_description">Description:</string>
     <string name="collection_name">Collection name:</string>
@@ -112,5 +112,6 @@
     <string name="have_account">Already have an account?</string>
     <string name="synchronization_not_implement">Synchronization is not implemented yet</string>
     <string name="serverJava2">http://78.133.154.39:2080/</string>
+    <string name="search_hint">Enter search text</string>
 
 </resources>

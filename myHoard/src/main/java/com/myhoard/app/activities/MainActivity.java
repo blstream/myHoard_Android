@@ -31,6 +31,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -183,15 +184,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private void search() {
         //Set zgodnie z grafikami oparty na drawerze, jesli bedzie zmiana i przeniesienie
         //na action bar to zrobie na actionbarze ;)
-        MenuItem search = actionBarMenu.findItem(R.id.action_search);
-        if (search != null) {
-            search.setVisible(true);
-            search.expandActionView();
-            search.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+        MenuItem miSearch = actionBarMenu.findItem(R.id.action_search);
+        if (miSearch != null) {
+            miSearch.setVisible(true);
+            miSearch.expandActionView();
+            miSearch.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
                 @Override
                 public boolean onMenuItemActionExpand(MenuItem menuItem) {
-                    SearchView search = (SearchView) menuItem;
-                    //TODO: search logic here
                     return true;
                 }
 
@@ -201,6 +200,29 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     return true;
                 }
             });
+
+            final SearchView svSearch = (SearchView) miSearch.getActionView();
+            if (svSearch != null) {
+                svSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String s) {
+                        Log.d("SEARCH", s + " !Submit");
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String s) {
+                        if (s.length() > 20) {
+                            svSearch.setQuery(s.substring(0, 20), false);
+                        } else if (s.length() >= 2 || s.length() == 0){
+                            Bundle args = new Bundle();
+                            args.putString(CollectionsListFragment.QUERY, s);
+                            collectionsListFragment.fillGridView(args);
+                        }
+                        return true;
+                    }
+                });
+            }
         }
     }
 
