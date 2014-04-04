@@ -84,8 +84,8 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
                     HttpMultipartMode.BROWSER_COMPATIBLE);
 
             //Set Data and Content-type header for the image
-            entity.addPart("file",
-                    new ByteArrayBody(((Media) media).getFile(), "image/jpeg", "file"));
+            entity.addPart("image",
+                    new ByteArrayBody(((Media) media).getFile(), "image/jpeg", "image"));
             httpPost.setEntity(entity);
             try {
 
