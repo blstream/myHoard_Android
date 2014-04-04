@@ -35,6 +35,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
@@ -54,6 +55,7 @@ public class CollectionsListFragment extends Fragment implements
     private static final String NEWCOLLECTION = "NewCollection";
     private static final String EDITCOLLECTION = "EditCollection";
 	private GridView gridView;
+    RelativeLayout tvEmpty, spinner;
 	private Context context;
 	private ImageAdapter adapter;
 
@@ -70,6 +72,9 @@ public class CollectionsListFragment extends Fragment implements
 		super.onViewCreated(view, savedInstanceState);
 		gridView = (GridView) view.findViewById(R.id.gridview);
 		gridView.setEmptyView(view.findViewById(R.id.tvEmpty));
+
+        tvEmpty = (RelativeLayout) view.findViewById(R.id.tvEmpty);
+        spinner = (RelativeLayout) view.findViewById(R.id.spinner);
 
         ImageView ivFirstCollectionButton = (ImageView) view.findViewById(R.id.ivFirstCollectionButton);
         ivFirstCollectionButton.setOnClickListener(new View.OnClickListener() {
@@ -186,6 +191,8 @@ public class CollectionsListFragment extends Fragment implements
     }
 
 	void fillGridView() {
+        tvEmpty.setVisibility(View.GONE);
+        spinner.setVisibility(View.VISIBLE);
 		getLoaderManager().restartLoader(0, null, this);
 	}
 
@@ -199,6 +206,8 @@ public class CollectionsListFragment extends Fragment implements
 	@Override
 	public void onLoadFinished(Loader loader, Cursor cursor) {
 		adapter.swapCursor(cursor);
+        spinner.setVisibility(View.GONE);
+        gridView.setEmptyView(tvEmpty);
 
 	}
 
