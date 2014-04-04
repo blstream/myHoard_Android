@@ -30,6 +30,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,6 +59,7 @@ Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     private CollectionsListFragment collectionsListFragment;
     private UserManager userManager;
+    private Menu actionBarMenu;
 
 
     //to receive information from service SynchronizeService
@@ -128,7 +131,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                         switch (w) {
                             case 0:
-
+                                if (getVisibleFragmentTag() == MAIN) {
+                                    search();
+                                }
                                 break;
                             /* AWA:FIXME: Hardcoded value
                             Magiczne numerki co oznaczaja 1, 2, 3....
@@ -157,12 +162,15 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                 }
                                 break;
                             case 2:
-                                GeneratorDialog generatorDialog = new GeneratorDialog();
-                                generatorDialog.show(getSupportFragmentManager(), "");
-
+                               // GeneratorDialog generatorDialog = new GeneratorDialog();
+                               // generatorDialog.show(getSupportFragmentManager(), "");
+                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
                                 break;
                             case 3:
-
+                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
+                                break;
+                            case 4:
+                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
                                 break;
                             default:
                                 break;
@@ -174,6 +182,51 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
             }
         });
+    }
+
+    private void search() {
+        //Set zgodnie z grafikami oparty na drawerze, jesli bedzie zmiana i przeniesienie
+        //na action bar to zrobie na actionbarze ;)
+        MenuItem miSearch = actionBarMenu.findItem(R.id.action_search);
+        if (miSearch != null) {
+            miSearch.setVisible(true);
+            miSearch.expandActionView();
+            miSearch.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                    return true;
+                }
+
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                    menuItem.setVisible(false);
+                    return true;
+                }
+            });
+
+            final SearchView svSearch = (SearchView) miSearch.getActionView();
+            if (svSearch != null) {
+                svSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String s) {
+                        Log.d("SEARCH", s + " !Submit");
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String s) {
+                        if (s.length() > 20) {
+                            svSearch.setQuery(s.substring(0, 20), false);
+                        } else if (s.length() >= 2 || s.length() == 0){
+                            Bundle args = new Bundle();
+                            args.putString(CollectionsListFragment.QUERY, s);
+                            collectionsListFragment.fillGridView(args);
+                        }
+                        return true;
+                    }
+                });
+            }
+        }
     }
 
     private void openFragment(Bundle savedInstanceState, FragmentManager fm) {
@@ -265,6 +318,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         //menu.findItem(R.id.action_sort).setVisible(false);
         //set search option unvisible
         //menu.findItem(R.id.action_search).setVisible(false);
+
+        actionBarMenu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -417,8 +472,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     List<RowItem> preparing_navigationDrawer() {
         String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-        int[] images = {R.drawable.kolekcje, R.drawable.kolekcje, R.drawable.anuluj, R.drawable.znajomi, R.drawable.profilpng};
-        //wiem ze to slabe, postaram sie niedlugo zrobic lepsze przekazywanie ikonek
+        int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.anuluj, R.drawable.znajomi, R.drawable.profilpng};
+
 
 
         List<RowItem> list = new ArrayList<>();
