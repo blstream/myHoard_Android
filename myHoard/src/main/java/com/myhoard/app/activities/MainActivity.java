@@ -162,14 +162,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                 }
                                 break;
                             case 2:
-                               // GeneratorDialog generatorDialog = new GeneratorDialog();
-                               // generatorDialog.show(getSupportFragmentManager(), "");
                                 Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
                                 break;
                             case 3:
-                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
-                                break;
-                            case 4:
                                 Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
                                 break;
                             default:
@@ -472,7 +467,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     List<RowItem> preparing_navigationDrawer() {
         String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-        int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.anuluj, R.drawable.znajomi, R.drawable.profilpng};
+        int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
 
 
 

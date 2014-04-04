@@ -9,19 +9,11 @@
     <string-array name="drawer_menu">
         <item>@string/search</item>
         <item>@string/collection</item>
-        <item>@string/sort</item>
         <item>@string/friends</item>
         <item>@string/profile</item>
     </string-array>
 
 
-    <integer-array name="nav_drawer_icons">
-        <item>@drawable/anuluj</item>
-        <item>@drawable/kolekcje</item>
-        <item>@drawable/anuluj</item>
-        <item>@drawable/znajomi</item>
-        <item>@drawable/profilpng</item>
-    </integer-array>
 
 
 </resources>

@@ -11,6 +11,7 @@ import org.json.JSONObject;
  *         Date: 18.03.14
  */
  public class User implements IModel {
+    private String id;
     private String username;
     private String email;
     private String password;
@@ -49,12 +50,12 @@ import org.json.JSONObject;
 
     @Override
     public String getId() {
-        return null;
+        return id;
     }
 
     @Override
     public void setId(String id) {
-
+        this.id = id;
     }
 
     @Override
