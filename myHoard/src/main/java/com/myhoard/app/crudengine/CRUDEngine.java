@@ -72,9 +72,8 @@ import java.util.List;
                 HttpEntity entity = response.getEntity();
                 stringResponse = getASCIIContentFromEntity(entity);
 
-                //Type collectionType = new TypeToken<List<Collection>>() {
-                //}.getType();
-                List<T> items = (List<T>) new Gson().fromJson(stringResponse, IModel.class);
+                Type listType = new TypeToken<List<T>>(){}.getType();
+                List<T> items = (List<T>) new Gson().fromJson(stringResponse, listType);
 
                 return items;
             } catch (Exception e) {
