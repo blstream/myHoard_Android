@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
@@ -131,7 +132,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                         switch (w) {
                             case 0:
-                                if (getVisibleFragmentTag() == MAIN) {
+                                if (getVisibleFragmentTag().equals(MAIN)) {
                                     search();
                                 }
                                 break;
@@ -185,7 +186,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         MenuItem miSearch = actionBarMenu.findItem(R.id.action_search);
         if (miSearch != null) {
             miSearch.setVisible(true);
-            miSearch.expandActionView();
+            MenuItemCompat.expandActionView(miSearch);
             miSearch.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
                 @Override
                 public boolean onMenuItemActionExpand(MenuItem menuItem) {
