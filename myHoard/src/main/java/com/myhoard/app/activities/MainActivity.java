@@ -82,7 +82,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private static final String NEWCOLLECTION = "NewCollection";
     private static final String MAIN = "Main";
     private static final String WYLOGOWANO = "Wylogowano";
-    private static final String NEWELEMNT = "NewElement";
+    private static final String NEWELEMENT = "NewElement";
     private static final String ITEMSLIST = "ItemsList";
     private static final String FRAGMENT = "fragment";
 
@@ -144,7 +144,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                             case 1:
                                 if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
                                         !getVisibleFragmentTag().equals(ITEMSLIST) &&
-                                        !getVisibleFragmentTag().equals(NEWELEMNT)) {
+                                        !getVisibleFragmentTag().equals(NEWELEMENT)) {
                                     //item.setTitle(R.string.action_new_collection);//TODO correct
                                     getSupportFragmentManager().beginTransaction()
                                             .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
@@ -158,8 +158,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                     b.putInt(ElementFragment.ID, -1);
                                     elementFragment.setArguments(b);
                                     getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, elementFragment, NEWELEMNT)
-                                            .addToBackStack(NEWELEMNT)
+                                            .replace(R.id.container, elementFragment, NEWELEMENT)
+                                            .addToBackStack(NEWELEMENT)
                                             .commit();
                                 }
                                 break;

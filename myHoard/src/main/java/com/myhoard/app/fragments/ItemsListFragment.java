@@ -44,7 +44,7 @@ import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Maciej Plewko on 04.03.14.
- * Modified by Piotr Brzozowski, Dawid Graczyk, Rafal Soudani
+ * Modified by Piotr Brzozowski, Dawid Graczyk, Rafal Soudani, Sebastian Peryt
  * List of items of collection
  */
 public class ItemsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
@@ -298,12 +298,16 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_search){
-            Fragment newFragment = new SearchFragment();
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        Bundle b = new Bundle();
+        Fragment newFragment;
+        FragmentTransaction transaction;
+
+        switch(item.getItemId()) {
+            case R.id.action_search:
+            newFragment = new SearchFragment();
+            transaction = getFragmentManager().beginTransaction();
 
             // Add arguments to opened fragment element
-            Bundle b = new Bundle();
             b.putLong(SEARCH_COLLECTION_ID,mCollectionID);
             newFragment.setArguments(b);
 
@@ -314,6 +318,22 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
             // Commit the transaction
             transaction.commit();
+                break;
+
+            case R.id.action_new_element:
+                newFragment = new ElementFragment();
+                transaction = getFragmentManager().beginTransaction();
+
+                // Add arguments to opened fragment element
+                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
+                b.putInt(ElementFragment.ID, -1);
+                newFragment.setArguments(b);
+                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
+                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
+
+                // Commit the transaction
+                transaction.commit();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
