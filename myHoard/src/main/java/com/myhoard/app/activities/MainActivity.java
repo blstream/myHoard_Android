@@ -30,6 +30,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SearchViewCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -187,7 +188,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         if (miSearch != null) {
             miSearch.setVisible(true);
             MenuItemCompat.expandActionView(miSearch);
-            miSearch.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            MenuItemCompat.setOnActionExpandListener(miSearch, new MenuItemCompat.OnActionExpandListener() {
                 @Override
                 public boolean onMenuItemActionExpand(MenuItem menuItem) {
                     return true;
@@ -200,7 +201,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 }
             });
 
-            final SearchView svSearch = (SearchView) miSearch.getActionView();
+            final SearchView svSearch = (SearchView) MenuItemCompat.getActionView(miSearch);
             if (svSearch != null) {
                 svSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
