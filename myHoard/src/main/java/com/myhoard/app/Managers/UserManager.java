@@ -1,5 +1,7 @@
 package com.myhoard.app.Managers;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -158,8 +160,10 @@ public class UserManager {
                     HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
 
                     if (HTTP_response.contains(ERROR_STRING)){
+                        Log.d("TAG", "nieudalo sie pobrac tokena");
                         return null;
                     } else {
+                        Log.d("TAG", HTTP_response);
                         Type tokenType = new TypeToken<Token>(){}.getType();
                         Token token = new Gson().fromJson( HTTP_response , tokenType);
                         return token;

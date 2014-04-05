@@ -51,7 +51,7 @@ import java.util.List;
     protected String url;
 
     private static final String AUTHORIZATION = "Authorization";
-    private static final String APPLICATION_JSON = "application/json";
+    private static final String APPLICATION_JSON = "application/json;charset=UTF-8";
     private static final int STATUS_CREATED = 201;
     private static final int STATUS_OK = 200;
     private static final int STATUS_NO_CONTENT = 204;
@@ -137,7 +137,7 @@ import java.util.List;
 
             json = item.toJson();
 
-            StringEntity se = new StringEntity(json.toString());
+            StringEntity se = new StringEntity(json.toString(),HTTP.UTF_8);
             se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, APPLICATION_JSON));
             httpPost.setEntity(se);
             response = httpClient.execute(httpPost);
@@ -153,12 +153,14 @@ import java.util.List;
                     return imodel;
                 }
                 else {
+                    Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
                     return null;
                 }
                 //return HTTP_response.contains(ERROR_STRING) ? ERROR_CODE  : 1;
             }
         } catch (Exception e) {
             //return ERROR_CODE;
+            Log.d("TAG", e.toString());
             return null;
         }
         //return ERROR_CODE;
@@ -179,7 +181,7 @@ import java.util.List;
 
             JSONObject json = item.toJson();
 
-            StringEntity se = new StringEntity(json.toString());
+            StringEntity se = new StringEntity(json.toString(),HTTP.UTF_8);
             se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, APPLICATION_JSON));
             httpPut.setEntity(se);
             response = httpClient.execute(httpPut);
@@ -194,10 +196,12 @@ import java.util.List;
                     return model;
                 }
             }
+            Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
         } catch (Exception e) {
             /* AWA:FIXME: Obsługa błędów
                 Wypychanie błędów do UI
             */
+            Log.d("TAG", e.toString());
             e.printStackTrace();
         }
         return null;
@@ -217,12 +221,15 @@ import java.util.List;
             response = httpClient.execute(httpDelete);
             if (response != null) {
                 if (response.getStatusLine().getStatusCode() == STATUS_NO_CONTENT) {
+                    Log.d("TAG","usunieto");
                     return true;
                 }
             }
         } catch (IOException e) {
+            Log.d("TAG","NIEusunieto");
             e.printStackTrace();
         }
+        Log.d("TAG","NIEusunieto");
         return false;
     }
 

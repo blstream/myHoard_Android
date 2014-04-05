@@ -38,10 +38,11 @@ import java.util.List;
 public class MediaCrudTest extends TestCase {
 
     private String email;
+    private String username;
     private String password;
     private Token token;
     private MediaCrudEngine<Media> mediaEngine;
-    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:1180/");
+    public static final List<String> URLS = Arrays.asList("http://78.133.154.18:1180/");
             //"http://78.133.154.39:1080/");
     public byte [] image;
 
@@ -51,6 +52,7 @@ public class MediaCrudTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
+        //username = "android" + Calendar.getInstance().getTimeInMillis();
         email = "android" + Calendar.getInstance().getTimeInMillis() + "@op.pl";
         password = "haselko";
         setImages();
@@ -89,9 +91,10 @@ public class MediaCrudTest extends TestCase {
         UserManager uM = UserManager.getInstance();
         //rejestracja
         uM.setIp(url);
-        uM.register(new User(email, password));
+        uM.register(new User(username, email, password));
         //pobranie tokena = logowanie
-        uM.login(new User(email, password));
+        uM.login(new User(username, email, password));
+
         token = uM.getToken();
         mediaEngine = new MediaCrudEngine<Media>(url+"media/");
     }
