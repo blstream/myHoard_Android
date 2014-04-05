@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -19,6 +20,10 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -34,6 +39,7 @@ import android.widget.Toast;
 
 import com.myhoard.app.R;
 import com.myhoard.app.gps.GPSProvider;
+import com.myhoard.app.provider.CollectionsTable;
 import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.views.ScaleImageView;
 
@@ -47,7 +53,8 @@ import java.util.Date;
 /*
  * Created by Sebastian Peryt on 27.02.14.
  */
-public class ElementFragment extends Fragment implements View.OnClickListener {
+public class ElementFragment extends Fragment implements View.OnClickListener,
+        LoaderManager.LoaderCallbacks<Cursor>{
 
 	public static final String ID = "elementId";
 	public static final String NAME = "elementName";
@@ -63,6 +70,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener {
 	private static final int REQUEST_IMAGE_CAPTURE = 2;
 	private static final int SELECT_PICTURE = 1;
 
+    private static final int LOADER_ID = 1;
+    private static final int NO_FLAGS = 0;
+
     /* AWA:FIXME: Niepotrzebne prefiksy określające typ
 Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
 */
@@ -74,6 +84,7 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
     private int elementId;
     private Context context;
     private ScaleImageView ivElementPhoto;
+    private SimpleCursorAdapter adapter;
 
 	GPSProvider mService;
 	boolean mBound = false;
@@ -143,11 +154,10 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
         tvElementPosition.setText("ustalam");
         tvElementPosition.setTextColor(Color.YELLOW);
 
-        tvElementCategory.setText("brak");//TODO add dialog to chose category from
-        tvElementCategory.setOnClickListener(this);
+        fillData();
 
         elementId = -1;
-        iCollectionId = 0;
+        iCollectionId = -1;
 
         Bundle b = getArguments();
         if (b != null) {
@@ -173,6 +183,15 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
         }
         ivElementPhoto.setOnClickListener(this);
 
+//        if(iCollectionId!=-1) {
+//            adapter.getCursor().moveToPosition(iCollectionId);
+//            int columnIndex = adapter.getCursor().getColumnIndex(DataStorage.Collections.NAME);
+//            tvElementCategory.setText(adapter.getCursor().getString(columnIndex));
+//        } else {
+            tvElementCategory.setText("brak");
+//        }
+        tvElementCategory.setOnClickListener(this);
+
         return v;
     }
 
@@ -188,10 +207,45 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
             }
             break;
             case R.id.tvElementCategory:
-                //TODO do
-                Toast.makeText(context,"In development",Toast.LENGTH_SHORT).show();
+                categoryPicker();
 		}
 	}
+
+    /**
+     * Method shows category picker with categories from whole database.
+     */
+    private void categoryPicker() {
+        AlertDialog.Builder categoryDialogBuilder = new AlertDialog.Builder(context);
+
+        categoryDialogBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                adapter.getCursor().moveToPosition(i);
+                int columnIndex = adapter.getCursor().getColumnIndex(DataStorage.Collections.NAME);
+                tvElementCategory.setText(adapter.getCursor().getString(columnIndex));
+                iCollectionId = (int)adapter.getItemId(i);
+            }
+        });
+
+        AlertDialog choseDialog = categoryDialogBuilder.create();
+        choseDialog.show();
+
+    }
+
+    /**
+     * Fill adapter data with proper cursor values
+     */
+    private void fillData() {
+        // Fields from databse from which data will be taken. Has to include _id column.
+        String[] from = new String[] {DataStorage.Collections.NAME,
+                DataStorage.Collections._ID};
+        // UI fields in given layout into which elemnts have to be put.
+        int[] to = new int[] { android.R.id.text1 };
+
+        getLoaderManager().initLoader(LOADER_ID, null, this);
+
+        adapter = new SimpleCursorAdapter(context, android.R.layout.simple_list_item_1, null, from, to, NO_FLAGS);
+    }
 
 	/**
 	 * Method shows source picker, where user chose source of element image.
@@ -200,21 +254,21 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
 		AlertDialog.Builder pickerDialogBuilder = new AlertDialog.Builder(context);
 
 		pickerDialogBuilder.setItems(R.array.actions_on_picker,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
 
-						if (which == 0) // add from camera
-						{
-							dispatchTakePictureIntent();
-						} else if (which == 1) // add from gallery
-						{
-							Intent i = new Intent(
-									Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-							startActivityForResult(i, SELECT_PICTURE);
-						}
-					}
-				}
-		);
+                        if (which == 0) // add from camera
+                        {
+                            dispatchTakePictureIntent();
+                        } else if (which == 1) // add from gallery
+                        {
+                            Intent i = new Intent(
+                                    Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            startActivityForResult(i, SELECT_PICTURE);
+                        }
+                    }
+                }
+        );
 
 		AlertDialog choseDialog = pickerDialogBuilder.create();
 		choseDialog.show();
@@ -436,5 +490,26 @@ Wypychanie błędów do UI
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {
+                DataStorage.Collections.NAME,
+                DataStorage.Collections._ID};
+        CursorLoader cursorLoader = new CursorLoader(this.getActivity(),
+                DataStorage.Collections.CONTENT_URI, projection,
+                null,null,DataStorage.Collections.NAME + " ASC");
+        return cursorLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        adapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        adapter.swapCursor(null);
     }
 }
