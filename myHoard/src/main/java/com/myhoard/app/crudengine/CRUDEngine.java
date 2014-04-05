@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.IModel;
 import com.myhoard.app.model.Token;
+import com.myhoard.app.model.User;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -29,6 +30,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -60,7 +63,7 @@ import java.util.List;
     }
 
     @Override
-    public List<T> getList(Token token) {
+    public List<T> getList(Token token){
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
@@ -75,7 +78,16 @@ import java.util.List;
                 Type listType = new TypeToken<List<T>>(){}.getType();
                 List<T> items = (List<T>) new Gson().fromJson(stringResponse, listType);
 
-                return items;
+                List<T> newItems = new ArrayList<T>();
+
+                Iterator iter = items.iterator();
+                while(iter.hasNext()) {
+                    stringResponse = iter.next().toString();
+                    T item = new Gson().fromJson(stringResponse, clazz);
+                    newItems.add(item);
+                }
+
+                return newItems;
             } catch (Exception e) {
                 //return e.getLocalizedMessage();
                 return null;

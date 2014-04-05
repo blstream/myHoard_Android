@@ -3,6 +3,7 @@ package com.myhoard.app.test.crudengine;
 import com.google.gson.Gson;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.crudengine.CRUDEngine;
+import com.myhoard.app.model.Token;
 import com.myhoard.app.model.User;
 
 import junit.framework.TestCase;
@@ -21,11 +22,9 @@ import java.util.List;
  */
 public class UserCrudTest extends TestCase {
 
-    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2080/",
-            "http://78.133.154.39:1080/");
-    public String email = "android"+Calendar.getInstance().getTimeInMillis()+"@op.pl";
+    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2080/");//,
+            //"http://78.133.154.39:1080/");
     public String password = "haselko";
-    public String updatedEmail = "android"+Calendar.getInstance().getTimeInMillis()+"@op.pl";
 
     public UserCrudTest(String name) {
         super(name);
@@ -43,29 +42,32 @@ public class UserCrudTest extends TestCase {
     /**
      * Tests: registration and getting token
      */
-    /*public void testRegistrationUser() {
+    public void testRegistrationUser() {
+        String email = "regandroid" + Calendar.getInstance().getTimeInMillis()+"@op.pl";
         UserManager uM = UserManager.getInstance();
         for (String url: URLS) {
             uM.setIp(url);
             assertTrue(uM.register(new User(email, password)));
         }
-        email = "android"+Calendar.getInstance().getTimeInMillis()+"@op.se";
     }
 
     public void testLogin() {
         UserManager uM = UserManager.getInstance();
+        String email = "logandroid" + Calendar.getInstance().getTimeInMillis()+"@op.pl";
         for (String url: URLS) {
             uM.setIp(url);
-            assertTrue(uM.register(new User(email, password)));
+            boolean tmp = uM.register(new User(email, password));
+            assertTrue(tmp);
             uM.login(new User(email, password));
-            assertNotNull(uM.getToken());
+            Token token = uM.getToken();
+            assertNotNull(token);
             uM.logout();
         }
-        email = "android"+Calendar.getInstance().getTimeInMillis()+"@op.de";
     }
 
     public void testGetUsers() {
         UserManager uM = UserManager.getInstance();
+        String email = "getandroid" + Calendar.getInstance().getTimeInMillis()+"@op.pl";
         for (String url: URLS) {
             uM.setIp(url);
             uM.register(new User(email, password));
@@ -74,35 +76,50 @@ public class UserCrudTest extends TestCase {
             List<User> users = usersCRUD.getList(uM.getToken());
             assertNotNull(users);
         }
-        email = "android"+Calendar.getInstance().getTimeInMillis()+"@op.be";
-    }*/
+    }
 
     public void testUpdateUser() {
         UserManager uM = UserManager.getInstance();
+        String email = "updateandroid" + Calendar.getInstance().getTimeInMillis()+"@op.pl";
+        String emailUpdate = "androidUpdate" + Calendar.getInstance().getTimeInMillis()+"@op.pl";
         for (String url : URLS) {
             uM.setIp(url);
             uM.register(new User(email, password));
             uM.login(new User(email, password));
             CRUDEngine<User> usersCRUD = new CRUDEngine<User>(url+"users/",User.class);
             List<User> users = usersCRUD.getList(uM.getToken());
-            List<User> usersy = new ArrayList<User>();
 
-            Iterator iter = users.iterator();
-            while(iter.hasNext()) {
-                String stringResponse = iter.next().toString();
-                User u = new Gson().fromJson(stringResponse, User.class);
-                usersy.add(u);
-            }
 
             String idUser = null;
-            for (User us: usersy) {
-                if(us.getEmail().startsWith("android")){
+            for (User us: users) {
+                if(us.getEmail().equals(email)){
                     idUser = us.getId();
                 }
             }
 
-            usersCRUD.update(new User(updatedEmail,password),idUser,uM.getToken());
+            User u = usersCRUD.update(new User(emailUpdate,password),idUser,uM.getToken());
+            //assertEquals(u.getEmail(), emailUpdate);
         }
-        email = "android"+Calendar.getInstance().getTimeInMillis()+"@op.uk";
+    }
+
+    public void testDeleteUser() {
+        UserManager uM = UserManager.getInstance();
+        String email = "delete" + Calendar.getInstance().getTimeInMillis()+"@op.pl";
+        for (String url : URLS) {
+            uM.setIp(url);
+            uM.register(new User(email, password));
+            uM.login(new User(email, password));
+            CRUDEngine<User> usersCRUD = new CRUDEngine<User>(url+"users/",User.class);
+            List<User> users = usersCRUD.getList(uM.getToken());
+
+
+            String idUser = null;
+            for (User us: users) {
+                if(us.getEmail().equals(email)){
+                    idUser = us.getId();
+                }
+            }
+            assertTrue(usersCRUD.remove(idUser,uM.getToken()));
+        }
     }
 }
