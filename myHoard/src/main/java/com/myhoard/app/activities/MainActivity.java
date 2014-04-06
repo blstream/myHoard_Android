@@ -30,10 +30,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SearchViewCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -206,7 +204,6 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 svSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextSubmit(String s) {
-                        Log.d("SEARCH", s + " !Submit");
                         return true;
                     }
 
@@ -214,10 +211,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     public boolean onQueryTextChange(String s) {
                         if (s.length() > 20) {
                             svSearch.setQuery(s.substring(0, 20), false);
-                        } else if (s.length() >= 2 || s.length() == 0){
+                        } else if (s.length() >= 2){
                             Bundle args = new Bundle();
                             args.putString(CollectionsListFragment.QUERY, s);
                             collectionsListFragment.fillGridView(args);
+                        } else if (s.length() <2){
+                            collectionsListFragment.fillGridView(null); // reset listy wyników
+
                         }
                         return true;
                     }

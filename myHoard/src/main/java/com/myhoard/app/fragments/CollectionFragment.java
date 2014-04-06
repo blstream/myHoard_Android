@@ -135,6 +135,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                             mTags = etCollectionTags.getText().toString();
                         }
                         saveDataInDataBase();
+                        showAToast(getString(R.string.collection_added), Toast.LENGTH_SHORT);
                         getActivity().getSupportFragmentManager().popBackStack();
                     }
                 }

@@ -16,6 +16,7 @@
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/newCollection"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -54,7 +55,10 @@
                 android:textColor="@color/yellow_main"
                 android:textCursorDrawable="@null"
                 android:layout_gravity="center_horizontal"
-                android:inputType="text"/>
+                android:digits="AaĄąBbCcĆćDdEeĘęFfGgHhIiJjKkLlŁłMmNnŃńOoÓóPpQqRrSsŚśTtUuVvWwXxYyZzŹźŻż1234567890 "
+                android:inputType="textNoSuggestions"
+                tools:ignore="UnusedAttribute" /> <!--Poniżej
+                api 12 "android:textCursorDrawable="@null"" nie jest używane-->
 
             <TextView
                 android:id="@+id/tvCollectionType"
@@ -96,6 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:textSize="20sp"
+                android:maxLength="900"
                 android:padding="10dp"
                 android:gravity="top"
                 android:inputType="textMultiLine"
@@ -103,7 +108,9 @@
                 android:textColor="@color/yellow_main"
                 android:minLines="4"
                 android:textCursorDrawable="@null"
-                android:layout_gravity="center_horizontal" />
+                android:layout_gravity="center_horizontal"
+                tools:ignore="UnusedAttribute" /> <!--Poniżej
+                api 12 "android:textCursorDrawable="@null"" nie jest używane-->
 
             <TextView
                 android:id="@+id/tvCollectionTags"
@@ -125,7 +132,9 @@
                 android:textColor="@color/yellow_main"
                 android:textCursorDrawable="@null"
                 android:layout_gravity="center_horizontal"
-                android:inputType="text"/>
+                android:inputType="text"
+                tools:ignore="UnusedAttribute" /> <!--Poniżej
+                api 12 "android:textCursorDrawable="@null"" nie jest używane-->
 
         </LinearLayout>
     </ScrollView>
