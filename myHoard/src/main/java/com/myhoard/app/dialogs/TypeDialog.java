@@ -62,8 +62,6 @@ public class TypeDialog extends DialogFragment implements View.OnClickListener {
                     NoAccountDialog noAccountDialog = new NoAccountDialog();
                     noAccountDialog.show(getFragmentManager(), "");
                 }
-                NoAccountDialog noAccountDialog2 = new NoAccountDialog();
-                noAccountDialog2.show(getFragmentManager(), "");
                 dismiss();
                 break;
         }
