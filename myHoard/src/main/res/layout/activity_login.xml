@@ -98,10 +98,11 @@
 
             <Button
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:text="@string/Login"
+                android:layout_height="80dp"
+                android:textSize="30dp"
+                android:text="@string/Log_in"
                 android:id="@+id/button_login"
-                android:background="@color/yellow_text"
+                android:background="@color/yellow_main"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginBottom="20dp" />

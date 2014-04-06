@@ -27,7 +27,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="70sp"
+                android:textSize="70dp"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="@color/white"
                 android:textStyle="bold"
@@ -38,7 +38,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="70sp"
+                android:textSize="70dp"
                 android:textColor="@color/yellow_text"
                 android:layout_marginTop="60dp"
                 android:text="@string/Hoard"
@@ -53,6 +53,7 @@
             android:layout_height="80dp"
             android:background="@color/yellow_main"
             android:text="@string/Log_in"
+            android:textSize="30dp"
             android:id="@+id/login_button"
             android:layout_gravity="center_horizontal"
             android:layout_margin="15dp"/>
@@ -62,6 +63,7 @@
             android:layout_height="80dp"
             android:background="@color/yellow_main"
             android:text="@string/sign_up"
+            android:textSize="30dp"
             android:id="@+id/sing_up_button"
             android:layout_gravity="center_horizontal"
             android:layout_margin="15dp"/>
@@ -71,6 +73,7 @@
             android:layout_height="80dp"
             android:background="@color/yellow_main"
             android:text="@string/continue_offline"
+            android:textSize="30dp"
             android:id="@+id/continue_offline_button"
             android:layout_gravity="center_horizontal"
             android:layout_margin="15dp"/>

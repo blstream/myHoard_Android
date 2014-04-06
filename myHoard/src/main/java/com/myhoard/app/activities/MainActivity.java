@@ -32,7 +32,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,7 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
-Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz, Maciej Plewko
+Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 */
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     private CollectionsListFragment collectionsListFragment;
@@ -163,10 +162,10 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                 }
                                 break;
                             case 2:
-                                Toast.makeText(getBaseContext(), "Not implemented yet", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
                                 break;
                             case 3:
-                                Toast.makeText(getBaseContext(), "Not implemented yet", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
                                 break;
                             default:
                                 break;
@@ -205,7 +204,6 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 svSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextSubmit(String s) {
-                        Log.d("SEARCH", s + " !Submit");
                         return true;
                     }
 
@@ -213,10 +211,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     public boolean onQueryTextChange(String s) {
                         if (s.length() > 20) {
                             svSearch.setQuery(s.substring(0, 20), false);
-                        } else if (s.length() >= 2 || s.length() == 0) {
+                        } else if (s.length() >= 2){
                             Bundle args = new Bundle();
                             args.putString(CollectionsListFragment.QUERY, s);
                             collectionsListFragment.fillGridView(args);
+                        } else if (s.length() <2){
+                            collectionsListFragment.fillGridView(null); // reset listy wyników
+
                         }
                         return true;
                     }
@@ -354,6 +355,21 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 GeneratorDialog generatorDialog = new GeneratorDialog();
                 generatorDialog.show(getSupportFragmentManager(), "");
                 break;
+            //MPLewko: usunę jak ostatecznie zakończę sortowanie
+            /*case R.id.action_sort:
+
+                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
+                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
+                        !getVisibleFragmentTag().equals(NEWELEMNT)) {
+                    //TODO collection list custom sort
+
+                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
+                    // items list sort order change
+                    ItemsListFragment fragment = (ItemsListFragment) getSupportFragmentManager().
+                            findFragmentByTag(ITEMSLIST);
+                    fragment.itemsSortOrderChange(item);
+                }
+                break;*/
             case R.id.action_synchronize:
                 startProgressBar();
                 Intent synchronize = new Intent(this, SynchronizeService.class);
@@ -454,6 +470,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     List<RowItem> preparing_navigationDrawer() {
         String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
         int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
+
 
 
         List<RowItem> list = new ArrayList<>();

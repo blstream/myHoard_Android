@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class UserCrudTest extends TestCase {
 
-    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2080/");//,
+    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2180/");//,
             //"http://78.133.154.39:1080/");
     public String password = "haselko";
 
