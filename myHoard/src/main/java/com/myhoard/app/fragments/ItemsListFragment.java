@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -76,6 +74,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private TextView mItemsDescription;
     private TextView mItemsTags;
 
+    private static TextView sortByNameTabText;
+    private static TextView sortByDateTabText;
     private static final String LABEL_BY_NAME_ASC = "A-Z";
     private static final String LABEL_BY_NAME_DESC = "Z-A";
     private static final String LABEL_BY_DATE_ASC = "< DATE";
@@ -107,7 +107,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-        setSortTabs();
+        // currently moved to onResume()
+        //setSortTabs();
 
         // Lifecycle Facebook session
         Session session = Session.getActiveSession();
@@ -179,21 +180,23 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
         //tab sort by name
         ActionBar.Tab tabSortByName = actionBar.newTab();
-        tabSortByName.setText(LABEL_BY_NAME_DESC);
+        tabSortByName.setCustomView(R.layout.sort_tab);
+        sortByNameTabText = (TextView) tabSortByName.getCustomView().findViewById(R.id.tab_text);
+        setSelectedTabByNameText(LABEL_BY_NAME_ASC);
         ActionBar.TabListener sortByNameTabListener = new ActionBar.TabListener() {
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByName(tab);
+                sortByName();
             }
 
             @Override
             public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByNameTabUnselected(tab);
+                sortByNameTabUnselected();
             }
 
             @Override
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByName(tab);
+                sortByName();
             }
         };
         tabSortByName.setTabListener(sortByNameTabListener);
@@ -201,24 +204,24 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
         //tab sort by date
         ActionBar.Tab tabSortByDate = actionBar.newTab();
-        tabSortByDate.setText(LABEL_BY_DATE_ASC);
-        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.BLUE));
+        tabSortByDate.setCustomView(R.layout.sort_tab);
+        sortByDateTabText = (TextView) tabSortByDate.getCustomView().findViewById(R.id.tab_text);
+        setUnselectedTabByDateText(LABEL_BY_DATE_ASC);
         ActionBar.TabListener sortByDateTabListener = new ActionBar.TabListener() {
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByDate(tab);
-                //Toast.makeText(getActivity().getApplicationContext(),Integer.toString(tab.getPosition()), 1).show();
+                sortByDate();
             }
 
             @Override
             public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByDateTabUnselected(tab);
+                sortByDateTabUnselected();
 
             }
 
             @Override
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByDate(tab);
+                sortByDate();
             }
         };
         tabSortByDate.setTabListener(sortByDateTabListener);
@@ -236,6 +239,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	public void onResume() {
 		super.onResume();
         getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
+        setSortTabs();
     }
 
     @Override
@@ -451,51 +455,57 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         }
 	}
 
-    private void sortByName(ActionBar.Tab tab) {
+    private void sortByName() {
         if (sortOrder == sortByNameAscending) {
             sortOrder = sortByNameDescending;
-            tab.setText(LABEL_BY_NAME_DESC);
+            setSelectedTabByNameText(LABEL_BY_NAME_DESC);
         } else {
             sortOrder = sortByNameAscending;
-            tab.setText(LABEL_BY_NAME_ASC);
+            setSelectedTabByNameText(LABEL_BY_NAME_ASC);
         }
-        getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
+        getLoaderManager().restartLoader(0, null, this);
     }
 
-    private void sortByDate(ActionBar.Tab tab) {
+    private void sortByDate() {
         if (sortOrder == sortByDateAscending) {
             sortOrder = sortByDateDescending;
-            tab.setText(LABEL_BY_DATE_DESC);
+            setSelectedTabByDateText(LABEL_BY_DATE_DESC);
         } else {
             sortOrder = sortByDateAscending;
-            tab.setText(LABEL_BY_DATE_ASC);
+            setSelectedTabByDateText(LABEL_BY_DATE_ASC);
         }
-        getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
+        getLoaderManager().restartLoader(0, null, this);
     }
 
-    private void sortByNameTabUnselected(ActionBar.Tab tab) {
-        tab.setText(LABEL_BY_NAME_ASC);
+    private void sortByNameTabUnselected() {
+        setUnselectedTabByNameText(LABEL_BY_NAME_ASC);
         sortOrder = DEFAULT_SORT;
     }
 
-    private void sortByDateTabUnselected(ActionBar.Tab tab) {
-        tab.setText(LABEL_BY_DATE_ASC);
+    private void sortByDateTabUnselected() {
+        setUnselectedTabByDateText(LABEL_BY_DATE_ASC);
         sortOrder = DEFAULT_SORT;
     }
 
-    //Mplewko: usunę jak ostatecznie zakończę sortowanie
-    /*public void itemsSortOrderChange(MenuItem item) {
-        if (sortOrder.equals(sortByName)) {
-            sortOrder = sortByDate;
-            Toast.makeText(mContext, "ITEMS SORTED BY DATE", Toast.LENGTH_SHORT).show();
-            item.setTitle(R.string.action_sort_by_name);
-        } else if (sortOrder.equals(sortByDate)) {
-            sortOrder = sortByName;
-            Toast.makeText(mContext, "ITEMS SORTED BY NAME", Toast.LENGTH_SHORT).show();
-            item.setTitle(R.string.action_sort_by_date);
-        }
-        getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
-    }*/
+    private void setSelectedTabByNameText(String text) {
+        sortByNameTabText.setTextColor(getResources().getColor(R.color.selected_tab_text_color));
+        sortByNameTabText.setText(text);
+    }
+
+    private void setSelectedTabByDateText(String text) {
+        sortByDateTabText.setTextColor(getResources().getColor(R.color.selected_tab_text_color));
+        sortByDateTabText.setText(text);
+    }
+
+    private void setUnselectedTabByNameText(String text) {
+        sortByNameTabText.setTextColor(getResources().getColor(R.color.black));
+        sortByNameTabText.setText(text);
+    }
+
+    private void setUnselectedTabByDateText(String text) {
+        sortByDateTabText.setTextColor(getResources().getColor(R.color.black));
+        sortByDateTabText.setText(text);
+    }
 
     /*
     * Sharing on Facebook name/description/photos/location
