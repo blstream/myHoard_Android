@@ -56,8 +56,9 @@
 
             <Button
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="@color/yellow_text"
+                android:layout_height="80dp"
+                android:textSize="30dp"
+                android:background="@color/yellow_main"
                 android:text="@string/sign_up"
                 android:id="@+id/reg_button"
                 android:layout_gravity="center_horizontal"
