@@ -69,14 +69,14 @@ public class CollectionsListFragment extends Fragment implements
     private static final String LABEL_BY_NAME_DESC = "Z-A";
     private static final String LABEL_BY_DATE_ASC = "< DATE";
     private static final String LABEL_BY_DATE_DESC = "> DATE";
-    private static final String UNSORTED = "unsorted";
+    private static final String DEFAULT_SORT = DataStorage.Collections.NAME;
     private static String sortByNameAscending = DataStorage.Collections.NAME + " ASC";
     private static String sortByDateAscending = DataStorage.Collections.TABLE_NAME + "." +
             DataStorage.Collections.CREATED_DATE + " ASC";
     private static String sortByNameDescending = DataStorage.Collections.NAME + " DESC";
     private static String sortByDateDescending = DataStorage.Collections.TABLE_NAME + "." +
             DataStorage.Collections.CREATED_DATE + " DESC";
-    private static String sortOrder = UNSORTED;
+    private static String sortOrder = DEFAULT_SORT;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -309,12 +309,12 @@ public class CollectionsListFragment extends Fragment implements
 
     private void sortByNameTabUnselected(ActionBar.Tab tab) {
         tab.setText(LABEL_BY_NAME_ASC);
-        sortOrder = UNSORTED;
+        sortOrder = DEFAULT_SORT;
     }
 
     private void sortByDateTabUnselected(ActionBar.Tab tab) {
         tab.setText(LABEL_BY_DATE_ASC);
-        sortOrder = UNSORTED;
+        sortOrder = DEFAULT_SORT;
     }
 
     @Override

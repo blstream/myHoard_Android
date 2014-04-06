@@ -80,14 +80,14 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private static final String LABEL_BY_NAME_DESC = "Z-A";
     private static final String LABEL_BY_DATE_ASC = "< DATE";
     private static final String LABEL_BY_DATE_DESC = "> DATE";
-    private static final String UNSORTED = "unsorted";
+    private static final String DEFAULT_SORT = DataStorage.Items.NAME;
     private static String sortByNameAscending = DataStorage.Items.NAME + " ASC";
     private static String sortByDateAscending = DataStorage.Items.TABLE_NAME + "." +
             DataStorage.Items.CREATED_DATE + " ASC";
     private static String sortByNameDescending = DataStorage.Items.NAME + " DESC";
     private static String sortByDateDescending = DataStorage.Items.TABLE_NAME + "." +
             DataStorage.Items.CREATED_DATE + " DESC";
-    private static String sortOrder = UNSORTED;
+    private static String sortOrder = DEFAULT_SORT;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_items_list, container, false);
@@ -475,12 +475,12 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     private void sortByNameTabUnselected(ActionBar.Tab tab) {
         tab.setText(LABEL_BY_NAME_ASC);
-        sortOrder = UNSORTED;
+        sortOrder = DEFAULT_SORT;
     }
 
     private void sortByDateTabUnselected(ActionBar.Tab tab) {
         tab.setText(LABEL_BY_DATE_ASC);
-        sortOrder = UNSORTED;
+        sortOrder = DEFAULT_SORT;
     }
 
     //Mplewko: usunę jak ostatecznie zakończę sortowanie
