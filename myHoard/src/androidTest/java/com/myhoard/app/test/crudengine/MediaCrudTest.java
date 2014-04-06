@@ -42,7 +42,7 @@ public class MediaCrudTest extends TestCase {
     private String password;
     private Token token;
     private MediaCrudEngine<Media> mediaEngine;
-    public static final List<String> URLS = Arrays.asList("http://78.133.154.18:1180/");
+    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:1080/");
             //"http://78.133.154.39:1080/");
     public byte [] image;
 

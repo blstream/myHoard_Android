@@ -51,7 +51,7 @@ import java.util.List;
     protected String url;
 
     private static final String AUTHORIZATION = "Authorization";
-    private static final String APPLICATION_JSON = "application/json;charset=UTF-8";
+    private static final String APPLICATION_JSON = "application/json; charset=utf-8";
     private static final int STATUS_CREATED = 201;
     private static final int STATUS_OK = 200;
     private static final int STATUS_NO_CONTENT = 204;
