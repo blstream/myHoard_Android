@@ -1,32 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/newElement"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <GridView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/gvPhotosList"
+        android:background="@color/gray_background"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:verticalSpacing="0dp"
+        android:horizontalSpacing="0dp"
+        android:stretchMode="columnWidth"
+        android:numColumns="3"
+        android:layout_weight="1"/>
+
+    <!-- Grid view empty view -->
+    <RelativeLayout
+        android:id="@+id/element_emptyview"
+        android:layout_width="match_parent"
+        android:background="@color/gray_background"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/emptyview_inside"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/nophoto"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="take a photo"
+                android:textColor="@color/gray_text"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+    <!-- END Grid view empty view -->
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/gray_background">
-
-            <com.myhoard.app.views.ScaleImageView
-                android:id="@+id/ivElementPhoto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/nophoto"/>
-
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:layout_weight="1.5">
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="20dp"
             android:background="@color/gray_background">
+
+            <!-- TMP HACK -->
+            <Button
+                android:id="@+id/imgTmpAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dodaj obrazek"/>
+            <!-- -->
 
             <TextView
                 android:id="@+id/tvElementNameLabel"
@@ -126,6 +167,5 @@
                 android:visibility="gone"/>
 
         </LinearLayout>
-        </LinearLayout>
     </ScrollView>
-</FrameLayout>
+</LinearLayout>

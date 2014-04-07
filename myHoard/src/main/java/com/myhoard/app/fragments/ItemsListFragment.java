@@ -394,10 +394,10 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 transaction.commit();
                 return true;
             case DELETE_ID:
-                AsyncQueryHandler asyncHandler =
-                        new AsyncQueryHandler(getActivity().getContentResolver()) { };
-                asyncHandler.startDelete(0, null, DataStorage.Items.CONTENT_URI,
-                        DataStorage.Items._ID + " = ?", new String[]{String.valueOf(info.id)});
+//                AsyncQueryHandler asyncHandler =
+//                        new AsyncQueryHandler(getActivity().getContentResolver()) { };
+//                asyncHandler.startDelete(0, null, DataStorage.Items.CONTENT_URI,
+//                        DataStorage.Items._ID + " = ?", new String[]{String.valueOf(info.id)});
                 return true;
         }
 
