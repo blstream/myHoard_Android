@@ -204,6 +204,10 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 svSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextSubmit(String s) {
+                        if (s.equals("generate")) {
+                            GeneratorDialog generatorDialog = new GeneratorDialog();
+                            generatorDialog.show(getSupportFragmentManager(), "");
+                        }
                         return true;
                     }
 
