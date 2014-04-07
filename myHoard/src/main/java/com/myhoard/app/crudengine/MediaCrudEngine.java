@@ -11,11 +11,14 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -36,6 +39,7 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
 
     protected String url;
     private static final String AUTHORIZATION = "Authorization";
+    private static final int STATUS_NO_CONTENT = 204;
 
     public MediaCrudEngine(String url) {
         this.url = url;
@@ -83,12 +87,10 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
             MultipartEntity entity = new MultipartEntity(
                     HttpMultipartMode.BROWSER_COMPATIBLE);
 
-            //Set Data and Content-type header for the image
             entity.addPart("image",
                     new ByteArrayBody(((Media) media).getFile(), "image/jpeg", "image"));
             httpPost.setEntity(entity);
             try {
-
                 HttpResponse response = httpClient.execute(httpPost);
                 //Read the response
                 String jsonString = EntityUtils.toString(response.getEntity());
@@ -107,12 +109,55 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
         }
 
         @Override
-        public T update (IModel t, String id, Token token){
+        public T update (IModel media, String id, Token token){
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPut httpPut = new HttpPut(url+id+"/");
+            httpPut.setHeader(AUTHORIZATION, token.getAccess_token());
+            MultipartEntity entity = new MultipartEntity(
+                    HttpMultipartMode.BROWSER_COMPATIBLE);
+            entity.addPart("image",
+                    new ByteArrayBody(((Media) media).getFile(), "image/jpeg", "image"));
+            httpPut.setEntity(entity);
+            try {
+                HttpResponse response = httpClient.execute(httpPut);
+                //Read the response
+                String jsonString = EntityUtils.toString(response.getEntity());
+                IModel imodel = new Gson().fromJson(jsonString, Media.class);
+                Log.d("TAG", "Jsontext = " + jsonString);
+                String returedId = imodel.getId();
+                return (T)imodel;
+            } catch (ClientProtocolException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             return null;
         }
 
         @Override
         public boolean remove (String id, Token token){
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
+            HttpDelete httpDelete = new HttpDelete(url + id + "/");
+            HttpResponse response;
+
+            httpDelete.setHeader(AUTHORIZATION, token.getAccess_token());
+
+            try {
+                response = httpClient.execute(httpDelete);
+                if (response != null) {
+                    if (response.getStatusLine().getStatusCode() == STATUS_NO_CONTENT) {
+                        Log.d("TAG","usunieto");
+                        return true;
+                    }
+                }
+            } catch (IOException e) {
+                Log.d("TAG","NIEusunieto");
+                e.printStackTrace();
+            }
+            Log.d("TAG","NIEusunieto");
             return false;
         }
     }

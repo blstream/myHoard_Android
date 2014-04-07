@@ -1,16 +1,11 @@
 package com.myhoard.app.test.crudengine;
 
-import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.Environment;
 
 import com.myhoard.app.Managers.UserManager;
-import com.myhoard.app.crudengine.CRUDEngine;
 import com.myhoard.app.crudengine.MediaCrudEngine;
-import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.IModel;
 import com.myhoard.app.model.Media;
 import com.myhoard.app.model.Token;
@@ -42,8 +37,8 @@ public class MediaCrudTest extends TestCase {
     private String password;
     private Token token;
     private MediaCrudEngine<Media> mediaEngine;
-    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2180/");
-            //"http://78.133.154.39:1080/");
+    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2080/",
+            "http://78.133.154.39:1080/");
     public byte [] image;
 
     public MediaCrudTest(String name) {
@@ -55,7 +50,7 @@ public class MediaCrudTest extends TestCase {
         //username = "android" + Calendar.getInstance().getTimeInMillis();
         email = "android" + Calendar.getInstance().getTimeInMillis() + "@op.pl";
         password = "haselko";
-        setImages();
+        setImages(false);
     }
 
     protected void tearDown() throws Exception {
@@ -86,6 +81,32 @@ public class MediaCrudTest extends TestCase {
         saveImageToExternalStorage(media.getFile(), returnedId);
     }
 
+    public void testUpdate() {
+        Media media=null;
+        String returnedId=null;
+        for (String url : URLS) {
+            registerAndGetToken(url);
+            IModel imodel = mediaEngine.create(new Media(image), token);
+            returnedId = imodel.getId();
+
+            setImages(true);
+            imodel = mediaEngine.update(new Media(image), returnedId, token);
+            returnedId = imodel.getId();
+            assertNotNull(returnedId);
+            media = mediaEngine.get(returnedId, token);
+        }
+        saveImageToExternalStorage(media.getFile(), returnedId);
+    }
+
+    public void testDelete() {
+        for (String url : URLS) {
+            registerAndGetToken(url);
+            IModel imodel = mediaEngine.create(new Media(image), token);
+            String returnedId = imodel.getId();
+
+            assertTrue(mediaEngine.remove(returnedId, token));
+        }
+    }
 
     private void registerAndGetToken(String url) {
         UserManager uM = UserManager.getInstance();
@@ -99,10 +120,13 @@ public class MediaCrudTest extends TestCase {
         mediaEngine = new MediaCrudEngine<Media>(url+"media/");
     }
 
-    private void setImages() {
+    private void setImages(boolean update) {
         InputStream is = null;
         try {
-            is = (InputStream) new URL("http://3.bp.blogspot.com/-uxwWt5jDVbs/T8fHQA4LoaI/AAAAAAAAA20/Cug1OyAP588/s1600/browar.jpg").getContent();
+            if(update)
+                is = (InputStream) new URL("http://crackberry.com/sites/crackberry.com/files/styles/large/public/topic_images/2013/ANDROID.png?itok=xhm7jaxS").getContent();
+            else
+                is = (InputStream) new URL("http://3.bp.blogspot.com/-uxwWt5jDVbs/T8fHQA4LoaI/AAAAAAAAA20/Cug1OyAP588/s1600/browar.jpg").getContent();
         } catch (IOException e) {
             e.printStackTrace();
         }
