@@ -16,7 +16,7 @@ install:
 before_script:
 script:
   - chmod +x gradlew
-  - TERM=dumb ./gradlew assembleRelease
+  - TERM=dumb ./gradlew assembleDebug
 after_success:
 - ARTEFACT_FILE_NAME="myHoard" #prefiks app name for artefact file
 - BUILD_DIR="$PWD/app/build" #dir where to find artefacts: apk, mapping
