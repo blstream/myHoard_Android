@@ -1,6 +1,10 @@
 language: java
 jdk: oraclejdk7
 env:
+  global:
+   - secure: "FPqieNWtuF/67ZPPDc6izeZZo8/bmxZv5dS5/Zcpx+m658afjH0REewD2DcITYc5j6lY/QC8kiM5g5Q4ApJRQKWShAEdl4uqr4q9CeFFpowdmnBTnX+Kn0DU2i+HmncxonAJ6gOGTxRLBMzaZtKuHjQ4hsLxbDftuN7fPvdnA4s="
+   - secure: "Lvem0QpGUqumKXl+UAJQRt8qJHpaKdaktY2YwYgtglArkLwIQ7/N6V/0hlDbdkJxxqLWjo0W8V80UdiuXAurIn7WyBQplSioPFBBpkyNYh6rIlLGQg2b6gpap1LnUSrRbe2Y0fPn80AxKN3wL/yriJ/oB+I3uPAT7RW84LWULjA="
+   - secure: "Jv59VEU3hkoj1ciVUdCZjwlbuAaK9f7oEEDqEr7OAd+w7zirW37rRH7Tj0PElYANv5S5r2N83x+uwePgvdisZTLNEhoIpipH2h4c0Roc4f5wfQ21AJO1cbaPcp4ZjPfZQ269/CU/NpoAKHToKSbUYGeIj+8EUW9mk36agVKn/UE="
   matrix:
     - ANDROID_SDKS=android-19,sysimg-19  ANDROID_TARGET=android-19  ANDROID_ABI=armeabi-v7a
 branches:
@@ -26,8 +30,3 @@ after_success:
 - prepareAndroidArtefacts $BUILD_DIR $ARTEFACT_FILE_NAME $COMMIT_HASH OUT_ARTEFACT_PATH
 - chmod +x ./scripts/google_disk_upload.sh
 - ./scripts/google_disk_upload.sh "$OUT_ARTEFACT_PATH" "$GOOGLE_ACCOUNT_USERNAME" "$GOOGLE_ACCOUNT_PASSWORD" "$GOOGLE_ACCOUNT_FOLDER"
-env:
-   global:
-   - secure: ivQL5R4Rhk8BP1tTsp53Qe4sZodDvoGKs+QfIYrIngcHpYahgx7sj0jVvU4gcoSM31ZqjFBCVhZqSmzWA5Xaw5jhwu1apqp29icxNCot7I+xNEHJxjse3xdWjKNKpFpUrccrcGRhHIYQCtbxcVNQZRDqgQCspITL3C5ey4k12wA=
-   - secure: MAbZjBbF9nD6IJAPCNVGIFGkWZZfNsfrPCw+GiCsCG1kwTD+dJ6KyUrKOCz3VUJKpFn4FHKsUOJHZLnRNGlRfV9x5SnWziIS7vsU7Jhg2/k6JQ5HCMrIcoxtWk7NqY3kY4c1Kbc3CdwMcrNXYCEQATy6Q5JZEs5+6GKa1S5I80A=
-   - secure: X/pxKF5ZbB4AooV945JflBuoQbIMjf00wc+mexWuImYHMHpWxemf3g31sC8JxI4JqdqLLvvdEnyWxKqg1FAhwbREYUDSlwmkiOl7XOzhtuvmWf0Y3RhymY4BBdygVUoWDVCgDdJpQhLCCyRQ257LS/8moyOxqCJcxGwHcCVrHt4=
