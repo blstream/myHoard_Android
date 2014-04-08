@@ -264,8 +264,10 @@ public class CollectionsListFragment extends Fragment implements
                 if (info != null) {
                     args.putLong("id", info.id);
                 }
+                CollectionFragment collectionFragment = new CollectionFragment();
+                collectionFragment.setArguments(args);
                 getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, new CollectionFragment(args), EDITCOLLECTION)
+                        .replace(R.id.container, collectionFragment, EDITCOLLECTION)
                         .addToBackStack(EDITCOLLECTION)
                         .commit();
                 return true;

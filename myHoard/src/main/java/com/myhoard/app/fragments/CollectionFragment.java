@@ -59,17 +59,6 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
     private EditText etCollectionName, etCollectionDescription, etCollectionTags, etCollectionType;
     Toast toast;
 
-
-    public CollectionFragment() {
-        super();
-    }
-
-    public CollectionFragment(Bundle args) {
-        super();
-        mEditId = args.getLong("id");
-
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -77,6 +66,11 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
         final View v = inflater.inflate(R.layout.fragment_new_collection, container, false);
         getLoaderManager().initLoader(LOAD_NAMES, null, this);
         setHasOptionsMenu(true);
+
+        Bundle args = getArguments();
+        if (args != null){
+            mEditId = args.getLong("id");
+        }
 
         if (v != null) {
             etCollectionName = (EditText) v.findViewById(R.id.etCollectionName);
