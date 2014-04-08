@@ -19,7 +19,7 @@ script:
   - TERM=dumb ./gradlew assembleDebug
 after_success:
 - ARTEFACT_FILE_NAME="myHoard" #prefiks app name for artefact file
-- BUILD_DIR="$PWD/app/build" #dir where to find artefacts: apk, mapping
+- BUILD_DIR="$PWD/myHoard/build" #dir where to find artefacts: apk, mapping
 - COMMIT_HASH=`git log --pretty=format:'%h' -n 1` #commit hash id
 - chmod +x ./scripts/prepare_artefacts.sh
 - . ./scripts/prepare_artefacts.sh
