@@ -14,9 +14,9 @@ echo "====================== Google Drive Upload ===================\n"
 echo $ARTEFACT_PATH
 echo "=============================================================="
 
-[ ! -z "$2" ] && GOOGLE_ACCOUNT_USERNAME=$2 || echo "Enter account"
-[ ! -z "$3" ] && GOOGLE_ACCOUNT_PASSWORD=$3 || echo "Enter pass"
-[ ! -z "$4" ] && GOOGLE_ACCOUNT_FOLDER=$4 || echo "Enter folder"
+[ ! -z "$2" ] && GOOGLE_ACCOUNT_USERNAME=$2 || echo "!!!!!!!!!!!!!! Enter account !!!!!!!!!!!!!!"
+[ ! -z "$3" ] && GOOGLE_ACCOUNT_PASSWORD=$3 || echo "!!!!!!!!!!!!!!  Enter pass !!!!!!!!!!!!!! "
+[ ! -z "$4" ] && GOOGLE_ACCOUNT_FOLDER=$4 || echo " !!!!!!!!!!!!!! Enter folder !!!!!!!!!!!!!! "
 
 #upload
 GOOGLE_ACCOUNT_TYPE="GOOGLE" #gooApps = HOSTED , gmail=GOOGLE
