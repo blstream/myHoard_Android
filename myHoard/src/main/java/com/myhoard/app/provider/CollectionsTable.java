@@ -14,7 +14,6 @@ import android.text.TextUtils;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.services.SynchronizationService;
-import com.myhoard.app.services.SynchronizeService;
 
 /**
  * Description

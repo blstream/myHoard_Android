@@ -48,7 +48,6 @@ import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.model.RowItem;
-import com.myhoard.app.services.SynchronizeService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -376,8 +375,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 break;*/
             case R.id.action_synchronize:
                 startProgressBar();
-                Intent synchronize = new Intent(this, SynchronizeService.class);
-                startService(synchronize);
+                //Intent synchronize = new Intent(this, SynchronizeService.class);
+                //startService(synchronize);
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -408,10 +407,10 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String status = intent.getStringExtra(SynchronizeService.currentStatus);
-            progressBarStatusOut = Double.parseDouble(status);
-            status = intent.getStringExtra(SynchronizeService.maxStatus);
-            maxProgressBarStatus = Double.parseDouble(status);
+            //String status = intent.getStringExtra(SynchronizeService.currentStatus);
+            //progressBarStatusOut = Double.parseDouble(status);
+            //status = intent.getStringExtra(SynchronizeService.maxStatus);
+            //maxProgressBarStatus = Double.parseDouble(status);
         }
 
     }
