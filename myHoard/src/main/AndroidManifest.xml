@@ -53,7 +53,7 @@
 
         <service android:name="com.myhoard.app.gps.GPSProvider" />
         <service
-            android:name="com.myhoard.app.services.SynchronizeService"
+            android:name="com.myhoard.app.services.SynchronizationService"
             android:exported="false" />
 
     </application>

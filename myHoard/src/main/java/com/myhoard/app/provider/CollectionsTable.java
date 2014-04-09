@@ -3,16 +3,25 @@ package com.myhoard.app.provider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-import com.myhoard.app.provider.DataStorage.Collections;
 
-/* AWA:FIXME: Brak Autora oraz nagłowka
-*/
+import com.myhoard.app.Managers.UserManager;
+import com.myhoard.app.provider.DataStorage.Collections;
+import com.myhoard.app.services.SynchronizationService;
+import com.myhoard.app.services.SynchronizeService;
+
+/**
+ * Description
+ *
+ * @author Tomasz Nosal
+ *         Date: 08.04.14
+ */
 public class CollectionsTable extends DatabaseTable {
 
 	private static final String DEFAULT_SORT_ORDER = Collections.NAME + " DESC";
@@ -74,6 +83,10 @@ public class CollectionsTable extends DatabaseTable {
 				orderBy        // The sort order
 		);
 
+        if (c.getCount()==0 && UserManager.getInstance().isLoggedIn()) {
+            Intent synchronize = new Intent(getContext(), SynchronizationService.class);
+            getContext().startService(synchronize);
+        }
 		// Tells the Cursor what URI to watch, so it knows when its source data changes
 		c.setNotificationUri(getContext().getContentResolver(), Collections.CONTENT_URI);
 		return c;

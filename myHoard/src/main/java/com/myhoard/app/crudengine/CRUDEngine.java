@@ -3,6 +3,9 @@ package com.myhoard.app.crudengine;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.IModel;
@@ -27,8 +30,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -73,17 +78,19 @@ import java.util.List;
             try {
                 HttpResponse response = httpClient.execute(httpGet, localContext);
                 HttpEntity entity = response.getEntity();
-                stringResponse = getASCIIContentFromEntity(entity);
 
-                Type listType = new TypeToken<List<T>>(){}.getType();
-                List<T> items = (List<T>) new Gson().fromJson(stringResponse, listType);
 
                 List<T> newItems = new ArrayList<T>();
+                stringResponse = getASCIIContentFromEntity(entity);
 
-                Iterator iter = items.iterator();
-                while(iter.hasNext()) {
-                    stringResponse = iter.next().toString();
-                    T item = new Gson().fromJson(stringResponse, clazz);
+                JsonElement json = new JsonParser().parse(stringResponse);
+                JsonArray array= json.getAsJsonArray();
+                Iterator iterator = array.iterator();
+
+                while(iterator.hasNext()){
+                    JsonElement json2 = (JsonElement)iterator.next();
+                    Gson gson = new Gson();
+                    T item = gson.fromJson(json2, clazz);
                     newItems.add(item);
                 }
 

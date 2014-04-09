@@ -76,6 +76,9 @@ public class UserManager {
     public void setIp(String ip){
         this.ip = ip;
     }
+    public String getIp() {
+        return ip;
+    }
     /**
      * Login to a server
      * @param user login information

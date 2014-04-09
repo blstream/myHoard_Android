@@ -222,7 +222,6 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                 Uri uri3 = DataStorage.Collections.CONTENT_URI;
                 String[] projection3 = {DataStorage.Collections._ID, DataStorage.Collections.NAME};
                 return new CursorLoader(context, uri3, projection3, null, null, null);
-
             default:
                 throw new IllegalArgumentException("there is no action for id: " + id);
         }

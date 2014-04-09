@@ -80,6 +80,8 @@ public class CollectionsListFragment extends Fragment implements
             DataStorage.Collections.CREATED_DATE + " DESC";
     private static String sortOrder = DEFAULT_SORT;
 
+    boolean gridViewWasFilled=false;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -165,7 +167,10 @@ public class CollectionsListFragment extends Fragment implements
         ActionBar.TabListener sortByNameTabListener = new ActionBar.TabListener() {
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByName();
+                if(!gridViewWasFilled) {
+                    sortByName();
+                    gridViewWasFilled=false;
+                }
             }
 
             @Override
@@ -289,6 +294,7 @@ public class CollectionsListFragment extends Fragment implements
         if (args != null) {
             getLoaderManager().restartLoader(SEARCH, args, this);
         }else{
+            gridViewWasFilled = true;
             getLoaderManager().restartLoader(0, args, this);
         }
     }
@@ -353,8 +359,9 @@ public class CollectionsListFragment extends Fragment implements
             selection = String.format("%s LIKE '%%%s%%'", DataStorage.Collections.NAME, args.getString(QUERY));
         }
 
-        return new CursorLoader(context, DataStorage.Collections.CONTENT_URI,
+        CursorLoader cL = new CursorLoader(context, DataStorage.Collections.CONTENT_URI,
                 projection, selection, null, sortOrder);
+        return cL;
     }
 
     @Override
