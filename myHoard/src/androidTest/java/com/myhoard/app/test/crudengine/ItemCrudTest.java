@@ -56,18 +56,15 @@ public class ItemCrudTest extends TestCase {
         for (String url : URLS) {
 
             registerAndGetToken(url);
-            /**
-             * Create
-             */
+
+            //create
             Item item = new Item("0", testItems.NAME, "dsc", null, null, "", "", collectionId);
 
             IModel imodel = itemsEngine.create(item, token);
             String returnedId = imodel.getId();
             assertNotNull(returnedId);
 
-            /**
-             * Read
-             */
+            //read
             item = itemsEngine.get(returnedId, token);
             assertEquals(item.name, testItems.NAME);
 

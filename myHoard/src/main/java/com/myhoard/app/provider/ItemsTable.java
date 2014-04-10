@@ -3,6 +3,7 @@ package com.myhoard.app.provider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,9 +11,11 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.provider.DataStorage.Items;
 import com.myhoard.app.provider.DataStorage.Media;
+import com.myhoard.app.services.SynchronizationService;
 
 /**
  * Description
@@ -82,7 +85,7 @@ public class ItemsTable extends DatabaseTable {
         );
 
         // Tells the Cursor what URI to watch, so it knows when its source data changes
-        c.setNotificationUri(getContext().getContentResolver(), Items.CONTENT_URI);
+        c.setNotificationUri(getContext().getContentResolver(), Collections.CONTENT_URI);
         return c;
     }
 
