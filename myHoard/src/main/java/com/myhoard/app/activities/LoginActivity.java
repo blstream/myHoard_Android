@@ -21,13 +21,10 @@ import com.myhoard.app.Managers.UserManager;
 /*
 * Crreated by Mateusz Czyszkiewicz
 */
-public class LoginActivity extends ActionBarActivity  {
+public class LoginActivity extends ActionBarActivity {
 
 	private EditText email;
 	private EditText password;
-
-
-
     private final static String SAVELOGIN = "saveLogin";
     private final static String LOGINPREFS = "loginPrefs";
     private final static String USERNAMES = "username";
@@ -49,7 +46,7 @@ public class LoginActivity extends ActionBarActivity  {
 		password = (EditText) findViewById(R.id.login_password);
 		Button login_button = (Button) findViewById(R.id.button_login);
 		TextView txt = (TextView) findViewById(R.id.registration_text);
-		remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
+        remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
 		SharedPreferences loginPreferences = getSharedPreferences(LOGINPREFS, MODE_PRIVATE);
 		editor = loginPreferences.edit();
 
@@ -80,15 +77,16 @@ public class LoginActivity extends ActionBarActivity  {
                     user.setEmail(email_ch);
                     user.setPassword(password_ch);
 
+
+
+
                     /* AWA:FIXME: AsyncTask canceling
                     Uruchamiany jest w tym miejscu AsyncTask
                     Jednak brak jest jego anulowania.
                     Co gdy uzytkownik opusci to acitivyt przez przycisk BACK?
                     AsyncTask dalej będzie w tle pracował.
                     */
-                    new getUserSingleton().execute();
-
-
+                        new getUserSingleton().execute();
 
                         if (remember_check.isChecked()) {
 
@@ -101,14 +99,17 @@ public class LoginActivity extends ActionBarActivity  {
                             editor.commit();
                         }
 
+
                 } else {
                     TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
                     incorrectData.setText(getString(R.string.no_internet_connection));
                 }
+
             }
 		});
 
 	}
+
 
 
 

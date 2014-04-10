@@ -32,8 +32,8 @@
                 android:background="@drawable/login_and_registration_border"
                 android:textColor="@color/yellow_text"
                 android:ems="10"
-                android:id="@+id/login_email"
 
+                android:id="@+id/login_email"
                 android:layout_margin="20dp"
                 android:layout_weight="0.22" />
 
@@ -54,6 +54,7 @@
                 android:background="@drawable/login_and_registration_border"
                 android:inputType="textPassword"
                 android:ems="10"
+
                 android:id="@+id/login_password"
                 android:layout_margin="20dp"
                 android:layout_weight="0.19" />

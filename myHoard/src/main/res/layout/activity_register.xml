@@ -29,7 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:textColor="@color/yellow_text"
-                android:background="@color/black_background"
+                android:background="@drawable/login_and_registration_border"
                 android:inputType="textEmailAddress"
                 android:ems="10"
                 android:id="@+id/email_register"
@@ -47,12 +47,40 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
-                android:background="@color/black_background"
                 android:textColor="@color/yellow_text"
                 android:inputType="textPassword"
                 android:ems="10"
+                android:background="@drawable/login_and_registration_border"
                 android:id="@+id/password_register"
                 android:layout_margin="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/gray_text"
+                android:text="@string/confirm_password"
+                android:id="@+id/confirm_password"
+                android:layout_marginLeft="20dp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:background="@drawable/login_and_registration_border"
+                android:textColor="@color/yellow_text"
+                android:inputType="textPassword"
+                android:ems="10"
+                android:id="@+id/password_confirm"
+                android:layout_margin="20dp"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white_border"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/no_internet"
+                android:layout_gravity="center_horizontal" />
 
             <Button
                 android:layout_width="match_parent"
@@ -61,7 +89,6 @@
                 android:background="@color/yellow_main"
                 android:text="@string/sign_up"
                 android:id="@+id/reg_button"
-                android:layout_gravity="center_horizontal"
                 android:layout_margin="20dp"/>
 
         </LinearLayout>
