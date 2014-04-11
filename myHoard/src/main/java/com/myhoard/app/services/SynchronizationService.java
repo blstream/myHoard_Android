@@ -1,20 +1,30 @@
 package com.myhoard.app.services;
 
 import android.app.IntentService;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.util.Log;
+import android.os.Environment;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.crudengine.CRUDEngine;
+import com.myhoard.app.crudengine.MediaCrudEngine;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.Item;
+import com.myhoard.app.model.ItemMedia;
+import com.myhoard.app.model.Media;
 import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.provider.DataStorage.TypeOfCollection;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -30,6 +40,7 @@ public class SynchronizationService extends IntentService {
 
     private static final String COLLECTION_ENDPOINT = "collections/";
     private static final String ITEM_ENDPOINT = "items/";
+    private static final String MEDIA_ENDPOINT = "media/";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     /**
@@ -49,16 +60,27 @@ public class SynchronizationService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         UserManager uM = UserManager.getInstance();
 
-        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(uM.getIp()+COLLECTION_ENDPOINT,Collection.class);
+        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(uM.getIp() + COLLECTION_ENDPOINT, Collection.class);
         List<Collection> collections = collectionCrud.getList(uM.getToken());
-        for (Collection collection:collections) {
+        for (Collection collection : collections) {
             insert(collection);
         }
 
-        CRUDEngine<Item> itemCrud = new CRUDEngine<>(uM.getIp()+ITEM_ENDPOINT,Item.class);
+        CRUDEngine<Item> itemCrud = new CRUDEngine<>(uM.getIp() + ITEM_ENDPOINT, Item.class);
+        MediaCrudEngine<Media> mediaCrud = new MediaCrudEngine<>(uM.getIp() + MEDIA_ENDPOINT);
         List<Item> items = itemCrud.getList(uM.getToken());
-        for (Item item:items) {
-            insert(item);
+        for (Item item : items) {
+            long id = insert(item);
+            if (item.media != null) {
+                for (ItemMedia iM : item.media) {
+                    Media media = mediaCrud.get(iM.id, uM.getToken());
+                    try {
+                        insert(media, id, item.name);
+                    } catch (IOException e) {
+                        //TODO: powiedz uzytkownikowi ze wystapil blad przy obrazkach
+                    }
+                }
+            }
         }
     }
 
@@ -83,10 +105,10 @@ public class SynchronizationService extends IntentService {
             e.printStackTrace();
         }
 
-        Uri uriFromInsert = getContentResolver().insert(Collections.CONTENT_URI, values);
+        Uri insert = getContentResolver().insert(Collections.CONTENT_URI, values);
     }
 
-    private void insert(Item item) {
+    private long insert(Item item) {
         ContentValues values = new ContentValues();
 
         values.put(DataStorage.Items.ID_SERVER, item.id);
@@ -115,14 +137,49 @@ public class SynchronizationService extends IntentService {
         values.put(DataStorage.Items.ID_COLLECTION, item.collection);
 
         Uri uri = Collections.CONTENT_URI;
-        String[] projection = new String[] { Collections._ID };
+        String[] projection = new String[]{Collections._ID};
         String selection = String.format("%s = %s", Collections.ID_SERVER, item.collection);
 
         Cursor cursor = getContentResolver().query(uri, projection, selection, null, null);
 
-        if (cursor.moveToFirst()) {
-            values.put(DataStorage.Items.ID_COLLECTION, cursor.getString(0));
-            getContentResolver().insert(DataStorage.Items.CONTENT_URI, values);
+        cursor.moveToFirst();
+        values.put(DataStorage.Items.ID_COLLECTION, cursor.getString(0));
+        return ContentUris.parseId(getContentResolver().insert(DataStorage.Items.CONTENT_URI, values));
+    }
+
+    private void insert(Media media, Long idItem, String name) throws IOException {
+        ContentValues values = new ContentValues();
+
+        String path = Environment.getExternalStorageDirectory().toString();
+        OutputStream fOut = null;
+
+        File folder = new File(path + "/myHoardFiles");
+        boolean success = true;
+        if (!folder.exists()) {
+            success = folder.mkdir();
         }
+        if (success) {
+            File file = new File(path+ "/myHoardFiles", name+".jpg");
+            fOut = new FileOutputStream(file);
+
+            BitmapFactory.decodeByteArray(media.getFile(), 0, media.getFile().length).compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+
+            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            File f = new File(file.getPath());
+            Uri contentUri = Uri.fromFile(f);
+            mediaScanIntent.setData(contentUri);
+            this.sendBroadcast(mediaScanIntent);
+
+            fOut.flush();
+            fOut.close();
+            values.put(DataStorage.Media.FILE_NAME, contentUri.toString());
+        } else {
+            //TODO: throw error;
+        }
+
+
+        values.put(DataStorage.Media.ID_SERVER, media.getId());
+        values.put(DataStorage.Media.ID_ITEM, idItem);
+        getContentResolver().insert(DataStorage.Media.CONTENT_URI, values);
     }
 }

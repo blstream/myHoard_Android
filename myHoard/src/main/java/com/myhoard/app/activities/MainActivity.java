@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -32,6 +33,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,6 +50,7 @@ import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.model.RowItem;
+import com.myhoard.app.provider.DataStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,6 +107,11 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         openFragment(savedInstanceState, fm);
         setDrawer();
 
+        Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d("TAG", "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
+            Log.d("TAG", cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+        }
     }
 
     private void setDrawer() {
