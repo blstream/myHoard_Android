@@ -85,7 +85,7 @@ public class ItemsTable extends DatabaseTable {
         );
 
         // Tells the Cursor what URI to watch, so it knows when its source data changes
-        c.setNotificationUri(getContext().getContentResolver(), Collections.CONTENT_URI);
+        c.setNotificationUri(getContext().getContentResolver(), Items.CONTENT_URI);
         return c;
     }
 

@@ -3,7 +3,9 @@ package com.myhoard.app.services;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.crudengine.CRUDEngine;
@@ -62,6 +64,7 @@ public class SynchronizationService extends IntentService {
 
     private void insert(Collection collection) {
         ContentValues values = new ContentValues();
+        values.put(Collections.ID_SERVER, collection.getId());
         values.put(Collections.NAME, collection.getName());
         values.put(Collections.DESCRIPTION, collection.getDescription());
         values.put(Collections.TAGS, collection.getTags().toString());
@@ -86,13 +89,13 @@ public class SynchronizationService extends IntentService {
     private void insert(Item item) {
         ContentValues values = new ContentValues();
 
-        //LOCATION, SERVER_ID ?
-
-        values.put(DataStorage.Items.NAME, item.name);
-        values.put(DataStorage.Items.DESCRIPTION, item.description);
-        values.put(DataStorage.Items.ID_COLLECTION, item.collection);
-        values.put(DataStorage.Items.LOCATION_LAT, item.location.lat);
-        values.put(DataStorage.Items.LOCATION_LNG, item.location.lng);
+        values.put(DataStorage.Items.ID_SERVER, item.id);
+        if (item.name != null) values.put(DataStorage.Items.NAME, item.name);
+        if (item.description != null) values.put(DataStorage.Items.DESCRIPTION, item.description);
+        if (item.location != null) {
+            values.put(DataStorage.Items.LOCATION_LAT, item.location.lat);
+            values.put(DataStorage.Items.LOCATION_LNG, item.location.lng);
+        }
 
         try {
             java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(item.modifiedDate);
@@ -109,6 +112,17 @@ public class SynchronizationService extends IntentService {
             values.put(DataStorage.Items.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
         }
 
-        getContentResolver().insert(DataStorage.Items.CONTENT_URI, values);
+        values.put(DataStorage.Items.ID_COLLECTION, item.collection);
+
+        Uri uri = Collections.CONTENT_URI;
+        String[] projection = new String[] { Collections._ID };
+        String selection = String.format("%s = %s", Collections.ID_SERVER, item.collection);
+
+        Cursor cursor = getContentResolver().query(uri, projection, selection, null, null);
+
+        if (cursor.moveToFirst()) {
+            values.put(DataStorage.Items.ID_COLLECTION, cursor.getString(0));
+            getContentResolver().insert(DataStorage.Items.CONTENT_URI, values);
+        }
     }
 }
