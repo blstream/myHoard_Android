@@ -35,8 +35,12 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     private static final String SEARCH_BY_NAME_TAB = "name";
     private static final String SEARCH_ALL_TAB = "all";
     private static final String SEARCH_BY_DESCRIPTION_TAB = "description";
-    private static final int LOAD_ELEMENTS_TO_SEARCH = 0;
     private static final int TEXT_TO_SEARCH_MIN_LENGTH = 2;
+    private static final int SEARCH_ALL = 0;
+    private static final int SEARCH_BY_NAME = 1;
+    private static final int SEARCH_BY_DESCRIPTION = 2;
+    private static int sSelectedTypeOfSearch = SEARCH_ALL;
+    private String mTextToSearch ="";
     private EditText mSearchText;
     private Context mContext;
     private ImageAdapterList mImageAdapterList;
@@ -80,17 +84,21 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
 
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setSelectedTabSearchByName(SEARCH_BY_NAME_TAB);
+                setSelectedTabSearchByName(SEARCH_BY_NAME_TAB);
+                sSelectedTypeOfSearch = SEARCH_BY_NAME;
+                checkText(mTextToSearch);
             }
 
             @Override
             public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setUnselectedTabSearchByName(SEARCH_BY_NAME_TAB);
+                setUnselectedTabSearchByName(SEARCH_BY_NAME_TAB);
             }
 
             @Override
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setSelectedTabSearchByName(SEARCH_BY_NAME_TAB);
+                setSelectedTabSearchByName(SEARCH_BY_NAME_TAB);
+                sSelectedTypeOfSearch = SEARCH_BY_NAME;
+                checkText(mTextToSearch);
             }
         };
         actionBarTabSearchByName.setTabListener(searchByNameTabListener);
@@ -106,17 +114,21 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
 
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setSelectedTabSearchAll(SEARCH_ALL_TAB);
+                setSelectedTabSearchAll(SEARCH_ALL_TAB);
+                sSelectedTypeOfSearch = SEARCH_ALL;
+                checkText(mTextToSearch);
             }
 
             @Override
             public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setUnselectedTabSearchAll(SEARCH_ALL_TAB);
+                setUnselectedTabSearchAll(SEARCH_ALL_TAB);
             }
 
             @Override
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setSelectedTabSearchAll(SEARCH_ALL_TAB);
+                setSelectedTabSearchAll(SEARCH_ALL_TAB);
+                sSelectedTypeOfSearch = SEARCH_ALL;
+                checkText(mTextToSearch);
             }
         };
         actionBarTabSearchAll.setTabListener(searchAllTabListener);
@@ -132,17 +144,21 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
 
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setSelectedTabSearchAll(SEARCH_ALL_TAB);
+                setSelectedTabSearchByDescription(SEARCH_BY_DESCRIPTION_TAB);
+                sSelectedTypeOfSearch = SEARCH_BY_DESCRIPTION;
+                checkText(mTextToSearch);
             }
 
             @Override
             public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setUnselectedTabSearchAll(SEARCH_ALL_TAB);
+                setUnselectedTabSearchByDescription(SEARCH_BY_DESCRIPTION_TAB);
             }
 
             @Override
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                //setSelectedTabSearchAll(SEARCH_ALL_TAB);
+                setSelectedTabSearchByDescription(SEARCH_BY_DESCRIPTION_TAB);
+                sSelectedTypeOfSearch = SEARCH_BY_DESCRIPTION;
+                checkText(mTextToSearch);
             }
         };
         actionBarTabSearchByDescription.setTabListener(searchByDescriptionTabListener);
@@ -159,11 +175,11 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 assert mSearchText.getText() != null;
-                String collectionElementText = mSearchText.getText().toString();
-                collectionElementText = collectionElementText.trim();
-                collectionElementText = collectionElementText.toLowerCase();
+                mTextToSearch = mSearchText.getText().toString();
+                mTextToSearch = mTextToSearch.trim();
+                mTextToSearch = mTextToSearch.toLowerCase();
                 //Search element when text to search have more than two characters
-                checkText(collectionElementText);
+                checkText(mTextToSearch);
             }
 
             @Override
@@ -179,7 +195,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
             //Put text to search to Bundle object
             args.putString(TEXT_TO_SEARCH, collectionElementText);
             //Restart to load data when user query is changed
-            getLoaderManager().restartLoader(LOAD_ELEMENTS_TO_SEARCH, args, SearchFragment.this);
+            getLoaderManager().restartLoader(sSelectedTypeOfSearch, args, SearchFragment.this);
         } else {
             //Clear screen
             mImageAdapterList.swapCursor(null);
@@ -196,8 +212,21 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         //Get text to search from args object
         String collectionElementText = args.getString(TEXT_TO_SEARCH);
-        String selection = String.format("%s = %s AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
-                mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.DESCRIPTION,collectionElementText,DataStorage.Items.NAME,collectionElementText);
+        String selection = null;
+        switch(id){
+            case SEARCH_ALL:
+                selection = String.format("%s = %s AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.DESCRIPTION,collectionElementText,DataStorage.Items.NAME,collectionElementText);
+                break;
+            case SEARCH_BY_NAME:
+                selection = String.format("%s = %s AND %s LIKE '%%%s%%'",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.NAME,collectionElementText);
+                break;
+            case SEARCH_BY_DESCRIPTION:
+                selection = String.format("%s = %s AND %s LIKE '%%%s%%'",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.DESCRIPTION,collectionElementText);
+                break;
+        }
         //CursorLoader used to get data from user query
         return new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
                 new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID},
