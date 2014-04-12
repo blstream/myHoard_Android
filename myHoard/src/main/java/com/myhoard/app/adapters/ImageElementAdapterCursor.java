@@ -34,7 +34,7 @@ public class ImageElementAdapterCursor extends CursorAdapter {
     private final ImageLoader mImageLoader;
 	public ImageElementAdapterCursor(Context context, Cursor c, int flags) {
 	    super(context, c, flags);
-	    mImageLoader = new ImageLoader();
+	    mImageLoader = new ImageLoader(context);
     }
 
 	@Override

@@ -43,7 +43,7 @@ public class ImageAdapter extends CursorAdapter {
 
 	public ImageAdapter(Context context) {
 		super(context, null, 0);
-        mImageLoader = new ImageLoader();
+        mImageLoader = new ImageLoader(context);
 
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();

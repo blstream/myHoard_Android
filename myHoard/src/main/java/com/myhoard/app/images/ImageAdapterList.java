@@ -29,7 +29,7 @@ public class ImageAdapterList extends CursorAdapter {
     private final ImageLoader mImageLoader;
 	public ImageAdapterList(Context context, Cursor c, int flags) {
 	    super(context, c, flags);
-	    mImageLoader = new ImageLoader();
+	    mImageLoader = new ImageLoader(context);
     }
 
 	@Override

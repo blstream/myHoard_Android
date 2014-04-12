@@ -418,7 +418,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             case 0:
                 selection = String.format("%s = %s",mCollectionID,DataStorage.Items.ID_COLLECTION);
                 cursorLoader =  new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
-                        new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR,
+                        new String[]{DataStorage.Items.NAME, DataStorage.Media.FILE_NAME,
                                 DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,DataStorage.Items.DESCRIPTION},
                         selection, null, sortOrder);
                 break;

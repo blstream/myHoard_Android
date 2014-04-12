@@ -229,7 +229,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         }
         //CursorLoader used to get data from user query
         return new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
-                new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID},
+                new String[]{DataStorage.Items.NAME, DataStorage.Media.FILE_NAME, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID},
                 selection, null, null);
     }
 
