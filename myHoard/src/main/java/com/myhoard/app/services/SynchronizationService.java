@@ -88,9 +88,10 @@ public class SynchronizationService extends IntentService {
         ContentValues values = new ContentValues();
         values.put(Collections.ID_SERVER, collection.getId());
         values.put(Collections.NAME, collection.getName());
-        values.put(Collections.DESCRIPTION, collection.getDescription());
+        if (collection.getDescription() != null) values.put(Collections.DESCRIPTION, collection.getDescription());
         values.put(Collections.TAGS, collection.getTags().toString());
         values.put(Collections.TYPE, TypeOfCollection.PUBLIC.toString());
+        values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
 
         try {
             java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getModified_date());
