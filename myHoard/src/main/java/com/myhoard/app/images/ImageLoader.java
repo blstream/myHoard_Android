@@ -52,7 +52,6 @@ public class ImageLoader{
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        //BitmapFactory.decodeFile(path, options);
         try {
            BitmapFactory.decodeStream(mContext.getContentResolver().openInputStream(Uri.parse(path)),null,options);
         } catch (FileNotFoundException e) {
@@ -63,7 +62,6 @@ public class ImageLoader{
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
-        //return BitmapFactory.decodeFile(path, options);
         try {
             return BitmapFactory.decodeStream(mContext.getContentResolver().openInputStream(Uri.parse(path)),null,options);
         } catch (FileNotFoundException e) {

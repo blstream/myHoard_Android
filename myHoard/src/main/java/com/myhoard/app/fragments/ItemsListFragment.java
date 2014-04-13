@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -38,6 +39,7 @@ import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.dialogs.FacebookShareDialog;
 import com.myhoard.app.images.ImageAdapterList;
+import com.myhoard.app.images.ImageLoader;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -596,9 +598,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         Cursor cursor = mImageAdapterList.getCursor();
         cursor.moveToPosition(mItemPositionOnList);
         // getting data form cursor
-        String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.AVATAR));
+        String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
         // Decoding image
-        Bitmap image  = ImageAdapterList.decodeSampledBitmapFromResource(data,photoSizeX,photoSizeY);
+        Bitmap image = ImageLoader.decodeSampledBitmapFromResource(data,photoSizeX,photoSizeY);
 
         bundle.putParcelable("source",image);
         bundle.putString("message",message);
