@@ -69,7 +69,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         createSearchAllTab(actionBar);
         createSearchByNameTab(actionBar);
         createSearchByDescriptionTab(actionBar);
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
         //Use text changed listener by mSearchTest EditText object to find elements in real time of search
         textListener();
         return v;
@@ -285,5 +285,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
         actionBar.removeAllTabs();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME|ActionBar.DISPLAY_HOME_AS_UP);
     }
 }

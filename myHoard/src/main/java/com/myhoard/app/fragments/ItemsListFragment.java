@@ -298,7 +298,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
         inflater.inflate(R.menu.item_list, menu);
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setDisplayOptions(android.app.ActionBar.DISPLAY_SHOW_HOME|android.app.ActionBar.DISPLAY_HOME_AS_UP);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
