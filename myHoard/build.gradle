@@ -37,7 +37,7 @@ dependencies {
     compile project(':libraries:facebook')
     compile files('libs/gson-2.2.4.jar')
     compile files('libs/httpmime-4.2.1.jar')
-    compile files('libs/robotium-solo-5.1.jar')
+    androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.+'
 }
 
 android {

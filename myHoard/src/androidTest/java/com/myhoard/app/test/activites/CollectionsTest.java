@@ -71,10 +71,10 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
     public void testAddNewCollections() {
         assertTrue("Expected CollectionsListFragment", solo.waitForFragmentByTag(MAIN));
         clickOnActionBarItem(R.id.action_new_collection);
-        addNewCollection(COLLECTION_NAME,COLLECTION_DESC,COLLECTION_TAG);
+        addNewCollection(COLLECTION_NAME, COLLECTION_DESC, COLLECTION_TAG);
         solo.sleep(TIME);
         clickOnActionBarItem(R.id.action_new_collection);
-        addNewCollection(COLLECTION_NAME,COLLECTION_DESC,COLLECTION_TAG);
+        addNewCollection(COLLECTION_NAME, COLLECTION_DESC, COLLECTION_TAG);
         assertTrue("Expected Toast", solo.waitForText(getActivity().getString(R.string.name_already_exist)));
         solo.sleep(TIME);
         solo.goBack();
@@ -130,8 +130,15 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
             solo.sleep(TIME);
             isNameLongEnough();
             solo.sleep(TIME);
+            solo.clearEditText(0);
+            solo.clearEditText(3);
+            solo.enterText(0, COLLECTION_DESC);
+            solo.enterText(3, COLLECTION_NAME);
             clickOnActionBarItem(R.id.action_accept);
             assertTrue("Expected Toast", solo.waitForText(getActivity().getString(R.string.collection_edited)));
+            assertTrue("Not found name after edit",solo.searchText(COLLECTION_DESC));
+            assertTrue("Not found tag after edit",solo.searchText(COLLECTION_NAME));
+            assertTrue("Not found counter of collection items",solo.searchText("0"));
         }
     }
 
