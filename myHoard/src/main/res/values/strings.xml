@@ -115,5 +115,7 @@
     <string name="search_hint">Enter search text</string>
     <string name="collection_added">Collection added successfully</string>
     <string name="delete_picker">Delete</string>
+    <string name="not_implement_yet">Not implemented yet</string>
+    <string name="Username">USERNAME(OPTIONAL)</string>
 
 </resources>

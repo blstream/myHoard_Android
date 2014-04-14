@@ -59,6 +59,9 @@ import java.util.List;
 Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 */
 public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
+
+    private static final String TAG = "MainActivity";
+
     private CollectionsListFragment collectionsListFragment;
     private UserManager userManager;
     private Menu actionBarMenu;
@@ -110,8 +113,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
         Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d("TAG", "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
-            Log.d("TAG", cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
+            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
         }
     }
 
@@ -436,15 +439,14 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     {
         
         switch (position) {
+            //search option
             case 0:
                 if (getVisibleFragmentTag().equals(MAIN)) {
                     search();
                 }
                 break;
-                            /* AWA:FIXME: Hardcoded value
-                            Magiczne numerki co oznaczaja 1, 2, 3....
-                            Musze z kodu wyczytac gdzie trafiłem ???
-                            */
+
+              //new collection
             case 1:
                 if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
                         !getVisibleFragmentTag().equals(ITEMSLIST) &&
@@ -467,11 +469,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                             .commit();
                 }
                 break;
+            //Friends
             case 2:
-                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(),getString(R.string.not_implement_yet),Toast.LENGTH_SHORT).show();
                 break;
+            //profile
             case 3:
-                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(),getString(R.string.not_implement_yet),Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
@@ -482,9 +486,6 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     List<RowItem> preparing_navigationDrawer() {
         String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
         int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
-
-
-
         List<RowItem> list = new ArrayList<>();
         for (int i = 0; i < drawerListItems.length; i++) {
             RowItem item = new RowItem(drawerListItems[i], images[i]);

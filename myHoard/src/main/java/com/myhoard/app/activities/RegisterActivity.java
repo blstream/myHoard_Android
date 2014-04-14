@@ -28,6 +28,7 @@ public class RegisterActivity extends ActionBarActivity {
     private static final String TAG = "REGISTRATION";
     private EditText emailRegistry;
     private EditText passwordRegistry;
+    private EditText usernameRegistry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,7 @@ public class RegisterActivity extends ActionBarActivity {
 
         emailRegistry = (EditText) findViewById(R.id.email_register);
         passwordRegistry = (EditText) findViewById(R.id.password_register);
+        usernameRegistry = (EditText) findViewById(R.id.username_register);
         Button registryButton = (Button) findViewById(R.id.reg_button);
 
         registryButton.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +64,9 @@ public class RegisterActivity extends ActionBarActivity {
         if (passwordFound && emailFound) {
             User user = new User();
             user.setEmail(String.valueOf(emailRegistry.getText()));
-            //user.setUsername(String.valueOf(emailRegistry.getText())); //TODO replace with value from username text field that will be added in near future
+            if(String.valueOf(usernameRegistry.getText()).length() > 0) {
+               user.setUsername(String.valueOf(usernameRegistry.getText())); //TODO replace with value from username text field that will be added in near future
+            }
             user.setPassword(String.valueOf(passwordRegistry.getText()));
 
 
