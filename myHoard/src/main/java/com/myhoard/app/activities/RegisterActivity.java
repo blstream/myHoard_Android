@@ -9,11 +9,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.myhoard.app.R;
-import com.myhoard.app.model.User;
 import com.myhoard.app.Managers.UserManager;
+import com.myhoard.app.R;
+import com.myhoard.app.crudengine.ConnectionDetector;
+import com.myhoard.app.model.User;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +31,7 @@ public class RegisterActivity extends ActionBarActivity {
     private EditText emailRegistry;
     private EditText passwordRegistry;
     private EditText usernameRegistry;
+    private EditText passwordConfirm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,7 @@ public class RegisterActivity extends ActionBarActivity {
         emailRegistry = (EditText) findViewById(R.id.email_register);
         passwordRegistry = (EditText) findViewById(R.id.password_register);
         usernameRegistry = (EditText) findViewById(R.id.username_register);
+        passwordConfirm = (EditText)findViewById(R.id.password_confirm);
         Button registryButton = (Button) findViewById(R.id.reg_button);
 
         registryButton.setOnClickListener(new View.OnClickListener() {
@@ -49,25 +53,39 @@ public class RegisterActivity extends ActionBarActivity {
     }
 
     public void registerUser() {
-        boolean passwordFound = validatePassword();
-        boolean emailFound = validateEmail();
-        if (!emailFound) {
 
-            emailRegistry.setError(getString(R.string.wrong_email_format));
+        ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+        if(!cd.isConnectingToInternet())
+        {
+            TextView txt = (TextView)findViewById(R.id.NoInternetTextView);
+            txt.setText(getString(R.string.no_internet_connection));
+
         }
-        if (!passwordFound) {
+        else {
+            boolean passwordFound = validatePassword();
+            boolean emailFound = validateEmail();
+            boolean passwordCheck = PasswordChecking(String.valueOf(passwordConfirm.getText()));
+            if (!emailFound) {
 
-            passwordRegistry.setError(getString(R.string.password_information));
-        }
-
-
-        if (passwordFound && emailFound) {
-            User user = new User();
-            user.setEmail(String.valueOf(emailRegistry.getText()));
-            if(String.valueOf(usernameRegistry.getText()).length() > 0) {
-               user.setUsername(String.valueOf(usernameRegistry.getText())); //TODO replace with value from username text field that will be added in near future
+                emailRegistry.setError(getString(R.string.wrong_email_format));
             }
-            user.setPassword(String.valueOf(passwordRegistry.getText()));
+            if (!passwordFound) {
+
+                passwordRegistry.setError(getString(R.string.password_information));
+            }
+            if (!passwordCheck) {
+                passwordConfirm.setError(getString(R.string.password_not_match));
+                passwordConfirm.setBackgroundResource(R.drawable.registration_border_wrong);
+            }
+
+
+            if (passwordFound && emailFound && passwordCheck) {
+                User user = new User();
+                user.setEmail(String.valueOf(emailRegistry.getText()));
+                if (String.valueOf(usernameRegistry.getText()).length() > 0) {
+                    user.setUsername(String.valueOf(usernameRegistry.getText())); //TODO replace with value from username text field that will be added in near future
+                }
+                user.setPassword(String.valueOf(passwordRegistry.getText()));
 
 
             /* AWA:FIXME: Niebezpieczne używanie wątku
@@ -75,10 +93,11 @@ public class RegisterActivity extends ActionBarActivity {
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.
         */
-            RegisterUser register  = new RegisterUser();
-            register.user = user;
-            register.activity = this;
-            register.execute();
+                RegisterUser register = new RegisterUser();
+                register.user = user;
+                register.activity = this;
+                register.execute();
+            }
         }
     }
 
@@ -101,6 +120,10 @@ public class RegisterActivity extends ActionBarActivity {
 
         if (!m.matches()) Log.d(TAG,getString(R.string.invalid_password));
         return m.matches();
+    }
+    public boolean PasswordChecking(String password)
+    {
+        return password.equals(String.valueOf(passwordRegistry.getText()));
     }
 
     private class RegisterUser extends AsyncTask<Void, Void, Boolean> {
