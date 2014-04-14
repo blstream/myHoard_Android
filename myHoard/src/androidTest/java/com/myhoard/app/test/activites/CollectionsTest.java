@@ -1,9 +1,5 @@
 package com.myhoard.app.test.activites;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.LoaderManager;
-import android.content.Loader;
 import android.support.v7.internal.view.menu.MenuView;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
@@ -15,8 +11,6 @@ import com.myhoard.app.R;
 import com.myhoard.app.activities.MainActivity;
 import com.robotium.solo.Solo;
 
-import junit.framework.Assert;
-
 import java.util.List;
 
 /**
@@ -27,6 +21,7 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
     private static final String COLLECTION_NAME = "Test";
     private static final String COLLECTION_DESC = "Testing";
     private static final String COLLECTION_TAG = "Tag";
+    private final int TIME = 1000;
 
     GridView gridView;
     private Solo solo;
@@ -66,7 +61,6 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.enterText(0, name);
         solo.enterText(2, desc);
         solo.enterText(3, tag);
-        solo.setActivityOrientation(Solo.LANDSCAPE);
         assertTrue("Not found name", solo.searchText(name));
         assertTrue("Not found description", solo.searchText(desc));
         assertTrue("Not found tag", solo.searchText(tag));
@@ -78,28 +72,29 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
         assertTrue("Expected CollectionsListFragment", solo.waitForFragmentByTag(MAIN));
         clickOnActionBarItem(R.id.action_new_collection);
         addNewCollection(COLLECTION_NAME,COLLECTION_DESC,COLLECTION_TAG);
-        solo.sleep(500);
+        solo.sleep(TIME);
         clickOnActionBarItem(R.id.action_new_collection);
         addNewCollection(COLLECTION_NAME,COLLECTION_DESC,COLLECTION_TAG);
         assertTrue("Expected Toast", solo.waitForText(getActivity().getString(R.string.name_already_exist)));
+        solo.sleep(TIME);
         solo.goBack();
-        solo.setActivityOrientation(Solo.LANDSCAPE);
+
         int collectionToAdd = 5;
         for(int i=0;i<collectionToAdd;i++) {
             clickOnActionBarItem(R.id.action_new_collection);
             addNewCollection(COLLECTION_NAME+i,COLLECTION_DESC,COLLECTION_TAG);
             assertTrue("Expected Toast", solo.waitForText(getActivity().getString(R.string.collection_added)));
-            solo.sleep(1000);
+            solo.sleep(TIME);
         }
         gridView = (GridView) getActivity().findViewById(R.id.gridview);
-        assertEquals(collectionToAdd, gridView.getAdapter().getCount());
+        assertEquals(collectionToAdd+1, gridView.getAdapter().getCount());
     }
 
     public void testDeleteAllCollection() {
         gridView = (GridView) getActivity().findViewById(R.id.gridview);
         int count = gridView.getAdapter().getCount();
         for (int i = 0; i < count; i++) {
-            solo.clickLongInList(i);
+            solo.clickLongInList(0);
             solo.clickOnMenuItem("Delete");
             assertTrue("Expected AlertDialog", solo.waitForText("DELETE COLLECTION"));
             solo.setActivityOrientation(Solo.LANDSCAPE);
@@ -132,9 +127,9 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
             assertTrue("Not found description", solo.searchText(COLLECTION_DESC));
             assertTrue("Not found tag", solo.searchText(COLLECTION_TAG));
             isNameCollection();
-            solo.sleep(500);
+            solo.sleep(TIME);
             isNameLongEnough();
-            solo.sleep(500);
+            solo.sleep(TIME);
             clickOnActionBarItem(R.id.action_accept);
             assertTrue("Expected Toast", solo.waitForText(getActivity().getString(R.string.collection_edited)));
         }
@@ -145,7 +140,7 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
         clickOnActionBarItem(R.id.action_accept);
         assertTrue("Expected Toast", solo.waitForText(getActivity().getString(R.string.required_name_collection)));
         solo.enterText(0, "     ");
-        solo.sleep(500);
+        solo.sleep(TIME);
         clickOnActionBarItem(R.id.action_accept);
         assertTrue("Expected Toast", solo.waitForText(getActivity().getString(R.string.required_name_collection)));
         solo.enterText(0,COLLECTION_NAME);
