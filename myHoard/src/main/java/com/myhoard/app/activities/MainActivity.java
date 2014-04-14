@@ -85,6 +85,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private static final String NEWELEMENT = "NewElement";
     private static final String ITEMSLIST = "ItemsList";
     private static final String FRAGMENT = "fragment";
+    private static DrawerLayout drawerLayout = null;
 
     private Handler handler = new Handler();
     private Thread progressBarThread;
@@ -115,7 +116,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     }
 
     private void setDrawer() {
-        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         final ListView navigationList = (ListView) findViewById(R.id.drawer_list);
         navigationList.setAdapter(navDrawerListAdapter);
 
@@ -128,63 +130,15 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int i, final long l) {
-                drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
 
-                    @Override
-                    public void onDrawerClosed(View drawerView) {
-                        super.onDrawerClosed(drawerView);
-
-                        int w = i;
-
-                        switch (w) {
-                            case 0:
-                                if (getVisibleFragmentTag().equals(MAIN)) {
-                                    search();
-                                }
-                                break;
-                            /* AWA:FIXME: Hardcoded value
-                            Magiczne numerki co oznaczaja 1, 2, 3....
-                            Musze z kodu wyczytac gdzie trafiłem ???
-                            */
-                            case 1:
-                                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
-                                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
-                                        !getVisibleFragmentTag().equals(NEWELEMENT)) {
-                                    //item.setTitle(R.string.action_new_collection);//TODO correct
-                                    getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
-                                            .addToBackStack(NEWCOLLECTION)
-                                            .commit();
-                                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
-                                    //item.setTitle(R.string.action_new_element);//TODO correct
-                                    Fragment elementFragment = new ElementFragment();
-                                    Bundle b = new Bundle();
-                                    b.putLong(ElementFragment.COLLECTION_ID, collectionSelected);
-                                    b.putInt(ElementFragment.ID, -1);
-                                    elementFragment.setArguments(b);
-                                    getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, elementFragment, NEWELEMENT)
-                                            .addToBackStack(NEWELEMENT)
-                                            .commit();
-                                }
-                                break;
-                            case 2:
-                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
-                                break;
-                            case 3:
-                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
-                                break;
-                            default:
-                                break;
-
-                        }
-                    }
-                });
-                drawerLayout.closeDrawer(navigationList);
+                displayView(i);
 
             }
+
+
         });
     }
+
 
     private void search() {
         //Set zgodnie z grafikami oparty na drawerze, jesli bedzie zmiana i przeniesienie
@@ -478,6 +432,53 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         progressBarThread.start();
     }
 
+    private void displayView(int position)
+    {
+        
+        switch (position) {
+            case 0:
+                if (getVisibleFragmentTag().equals(MAIN)) {
+                    search();
+                }
+                break;
+                            /* AWA:FIXME: Hardcoded value
+                            Magiczne numerki co oznaczaja 1, 2, 3....
+                            Musze z kodu wyczytac gdzie trafiłem ???
+                            */
+            case 1:
+                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
+                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
+                        !getVisibleFragmentTag().equals(NEWELEMENT)) {
+                    //item.setTitle(R.string.action_new_collection);//TODO correct
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
+                            .addToBackStack(NEWCOLLECTION)
+                            .commit();
+                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
+                    //item.setTitle(R.string.action_new_element);//TODO correct
+                    Fragment elementFragment = new ElementFragment();
+                    Bundle b = new Bundle();
+                    b.putLong(ElementFragment.COLLECTION_ID, collectionSelected);
+                    b.putInt(ElementFragment.ID, -1);
+                    elementFragment.setArguments(b);
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, elementFragment, NEWELEMENT)
+                            .addToBackStack(NEWELEMENT)
+                            .commit();
+                }
+                break;
+            case 2:
+                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
+                break;
+            case 3:
+                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+
+        }
+        drawerLayout.closeDrawers();
+    }
     List<RowItem> preparing_navigationDrawer() {
         String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
         int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
