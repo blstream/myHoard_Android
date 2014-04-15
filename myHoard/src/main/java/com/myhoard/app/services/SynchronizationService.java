@@ -1,19 +1,24 @@
 package com.myhoard.app.services;
 
 import android.app.IntentService;
+import android.content.ContentProviderOperation;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.RemoteException;
+import android.util.Log;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.crudengine.CRUDEngine;
 import com.myhoard.app.crudengine.MediaCrudEngine;
 import com.myhoard.app.model.Collection;
+import com.myhoard.app.model.IModel;
 import com.myhoard.app.model.Item;
 import com.myhoard.app.model.ItemMedia;
 import com.myhoard.app.model.Media;
@@ -27,7 +32,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -42,6 +49,8 @@ public class SynchronizationService extends IntentService {
     private static final String ITEM_ENDPOINT = "items/";
     private static final String MEDIA_ENDPOINT = "media/";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    ArrayList<ContentProviderOperation> operations = new
+            ArrayList<ContentProviderOperation>();
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -58,6 +67,197 @@ public class SynchronizationService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        String tmp = intent.getStringExtra("option");
+
+        switch (tmp) {
+            case "download":
+                download2();
+                break;
+            case "upload":
+                upload();
+                break;
+        }
+    }
+
+    private void download2() {
+        long startTime = System.currentTimeMillis();
+        UserManager uM = UserManager.getInstance();
+
+        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(uM.getIp() + COLLECTION_ENDPOINT, Collection.class);
+        List<Collection> collections = collectionCrud.getList(uM.getToken());
+
+        //List<String> listOfId = new ArrayList<>();
+        String selection = String.format(Collections.ID_SERVER+" IN (");
+        for (Collection collection : collections) {
+            //listOfId.add(collection.getId());
+            if (selection.charAt(selection.length() - 1)!='(') {
+                selection += ",";
+            }
+            selection += collection.getId();
+        }
+        selection += ")";
+
+        Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER,Collections.MODIFIED_DATE}, selection, null, null);
+        HashMap<String,Long> mapka = new HashMap<>();
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            mapka.put(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)),cursor.getLong(cursor.getColumnIndex(Collections.MODIFIED_DATE)));
+            }
+
+        for (Collection collection : collections) {
+            if (mapka.get(collection.getId())==null) {
+                //insert
+                insert(collection);
+            }
+            else { //jezeli data modyfikacji jest wieksza
+                Long dataMod = mapka.get(collection.getId());
+                //c.getString(c.getColumnIndex(Collections.MODIFIED_DATE));
+                //update
+                update(collection);
+            }
+        }
+
+
+        try {
+            getContentResolver().applyBatch(DataStorage.AUTHORITY,operations);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (OperationApplicationException e) {
+            e.printStackTrace();
+        }
+        Intent intent = new Intent("notification");
+        intent.putExtra("result", "downloaded");
+        sendBroadcast(intent);
+        long difference = System.currentTimeMillis() - startTime;
+        Log.d("MainActivity", "czas: " + ((Long) difference).toString());
+    }
+
+    private void upload() {
+        UserManager uM = UserManager.getInstance();
+        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(uM.getIp() + COLLECTION_ENDPOINT, Collection.class);
+        Cursor cursor = getContentResolver().query(DataStorage.Collections.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Collection collection = new Collection();
+            collection.setName(cursor.getString(cursor.getColumnIndex(Collections.NAME)));
+            collection.setDescription(cursor.getString(cursor.getColumnIndex(Collections.DESCRIPTION)));
+            if (cursor.getInt(cursor.getColumnIndex(Collections.SYNCHRONIZED))==0
+                    && cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)) != null) {
+                collectionCrud.update(collection, cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)), uM.getToken());
+                String where = String.format("%s = %s", Collections.ID_SERVER, cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)));
+                ContentValues values = new ContentValues();
+                values.put(Collections.SYNCHRONIZED, true);
+                int update = getContentResolver().update(Collections.CONTENT_URI, values, where, null);
+                int a = 2;
+                int b = a +3;
+            } else if (cursor.getInt(cursor.getColumnIndex(Collections.SYNCHRONIZED))==0) {
+                IModel imodel = collectionCrud.create(collection, uM.getToken());
+
+                String where = String.format("%s = %s", Collections._ID, cursor.getString(cursor.getColumnIndex(Collections._ID)));
+                ContentValues values = new ContentValues();
+                values.put(Collections.ID_SERVER,imodel.getId());
+                values.put(Collections.SYNCHRONIZED, true);
+                int update = getContentResolver().update(Collections.CONTENT_URI, values, where, null);
+            }
+        }
+    }
+
+    private void download() {
+        long startTime = System.currentTimeMillis();
+        UserManager uM = UserManager.getInstance();
+
+        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(uM.getIp() + COLLECTION_ENDPOINT, Collection.class);
+        List<Collection> collections = collectionCrud.getList(uM.getToken());
+        for (Collection collection : collections) {
+            String selection = String.format("%s = %s", Collections.ID_SERVER, collection.getId());
+            Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, null, selection, null, null);
+            if (cursor.moveToFirst()) {
+                //if datamotyfikacji sie zwiekszyla
+                update(collection);
+            } else {
+                insert(collection);
+            }
+        }
+        try {
+            getContentResolver().applyBatch(DataStorage.AUTHORITY,operations);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (OperationApplicationException e) {
+            e.printStackTrace();
+        }
+        Intent intent = new Intent("notification");
+        intent.putExtra("result", "downloaded");
+        sendBroadcast(intent);
+        long difference = System.currentTimeMillis() - startTime;
+        Log.d("MainActivity", "czas: " + ((Long) difference).toString());
+    }
+
+    private void update(Collection collection) {
+        ContentValues values = new ContentValues();
+        values.put(Collections.ID_SERVER, collection.getId());
+        values.put(Collections.NAME, collection.getName());
+        if (collection.getDescription() != null)
+            values.put(Collections.DESCRIPTION, collection.getDescription());
+        values.put(Collections.TAGS, collection.getTags().toString());
+        values.put(Collections.TYPE, TypeOfCollection.PUBLIC.toString());
+        values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
+        values.put(Collections.SYNCHRONIZED, true);
+
+        try {
+            java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getModified_date());
+            java.util.Date creDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getCreated_date());
+            long modifiedDate = modDate.getTime();
+            long createdDate = creDate.getTime();
+            values.put(Collections.MODIFIED_DATE, modifiedDate);
+            values.put(Collections.CREATED_DATE, createdDate);
+        } catch (ParseException e) {
+            values.put(Collections.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
+            values.put(Collections.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
+            e.printStackTrace();
+        }
+        String where = String.format("%s = %s", Collections.ID_SERVER, collection.getId());
+        operations.add(ContentProviderOperation.
+                        newUpdate(Collections.CONTENT_URI)
+                        .withSelection(where, null)
+                        .withValues(values)
+                        .build()
+        );
+        //int update = getContentResolver().update(Collections.CONTENT_URI, values, where, null);
+    }
+
+
+    private void insert(Collection collection) {
+        ContentValues values = new ContentValues();
+        values.put(Collections.ID_SERVER, collection.getId());
+        values.put(Collections.NAME, collection.getName());
+        if (collection.getDescription() != null)
+            values.put(Collections.DESCRIPTION, collection.getDescription());
+        values.put(Collections.TAGS, collection.getTags().toString());
+        values.put(Collections.TYPE, TypeOfCollection.PUBLIC.toString());
+        values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
+        values.put(Collections.SYNCHRONIZED, true);
+
+        try {
+            java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getModified_date());
+            java.util.Date creDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getCreated_date());
+            long modifiedDate = modDate.getTime();
+            long createdDate = creDate.getTime();
+            values.put(Collections.MODIFIED_DATE, modifiedDate);
+            values.put(Collections.CREATED_DATE, createdDate);
+        } catch (ParseException e) {
+            values.put(Collections.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
+            values.put(Collections.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
+            e.printStackTrace();
+        }
+
+        operations.add(ContentProviderOperation.
+                newInsert(Collections.CONTENT_URI)
+                .withValues(values)
+                .build());
+        //Uri insert = getContentResolver().insert(Collections.CONTENT_URI, values);
+    }
+
+            /*@Override
+    protected void onHandleIntent(Intent intent) {
+
         UserManager uM = UserManager.getInstance();
 
         CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(uM.getIp() + COLLECTION_ENDPOINT, Collection.class);
@@ -82,34 +282,9 @@ public class SynchronizationService extends IntentService {
                 }
             }
         }
-    }
+    }*/
 
-    private void insert(Collection collection) {
-        ContentValues values = new ContentValues();
-        values.put(Collections.ID_SERVER, collection.getId());
-        values.put(Collections.NAME, collection.getName());
-        if (collection.getDescription() != null) values.put(Collections.DESCRIPTION, collection.getDescription());
-        values.put(Collections.TAGS, collection.getTags().toString());
-        values.put(Collections.TYPE, TypeOfCollection.PUBLIC.toString());
-        values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
-
-        try {
-            java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getModified_date());
-            java.util.Date creDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getCreated_date());
-            long modifiedDate = modDate.getTime();
-            long createdDate = creDate.getTime();
-            values.put(Collections.MODIFIED_DATE, modifiedDate);
-            values.put(Collections.CREATED_DATE, createdDate);
-        } catch (ParseException e) {
-            values.put(Collections.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
-            values.put(Collections.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
-            e.printStackTrace();
-        }
-
-        Uri insert = getContentResolver().insert(Collections.CONTENT_URI, values);
-    }
-
-    private long insert(Item item) {
+    /*private long insert(Item item) {
         ContentValues values = new ContentValues();
 
         values.put(DataStorage.Items.ID_SERVER, item.id);
@@ -182,5 +357,5 @@ public class SynchronizationService extends IntentService {
         values.put(DataStorage.Media.ID_SERVER, media.getId());
         values.put(DataStorage.Media.ID_ITEM, idItem);
         getContentResolver().insert(DataStorage.Media.CONTENT_URI, values);
-    }
+    }*/
 }

@@ -45,6 +45,8 @@ public class ItemsTable extends DatabaseTable {
                 .append(Items.LOCATION + " TEXT, ")
                 .append(Items.CREATED_DATE + " NUMERIC, ")
                 .append(Items.MODIFIED_DATE + " NUMERIC, ")
+                .append(Items.SYNCHRONIZED + " BOOLEAN DEFAULT FALSE, ")
+                .append(Items.DELETED + " BOOLEAN DEFAULT FALSE, ")
                 .append("FOREIGN KEY(" + Items.ID_COLLECTION + ") REFERENCES " + Collections.TABLE_NAME + "(" + Collections._ID + "))");
         db.execSQL(sql.toString());
     }

@@ -82,6 +82,18 @@ public final class DataStorage {
          * <p>Type: NUMERIC</p>
          */
         public static final String ITEMS_NUMBER = "itemsNumber";
+
+        /**
+         * If object is synchronized with server. Column name.
+         * <p>Type: BOOLEAN</p>
+         */
+        public static final String SYNCHRONIZED = "synchronized";
+
+        /**
+         * If object is deleted local. Column name.
+         * <p>Type: BOOLEAN</p>
+         */
+        public static final String DELETED = "deleted";
 	}
 
 	protected interface ItemsColumns {
@@ -138,6 +150,18 @@ public final class DataStorage {
 		 * <p>Type: NUMERIC</p>
 		 */
 		public static final String MODIFIED_DATE = "modifiedDate";
+
+        /**
+         * If object is synchronized with server. Column name.
+         * <p>Type: BOOLEAN</p>
+         */
+        public static final String SYNCHRONIZED = "synchronized";
+
+        /**
+         * If object is deleted local. Column name.
+         * <p>Type: BOOLEAN</p>
+         */
+        public static final String DELETED = "deleted";
 	}
 
 	protected interface MediaColumns {
@@ -170,6 +194,18 @@ public final class DataStorage {
 		 * <p>Type: NUMERIC</p>
 		 */
 		public static final String CREATED_DATE = "createdDate";
+
+        /**
+         * If object is synchronized with server. Column name.
+         * <p>Type: BOOLEAN</p>
+         */
+        public static final String SYNCHRONIZED = "synchronized";
+
+        /**
+         * If object is deleted local. Column name.
+         * <p>Type: BOOLEAN</p>
+         */
+        public static final String DELETED = "deleted";
 	}
 
 	public static final class Collections implements BaseColumns, CollectionsColumns {
@@ -185,7 +221,9 @@ public final class DataStorage {
 				MODIFIED_DATE,
 				SERVERS,
                 TYPE,
-                ITEMS_NUMBER
+                ITEMS_NUMBER,
+                SYNCHRONIZED,
+                DELETED
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
 		/**
 		 * This utility class cannot be instantiated
@@ -207,7 +245,9 @@ public final class DataStorage {
 				LOCATION_LNG,
                 LOCATION,
 				CREATED_DATE,
-				MODIFIED_DATE
+				MODIFIED_DATE,
+                SYNCHRONIZED,
+                DELETED
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
 
 	}
@@ -221,6 +261,8 @@ public final class DataStorage {
 				AVATAR,
 				FILE_NAME,
 				CREATED_DATE,
+                SYNCHRONIZED,
+                DELETED
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
 
 	}

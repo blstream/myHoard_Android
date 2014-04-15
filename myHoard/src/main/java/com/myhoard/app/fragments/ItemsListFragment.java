@@ -281,14 +281,10 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         if (userManager.isLoggedIn()) {
             item = menu.findItem(R.id.action_login);
             if(item!=null) item.setTitle(R.string.logout);
-            item = menu.findItem(R.id.action_synchronize);
-            if(item!=null) item.setVisible(true);
         }
         else {
             item = menu.findItem(R.id.action_login);
             if(item!=null) item.setTitle(R.string.Login);
-            item = menu.findItem(R.id.action_synchronize);
-            if(item!=null) item.setVisible(false);
         }
         super.onPrepareOptionsMenu(menu);
     }

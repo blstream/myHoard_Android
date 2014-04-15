@@ -201,6 +201,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                 .getTime().getTime());
         values.put(DataStorage.Collections.TYPE, getTypeOfCollection(String.valueOf(etCollectionType.getText())));
         if (this.getTag().equals("EditCollection")) {
+            values.put(DataStorage.Collections.SYNCHRONIZED,false);
             Toast.makeText(getActivity(), context.getString(R.string
                     .collection_edited), Toast.LENGTH_LONG).show();
 

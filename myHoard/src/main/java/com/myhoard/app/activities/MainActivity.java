@@ -50,6 +50,7 @@ import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.model.RowItem;
 import com.myhoard.app.provider.DataStorage;
+import com.myhoard.app.services.SynchronizationService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,10 +111,19 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         openFragment(savedInstanceState, fm);
         setDrawer();
 
+        //Kod potrzebny do debugowania, prosze go nie uswuac
         Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
             Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+        }
+        Log.d(TAG,"<-----KOLKECJE----->");
+        cursor = getContentResolver().query(DataStorage.Collections.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections._ID)));
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.SYNCHRONIZED))>0)).toString());
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.DELETED))>0)).toString());
+            Log.d(TAG, (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.MODIFIED_DATE))).toString());
         }
     }
 
@@ -337,10 +347,15 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                     fragment.itemsSortOrderChange(item);
                 }
                 break;*/
-            case R.id.action_synchronize:
-                startProgressBar();
-                //Intent synchronize = new Intent(this, SynchronizeService.class);
-                //startService(synchronize);
+            case R.id.action_download:
+                Intent synchronize = new Intent(this, SynchronizationService.class);
+                synchronize.putExtra("option","download");
+                startService(synchronize);
+                break;
+            case R.id.action_upload:
+                Intent synchronizee = new Intent(this, SynchronizationService.class);
+                synchronizee.putExtra("option","upload");
+                startService(synchronizee);
                 break;
             default:
                 return super.onOptionsItemSelected(item);

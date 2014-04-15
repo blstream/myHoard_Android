@@ -13,12 +13,6 @@
 
 
     <item
-        android:id="@+id/action_synchronize"
-        android:title="@string/action_synchronize"
-        android:orderInCategory="100"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/action_new_collection"
         android:title="@string/action_new_collection"
         android:icon="@drawable/ic_action_new"
@@ -35,5 +29,13 @@
     <item
         android:id="@+id/action_generate"
         android:title="@string/action_generate"/>
+
+    <item
+        android:id="@+id/action_download"
+        android:title="download"/>
+
+    <item
+        android:id="@+id/action_upload"
+        android:title="upload"/>
 
 </menu>

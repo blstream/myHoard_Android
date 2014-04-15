@@ -36,6 +36,8 @@ public class MediaTable extends DatabaseTable {
 				.append(Media.AVATAR + " BOOLEAN, ")
 				.append(Media.FILE_NAME + " TEXT, ")
 				.append(Media.CREATED_DATE + " NUMERIC, ")
+                .append(Media.SYNCHRONIZED + " BOOLEAN DEFAULT FALSE, ")
+                .append(Media.DELETED + " BOOLEAN DEFAULT FALSE, ")
 				.append("FOREIGN KEY(" + Media.ID_ITEM + ") REFERENCES " + Items.TABLE_NAME + "(" + Items._ID + "))");
 		db.execSQL(sql.toString());
 	}
