@@ -19,7 +19,7 @@ import com.myhoard.app.model.User;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//TODO add username text field
+
     /*
     Created by Mateusz Czyszkiewicz , modified by Marcin Laszcz, Tomasz Nosal
     */
@@ -82,7 +82,7 @@ public class RegisterActivity extends BaseActivity {
                 User user = new User();
                 user.setEmail(String.valueOf(emailRegistry.getText()));
                 if (String.valueOf(usernameRegistry.getText()).length() > 0) {
-                    user.setUsername(String.valueOf(usernameRegistry.getText())); //TODO replace with value from username text field that will be added in near future
+                    user.setUsername(String.valueOf(usernameRegistry.getText()));
                 }
                 user.setPassword(String.valueOf(passwordRegistry.getText()));
 
