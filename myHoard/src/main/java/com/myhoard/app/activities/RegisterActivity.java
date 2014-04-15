@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,7 +23,7 @@ import java.util.regex.Pattern;
     /*
     Created by Mateusz Czyszkiewicz , modified by Marcin Laszcz, Tomasz Nosal
     */
-public class RegisterActivity extends ActionBarActivity {
+public class RegisterActivity extends BaseActivity {
 
 
     private static final String TAG = "REGISTRATION";

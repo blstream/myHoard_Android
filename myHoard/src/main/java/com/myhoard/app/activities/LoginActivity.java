@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -13,15 +12,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.crudengine.ConnectionDetector;
 import com.myhoard.app.model.User;
-import com.myhoard.app.Managers.UserManager;
 
 /*
 * Crreated by Mateusz Czyszkiewicz
 */
-public class LoginActivity extends ActionBarActivity  {
+public class LoginActivity extends BaseActivity  {
 
 	private EditText email;
 	private EditText password;
