@@ -59,6 +59,9 @@ public class Item implements IModel
     public String modifiedDate;
     public String collection;
 
+    public Item(){
+    }
+
     public Item(String id, String name, String description, ItemLocation location, List<ItemMedia> media,
                 String createdDate, String modifiedDate, String collection) {
         this.id = id;
@@ -69,6 +72,62 @@ public class Item implements IModel
         this.createdDate = createdDate;
         this.modifiedDate = modifiedDate;
         this.collection = collection;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public ItemLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(ItemLocation location) {
+        this.location = location;
+    }
+
+    public List<ItemMedia> getMedia() {
+        return media;
+    }
+
+    public void setMedia(List<ItemMedia> media) {
+        this.media = media;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getCollection() {
+        return collection;
+    }
+
+    public void setCollection(String collection) {
+        this.collection = collection;
+    }
+
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(String modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
     @Override

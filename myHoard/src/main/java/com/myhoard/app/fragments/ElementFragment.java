@@ -84,6 +84,8 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     private static final int LOADER_IMAGES = 2;
     private static final int NO_FLAGS = 0;
 
+    private boolean first = true;
+
     /* AWA:FIXME: Niepotrzebne prefiksy określające typ
 Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
 */
@@ -522,6 +524,7 @@ Wypychanie błędów do UI
                 ContentValues values = new ContentValues();
                 values.put(DataStorage.Media.ID_ITEM, elementId);
                 values.put(DataStorage.Media.FILE_NAME, uri.toString());
+                values.put(DataStorage.Media.AVATAR,true);
                 AsyncImageQueryHandler asyncHandler =
                         new AsyncImageQueryHandler(getActivity().getContentResolver()) {};
                 if (imageId != -1) {
@@ -806,6 +809,11 @@ Wypychanie błędów do UI
             ContentValues values = new ContentValues();
             values.put(DataStorage.Media.ID_ITEM, id);
             values.put(DataStorage.Media.FILE_NAME, uri.toString());
+            if (first) {
+                values.put(DataStorage.Media.AVATAR, true);
+                first=false;
+            }
+            else  values.put(DataStorage.Media.AVATAR,false);
             AsyncImageQueryHandler asyncHandler =
                     new AsyncImageQueryHandler(cr) {};
                 values.put(DataStorage.Media.CREATED_DATE, Calendar.getInstance()
