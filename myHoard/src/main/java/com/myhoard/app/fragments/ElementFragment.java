@@ -809,6 +809,7 @@ Wypychanie błędów do UI
             ContentValues values = new ContentValues();
             values.put(DataStorage.Media.ID_ITEM, id);
             values.put(DataStorage.Media.FILE_NAME, uri.toString());
+            values.put(DataStorage.Media.SYNCHRONIZED,false);
             if (first) {
                 values.put(DataStorage.Media.AVATAR, true);
                 first=false;

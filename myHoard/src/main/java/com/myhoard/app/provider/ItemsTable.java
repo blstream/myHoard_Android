@@ -60,6 +60,7 @@ public class ItemsTable extends DatabaseTable {
     public Cursor query(SQLiteDatabase db, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         //JOIN tables to get element name with its specific avatar
+        qb.setDistinct(true);
         qb.setTables(tableName + " LEFT JOIN " + Media.TABLE_NAME + " ON (" + Items.TABLE_NAME + "." + Items._ID + "=" + Media.TABLE_NAME + "." + Media.ID_ITEM + ")");
 
         String orderBy;

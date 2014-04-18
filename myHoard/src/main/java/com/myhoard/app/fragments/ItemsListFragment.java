@@ -413,7 +413,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         switch(i){
             //Get all elements from collection
             case 0:
-                selection = String.format("%s = %s and %s=%d",mCollectionID,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1);
+                selection = String.format("%s = %s and (%s=%d or %s is null)",mCollectionID,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR);
                 cursorLoader =  new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
                         new String[]{DataStorage.Items.NAME, DataStorage.Media.FILE_NAME,
                                 DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,DataStorage.Items.DESCRIPTION},

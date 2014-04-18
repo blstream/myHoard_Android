@@ -16,6 +16,10 @@ public class ItemMedia {
         this.id = id;
     }
 
+    public ItemMedia(String id) {
+        this.id = id;
+    }
+
     public JSONObject toJson() throws JSONException {
         final String API_ID = "id";
         final String API_URL = "url";

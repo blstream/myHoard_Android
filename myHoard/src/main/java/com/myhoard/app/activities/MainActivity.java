@@ -135,7 +135,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,
                 DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_COLLECTION,
                 DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.SYNCHRONIZED,
-                DataStorage.Media.TABLE_NAME + "." + DataStorage.Media.FILE_NAME,
+                //DataStorage.Media.TABLE_NAME + "." + DataStorage.Media.FILE_NAME,
                 };
         cursor = getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, null, null, null);
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -144,7 +144,15 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_SERVER)));
             Log.d(TAG, "id_collection "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_COLLECTION)));
             Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Items.SYNCHRONIZED))>0)).toString());
-            Log.d(TAG, "file name "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+            //Log.d(TAG, "file name "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+        }
+
+        cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG, "<-Media->");
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
+            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER)));
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Media.SYNCHRONIZED))>0)).toString());
         }
     }
 
