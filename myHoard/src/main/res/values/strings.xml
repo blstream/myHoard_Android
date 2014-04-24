@@ -119,5 +119,6 @@
     <string name="Username">USERNAME(OPTIONAL)</string>
     <string name="Confirm_password">CONFIRM PASSWORD</string>
     <string name="password_not_match">Password doesn\'t match</string>
+    <string name="password_strenght_text">Password Strenght</string>
 
 </resources>

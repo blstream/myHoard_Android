@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +33,8 @@ public class RegisterActivity extends BaseActivity {
     private EditText passwordRegistry;
     private EditText usernameRegistry;
     private EditText passwordConfirm;
+    private TextView password_strenght;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,8 @@ public class RegisterActivity extends BaseActivity {
         usernameRegistry = (EditText) findViewById(R.id.username_register);
         passwordConfirm = (EditText)findViewById(R.id.password_confirm);
         Button registryButton = (Button) findViewById(R.id.reg_button);
+        passwordRegistry.addTextChangedListener(PasswordEditorMatcher);
+        password_strenght = (TextView) findViewById(R.id.passwordStrenghtText);
 
         registryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,6 +56,8 @@ public class RegisterActivity extends BaseActivity {
             }
         });
     }
+
+
 
     public void registerUser() {
 
@@ -99,6 +107,35 @@ public class RegisterActivity extends BaseActivity {
             }
         }
     }
+
+        private final TextWatcher PasswordEditorMatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                password_strenght.setText("Empty");
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if(s.length() < 4)
+                {
+                    password_strenght.setTextColor(getResources().getColor(R.color.red));
+                    password_strenght.setText("too short");
+                }
+                else if(s.length() > 4 )
+                 {
+                    password_strenght.setTextColor(getResources().getColor(R.color.green));
+                    password_strenght.setText("quite ok");
+                }
+            }
+        };
+
+
 
     public boolean validatePassword() {
         String password = String.valueOf(passwordRegistry.getText());

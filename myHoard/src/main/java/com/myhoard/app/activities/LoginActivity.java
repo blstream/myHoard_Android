@@ -30,11 +30,13 @@ public class LoginActivity extends BaseActivity {
     private final static String LOGINPREFS = "loginPrefs";
     private final static String USERNAMES = "username";
     private final static String PASSWORDS = "password";
+    private final static String CHECK  ="checked";
     private CheckBox remember_check;
     private SharedPreferences.Editor editor;
     private Button login_button;
     private TextView txt;
     private User user;
+    private boolean checked = false;
 
     @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +52,10 @@ public class LoginActivity extends BaseActivity {
         if (saveLogin) {
             email.setText(loginPreferences.getString(USERNAMES, ""));
             password.setText(loginPreferences.getString(PASSWORDS, ""));
+            remember_check.setChecked(true);
         }
+
+
         txt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -65,6 +70,9 @@ public class LoginActivity extends BaseActivity {
             }
         });
     }
+
+
+
 
             public void setVariables() {
                 email = (EditText) findViewById(R.id.login_email);
@@ -103,6 +111,7 @@ public class LoginActivity extends BaseActivity {
                         editor.putBoolean(SAVELOGIN, true);
                         editor.putString(USERNAMES, email_ch);
                         editor.putString(PASSWORDS, password_ch);
+                        editor.putBoolean(CHECK,true);
                         editor.commit();
                     } else {
                         editor.clear();
