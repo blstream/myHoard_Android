@@ -75,6 +75,8 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
 	public static final String TAGS = "elementTags";
     public static final String EDITION = "edition";
 
+    private static final String CURRENT_PATH_KEY = "currentPathKey";
+
 	private static final String TAG = "ElementFragment";
 	private static final boolean D = false;
 	private static final int REQUEST_IMAGE_CAPTURE = 2;
@@ -158,6 +160,10 @@ Patrz:Ksiazka:Czysty kod:Rozdział 2:Nazwy klas, metod….
 
         final View v = inflater.inflate(R.layout.fragment_element, container, false);
         setHasOptionsMenu(true);
+
+        if(savedInstanceState!=null) {
+            sCurrentPhotoPath = savedInstanceState.getString(CURRENT_PATH_KEY);
+        }
 
         final RelativeLayout rlEmptyView = (RelativeLayout) v.findViewById(R.id.element_emptyview);
         final LinearLayout lnEmptyViewClickable = (LinearLayout) v.findViewById(R.id.emptyview_inside);
@@ -616,6 +622,12 @@ Wypychanie błędów do UI
         Date d = new Date();
         CharSequence s  = DateFormat.format("dMMyyyy", d.getTime());
         return Integer.getInteger(s.toString());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(CURRENT_PATH_KEY,sCurrentPhotoPath);
     }
 
     @Override
