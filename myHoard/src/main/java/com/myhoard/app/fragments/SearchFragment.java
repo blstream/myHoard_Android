@@ -215,16 +215,19 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         String selection = null;
         switch(id){
             case SEARCH_ALL:
-                selection = String.format("%s = %s AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.DESCRIPTION,collectionElementText,DataStorage.Items.NAME,collectionElementText);
+                selection = String.format("%s = %s and (%s=%d or %s is null) AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                        DataStorage.Items.DESCRIPTION,collectionElementText,DataStorage.Items.NAME,collectionElementText);
                 break;
             case SEARCH_BY_NAME:
-                selection = String.format("%s = %s AND %s LIKE '%%%s%%'",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.NAME,collectionElementText);
+                selection = String.format("%s = %s and (%s=%d or %s is null) AND %s LIKE '%%%s%%'",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                        DataStorage.Items.NAME,collectionElementText);
                 break;
             case SEARCH_BY_DESCRIPTION:
-                selection = String.format("%s = %s AND %s LIKE '%%%s%%'",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.DESCRIPTION,collectionElementText);
+                selection = String.format("%s = %s and (%s=%d or %s is null) AND %s LIKE '%%%s%%'",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                        DataStorage.Items.DESCRIPTION,collectionElementText);
                 break;
         }
         //CursorLoader used to get data from user query
