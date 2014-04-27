@@ -248,6 +248,12 @@ public class CollectionsListFragment extends Fragment implements
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        adapter.mImageLoader.clearCache();
+    }
+
+    @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);

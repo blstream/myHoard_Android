@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.myhoard.app.R;
@@ -19,12 +20,14 @@ import com.myhoard.app.R;
 public class ImageLoader{
 
     MemoryCache memoryCache = new MemoryCache();
+    ImageCacheDatabase imageCacheDatabase;
     private Map<ImageView, String> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
     ExecutorService executorService;
     Handler handler = new Handler();//handler to display images in UI thread
     private static Context mContext;
     public ImageLoader(Context mContext) {
         ImageLoader.mContext = mContext;
+        imageCacheDatabase = new ImageCacheDatabase(mContext);
         executorService = Executors.newFixedThreadPool(5);
     }
 
@@ -46,8 +49,16 @@ public class ImageLoader{
         executorService.submit(new PhotosLoader(p));
     }
 
-    public static Bitmap decodeSampledBitmapFromResource(String path,
-                                                         int reqWidth, int reqHeight) {
+    public Bitmap getBitmap(String url){
+        Bitmap bmp = imageCacheDatabase.getBitmap(url);
+        if(bmp==null){
+            bmp = decodeSampledBitmapFromResource(url, 100, 100);
+            imageCacheDatabase.addBitmap(url,bmp);
+        }
+        return bmp;
+    }
+
+    public static Bitmap decodeSampledBitmapFromResource(String path,int reqWidth, int reqHeight) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -113,7 +124,8 @@ public class ImageLoader{
             try {
                 if (imageViewReused(photoToLoad))
                     return;
-                Bitmap bmp = decodeSampledBitmapFromResource(photoToLoad.url, 200, 200);
+                //Bitmap bmp = decodeSampledBitmapFromResource(photoToLoad.url, 200, 200);
+                Bitmap bmp = getBitmap(photoToLoad.url);
                 memoryCache.put(photoToLoad.url, bmp);
                 if (imageViewReused(photoToLoad))
                     return;
@@ -148,5 +160,11 @@ public class ImageLoader{
             else
                 photoToLoad.imageView.setImageResource(stub_id);
         }
+    }
+
+    public void clearCache(){
+        memoryCache.clear();
+        imageCacheDatabase.clearDatabase();
+        Log.d("CLEAR MEMORY cache", "CLEAR MEMORY CACHE");
     }
 }

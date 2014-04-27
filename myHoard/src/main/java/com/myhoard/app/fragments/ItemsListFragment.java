@@ -258,6 +258,12 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mImageAdapterList.mImageLoader.clearCache();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);

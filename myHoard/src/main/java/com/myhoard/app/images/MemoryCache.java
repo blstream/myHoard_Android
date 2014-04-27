@@ -65,4 +65,13 @@ public class MemoryCache {
             return 0;
         return bitmap.getRowBytes() * bitmap.getHeight();
     }
+
+    public void clear() {
+        try{
+            cache.clear();
+            size=0;
+        }catch(NullPointerException ex){
+            ex.printStackTrace();
+        }
+    }
 }

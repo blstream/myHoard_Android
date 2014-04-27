@@ -26,7 +26,7 @@ public class ImageAdapterList extends CursorAdapter {
         ImageView img;
         String path;
     }
-    private final ImageLoader mImageLoader;
+    public final ImageLoader mImageLoader;
 	public ImageAdapterList(Context context, Cursor c, int flags) {
 	    super(context, c, flags);
 	    mImageLoader = new ImageLoader(context);

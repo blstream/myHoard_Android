@@ -39,7 +39,7 @@ import com.myhoard.app.provider.DataStorage;
 public class ImageAdapter extends CursorAdapter {
 	private int width = 200;
     private static final String EMPTY_COLLECTION = "0";
-    private final ImageLoader mImageLoader;
+    public final ImageLoader mImageLoader;
 
 	public ImageAdapter(Context context) {
 		super(context, null, 0);
