@@ -49,6 +49,7 @@ import com.myhoard.app.R;
 import com.myhoard.app.adapters.ImageElementAdapterCursor;
 import com.myhoard.app.adapters.ImageElementAdapterList;
 import com.myhoard.app.gps.GPSProvider;
+import com.myhoard.app.images.PhotoManager;
 import com.myhoard.app.provider.DataStorage;
 
 import java.io.File;
@@ -75,7 +76,8 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     public static final String TAGS = "elementTags";
     public static final String EDITION = "edition";
 
-    private static final String CURRENT_PATH_KEY = "currentPathKey";
+    private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
+    private static final int REQUEST_GET_PHOTO = 1;
 
     private static final String TAG = "ElementFragment";
     private static final boolean D = false;
@@ -109,6 +111,8 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     private Button tmpButtonAdd;
     private int imageId;
     private boolean editionMode;
+
+    private PhotoManager photoManager;
 
     GPSProvider mService;
     boolean mBound = false;
@@ -166,26 +170,21 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         setHasOptionsMenu(true);
 
         if (savedInstanceState != null) {
-            sCurrentPhotoPath = savedInstanceState.getString(CURRENT_PATH_KEY);
+            photoManager = savedInstanceState.getParcelable(PHOTO_MANAGER_KEY);
+        } else {
+            photoManager = new PhotoManager(this,REQUEST_GET_PHOTO);
         }
 
-        final RelativeLayout rlEmptyView = (RelativeLayout) v
-                .findViewById(R.id.element_emptyview);
-        final LinearLayout lnEmptyViewClickable = (LinearLayout) v
-                .findViewById(R.id.emptyview_inside);
+        final RelativeLayout rlEmptyView = (RelativeLayout) v.findViewById(R.id.element_emptyview);
+        final LinearLayout lnEmptyViewClickable = (LinearLayout) v.findViewById(R.id.emptyview_inside);
         context = getActivity();
         imagesUriList = new ArrayList<Uri>();
 
         tvElementName = (TextView) v.findViewById(R.id.tvElementName);
-        tvElementDescription = (TextView) v
-                .findViewById(R.id.tvElementDescription);
-        tvElementPosition = (TextView) v
-                .findViewById(R.id.tvElementLocalisation);
+        tvElementDescription = (TextView) v.findViewById(R.id.tvElementDescription);
+        tvElementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
         etElementName = (EditText) v.findViewById(R.id.etElementName);
-        etElementDescription = (EditText) v
-                .findViewById(R.id.etElementDescription);
-        // ivElementPhoto = (ScaleImageView)
-        // v.findViewById(R.id.ivElementPhoto);
+        etElementDescription = (EditText) v.findViewById(R.id.etElementDescription);
         tvElementCategory = (TextView) v.findViewById(R.id.tvElementCategory);
         gvPhotosList = (GridView) v.findViewById(R.id.gvPhotosList);
         gvPhotosList.setEmptyView(rlEmptyView);
@@ -233,21 +232,11 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
             }
         }
         gvPhotosList.setOnItemClickListener(this);
-        // ivElementPhoto.setOnClickListener(this);
-
-        // if(iCollectionId!=-1) {
-        // adapter.getCursor().moveToPosition(iCollectionId);
-        // int columnIndex =
-        // adapter.getCursor().getColumnIndex(DataStorage.Collections.NAME);
-        // tvElementCategory.setText(adapter.getCursor().getString(columnIndex));
-        // } else {
-        tvElementCategory.setText("brak");
-        // }
         tvElementCategory.setOnClickListener(this);
         lnEmptyViewClickable.setOnClickListener(this);
 
-        fillCategoriesData();
-
+        getLoaderManager().initLoader(LOADER_CATEGORIES, null,
+                new LoaderCategoriesCallbacks());
         return v;
     }
 
@@ -268,9 +257,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
             return;
         }
         switch (view.getId()) {
-            // case R.id.ivElementPhoto:
-            // imagePicker();
-            // break;
             case R.id.tvElementLocalisation:
                 if (String.valueOf(tvElementPosition.getText()).equals("brak")) {
                     startActivity(new Intent(
@@ -296,15 +282,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         }
         imageId = (int) l;
         imagePickerDel();
-        // switch(i) {
-        // case 0:
-        // Toast.makeText(getActivity(),"Pusty",Toast.LENGTH_SHORT).show();
-        // break;
-        // default:
-        // imageId = (int)l;
-        // imagePicker();
-        // break;
-        // }
     }
 
     /**
@@ -343,9 +320,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         // UI fields in given layout into which elemnts have to be put.
         int[] to = new int[] { android.R.id.text1 };
 
-        getLoaderManager().initLoader(LOADER_CATEGORIES, null,
-                new LoaderCategoriesCallbacks());
-        getLoaderManager().initLoader(3, null, new LoaderItemsCallbacks());
+//        getLoaderManager().initLoader(LOADER_CATEGORIES, null,
+//                new LoaderCategoriesCallbacks());
+//        getLoaderManager().initLoader(3, null, new LoaderItemsCallbacks());
 
         adapterCategories = new SimpleCursorAdapter(context,
                 android.R.layout.simple_list_item_1, null, from, to, NO_FLAGS);
@@ -372,17 +349,18 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         pickerDialogBuilder.setItems(R.array.actions_on_picker,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-
-                        if (which == 0) // add from camera
-                        {
-                            dispatchTakePictureIntent();
-                        } else if (which == 1) // add from gallery
-                        {
-                            Intent i = new Intent(
-                                    Intent.ACTION_PICK,
-                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            startActivityForResult(i, SELECT_PICTURE);
+                        try{
+                            if (which == 0) // add from camera
+                            {
+                                photoManager.takePicture(PhotoManager.MODE_CAMERA);
+                            } else if (which == 1) // add from gallery
+                            {
+                                photoManager.takePicture(PhotoManager.MODE_GALLERY);
+                            }
+                        } catch (IOException io) {
+                            //TODO show error
                         }
+
                     }
                 });
         pickerDialogBuilder
@@ -406,17 +384,18 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (which == 0) // add from camera
-                        {
-                            dispatchTakePictureIntent();
-                        } else if (which == 1) // add from gallery
-                        {
-                            Intent i = new Intent(
-                                    Intent.ACTION_PICK,
-                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            startActivityForResult(i, SELECT_PICTURE);
-                        } else if (which == 2) {
-                            deleteImage(imageId);
+                        try {
+                            if (which == 0) // add from camera
+                            {
+                                photoManager.takePicture(PhotoManager.MODE_CAMERA);
+                            } else if (which == 1) // add from gallery
+                            {
+                                photoManager.takePicture(PhotoManager.MODE_GALLERY);
+                            } else if (which == 2) {
+                                deleteImage(imageId);
+                            }
+                        } catch (IOException io) {
+                            //TODO show error
                         }
                     }
                 });
@@ -448,94 +427,17 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         }
     }
 
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(context.getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-
-				/*
-				 * AWA:FIXME: Obsługa błędów Wypychanie błędów do UI
-				 */
-                Log.e(TAG, "Error occurred while creating the File");
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-            }
-        }
-    }
-
-    /**
-     * Method creates file into which the taken photo will be saved. Without
-     * this mathod saving big photo is impossible/very difficult
-     *
-     * @return the file in which photo will be saved
-     * @throws IOException
-     */
-    private File createImageFile() throws IOException {
-		/*
-		 * AWA:FIXME: Hardcoded value Umiesc w private final static String, int,
-		 * etc.... lub w strings.xml lub innym *.xml
-		 */
-
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
-                .format(new Date());
-        String imageFileName = "JPEG_" + timeStamp;
-        File storageDir = Environment
-                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(imageFileName, /* prefix */
-                ".jpg", /* suffix */
-                storageDir /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        sCurrentPhotoPath = image.getAbsolutePath();
-
-        return image;
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            Bitmap bitmap = null;
-            Uri imgUri;
             switch (requestCode) {
-                case REQUEST_IMAGE_CAPTURE:
-                    // if image was added by photo
-                    imgUri = galleryAddPic();
-                    sImagePath = imgUri.getPath();
-                    break;
-                case SELECT_PICTURE:
-                    // if image was added from gallery
-                    imgUri = data.getData();
-                    sImagePath = imgUri.getPath();
+                case REQUEST_GET_PHOTO:
+                        Uri imgUri = photoManager.proceedResultPicture(this,data);
+                        setImage(imgUri);
                     break;
                 default:
-                    return;
+                    break;
             }
-            try {
-                setImage(imgUri);
-                bitmap = MediaStore.Images.Media.getBitmap(
-                        context.getContentResolver(), imgUri);
-                Log.d("TAG", "Size: " + imagesUriList.size());
-            } catch (FileNotFoundException e) {
-				/*
-				 * AWA:FIXME: Obsługa błędów Wypychanie błędów do UI
-				 */
-                Log.e(TAG, "FileNotFoundException error: " + e.toString());
-                e.printStackTrace();
-            } catch (IOException e) {
-                Log.e(TAG, "IOException error: " + e.toString());
-                e.printStackTrace();
-            }
-            // ivElementPhoto.setImageBitmap(bitmap);
         } else {
             // Response is wrong - visible only in debug mode
             if (D)
@@ -632,22 +534,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
 	 * KONIEC - Część kodu odpowiedzialna za GPS
 	 */
 
-    /**
-     * Method refreshes gallery view with added photo, so it can be seen by
-     * users in gallery.
-     *
-     * @return uri with info about added image
-     */
-    private Uri galleryAddPic() {
-        Intent mediaScanIntent = new Intent(
-                Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(sCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        context.sendBroadcast(mediaScanIntent);
-        return contentUri;
-    }
-
     private int getCurrentDate() {
         Date d = new Date();
         CharSequence s = DateFormat.format("dMMyyyy", d.getTime());
@@ -657,7 +543,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(CURRENT_PATH_KEY, sCurrentPhotoPath);
+        outState.putParcelable(PHOTO_MANAGER_KEY,photoManager);
     }
 
     @Override
@@ -673,11 +559,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
             case R.id.action_accept:
                 if (!editionMode && elementId != -1) {
                     getFragmentManager().popBackStackImmediate();
-                    break;
-                }
-                if (tvElementCategory.getText().equals("brak")) {
-                    Toast.makeText(getActivity(), "You need to choose collection",
-                            Toast.LENGTH_SHORT).show();
                     break;
                 }
                 if (tvElementName.getText() == null
@@ -738,13 +619,14 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            if (adapterCategories == null) {
+                // According to documentation moveToPosition range of values is -1 <= position <= count. This is why there is -1
+                data.moveToPosition(iCollectionId - 1);
+                String category = data.getString(data.getColumnIndex(DataStorage.Collections.NAME));
+                tvElementCategory.setText(category);
+                fillCategoriesData();
+            }
             adapterCategories.swapCursor(data);
-            // if(elementId!=-1) {
-            // data.moveToPosition(iCollectionId);
-            // String category =
-            // data.getString(data.getColumnIndex(DataStorage.Collections.NAME));
-            // tvElementCategory.setText(category);
-            // }
         }
 
         @Override
