@@ -1,12 +1,10 @@
 package com.myhoard.app.fragments;
 
 import android.app.ProgressDialog;
-import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -65,7 +63,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private ProgressDialog mProgressDialog; //Facebook
     private int mItemPositionOnList;
     private String mMessageOnFb;
-    private RequestAsyncTask mFacebookTask;
 
     private Cursor globalCursor;
 
@@ -83,12 +80,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private static final String LABEL_BY_DATE_ASC = "< DATE";
     private static final String LABEL_BY_DATE_DESC = "> DATE";
     private static final String DEFAULT_SORT = DataStorage.Items.NAME;
-    private static String sortByNameAscending = DataStorage.Items.NAME + " ASC";
-    private static String sortByDateAscending = DataStorage.Items.TABLE_NAME + "." +
-            DataStorage.Items.CREATED_DATE + " ASC";
-    private static String sortByNameDescending = DataStorage.Items.NAME + " DESC";
-    private static String sortByDateDescending = DataStorage.Items.TABLE_NAME + "." +
-            DataStorage.Items.CREATED_DATE + " DESC";
     private static String sortOrder = DEFAULT_SORT;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -378,8 +369,10 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 // Add arguments to opened fragment element
                 Bundle b = new Bundle();
                 b.putBoolean(ElementFragment.EDITION,true);
-                globalCursor.moveToPosition(info.position);
-                b.putLong(ElementFragment.ID,info.id);
+                if (info != null) {
+                    globalCursor.moveToPosition(info.position);
+                    b.putLong(ElementFragment.ID,info.id);
+                }
                 b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
                 String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
                 String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
@@ -459,8 +452,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	}
 
     private void sortByName() {
-        if (sortOrder == sortByNameAscending) {
-            sortOrder = sortByNameDescending;
+        String sortByNameAscending = DataStorage.Items.NAME + " ASC";
+        if (sortOrder.equals(sortByNameAscending)) {
+            sortOrder = DataStorage.Items.NAME + " DESC";
             setSelectedTabByNameText(LABEL_BY_NAME_DESC);
         } else {
             sortOrder = sortByNameAscending;
@@ -470,8 +464,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     private void sortByDate() {
-        if (sortOrder == sortByDateAscending) {
-            sortOrder = sortByDateDescending;
+        String sortByDateAscending = DataStorage.Items.TABLE_NAME + "." +
+                DataStorage.Items.CREATED_DATE + " ASC";
+        if (sortOrder.equals(sortByDateAscending)) {
+            sortOrder = DataStorage.Items.TABLE_NAME + "." +
+                    DataStorage.Items.CREATED_DATE + " DESC";
             setSelectedTabByDateText(LABEL_BY_DATE_DESC);
         } else {
             sortOrder = sortByDateAscending;
@@ -548,7 +545,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.
         */
-            mFacebookTask = new RequestAsyncTask(postRequest);
+            RequestAsyncTask mFacebookTask = new RequestAsyncTask(postRequest);
             mFacebookTask.execute();
 
         }
