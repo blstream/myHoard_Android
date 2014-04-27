@@ -60,8 +60,11 @@ public class ImageElementAdapterList extends ArrayAdapter<Uri> {
         {
             holder = (ViewHolder)row.getTag();
         }
+        Uri uri = null;
+        if(position != 0) {
+            uri = data.get(position);
+        }
 
-        Uri uri = data.get(position);
         if(uri==null)
         {
             holder.img.setImageResource(R.drawable.nophoto);

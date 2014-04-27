@@ -108,7 +108,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     private GridView gvPhotosList;
     private ArrayList<Uri> imagesUriList;
     private ImageElementAdapterList imageListAdapter;
-    private Button tmpButtonAdd;
     private int imageId;
     private boolean editionMode;
 
@@ -189,9 +188,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         gvPhotosList = (GridView) v.findViewById(R.id.gvPhotosList);
         gvPhotosList.setEmptyView(rlEmptyView);
 
-        tmpButtonAdd = (Button) v.findViewById(R.id.imgTmpAdd);
-        tmpButtonAdd.setOnClickListener(this);
-
         tvElementPosition.setOnClickListener(this);
 
         tvElementPosition.setText("ustalam");
@@ -217,7 +213,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
                     tvElementName.setText(b.getString(ElementFragment.NAME));
                     tvElementDescription.setText(b
                             .getString(ElementFragment.DESCRIPTION));
-                    tmpButtonAdd.setVisibility(View.GONE);
                 } else {
                     etElementName.setVisibility(View.VISIBLE);
                     etElementDescription.setVisibility(View.VISIBLE);
@@ -267,9 +262,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
                 categoryPicker();
                 break;
             case R.id.emptyview_inside:
-                imagePickerDel();
-                break;
-            case R.id.imgTmpAdd:
                 imagePicker();
                 break;
         }
@@ -280,8 +272,12 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         if (!editionMode && elementId != -1) {
             return;
         }
-        imageId = (int) l;
-        imagePickerDel();
+        if(i == 0) {
+            imagePicker();
+        } else {
+            imageId = (int) l;
+            imagePickerDel();
+        }
     }
 
     /**
@@ -424,6 +420,16 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
                     new String[] { String.valueOf(id) });
         } else {
             imagesUriList.remove(id);
+            if(imagesUriList.size()==1) {
+                imagesUriList.clear();
+            }
+            if(imagesUriList.size() == 2) {
+                gvPhotosList.setNumColumns(2);
+            } else {
+                gvPhotosList.setNumColumns(3);
+            }
+            imageId = -1;
+            imageListAdapter.notifyDataSetChanged();
         }
     }
 
@@ -448,6 +454,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     private void setImage(Uri uri) {
         switch (elementId) {
             case -1:
+                if(imageListAdapter.getCount()==0) {
+                    imagesUriList.add(null);
+                }
                 if (imageId != -1) {
                     imagesUriList.set(imageId, uri);
                     imageListAdapter.notifyDataSetChanged();
@@ -455,6 +464,11 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
                 } else {
                     imagesUriList.add(uri);
                     imageListAdapter.notifyDataSetChanged();
+                }
+                if(imageListAdapter.getCount()==2){
+                    gvPhotosList.setNumColumns(2);
+                } else {
+                    gvPhotosList.setNumColumns(3);
                 }
                 break;
             default:
@@ -529,7 +543,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     private String pos2str(double lat, double lon) {
         return lat + ":" + lon;
     }
-
 	/*
 	 * KONIEC - Część kodu odpowiedzialna za GPS
 	 */
@@ -729,6 +742,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         protected void onInsertComplete(int token, Object cookie, Uri uri) {
             super.onInsertComplete(token, cookie, uri);
             int id = Integer.parseInt(uri.getLastPathSegment());
+            imagesUriList.remove(0);
             for (Uri imageUri : imagesUriList) {
                 insertImage(id, imageUri);
             }
