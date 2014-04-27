@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 
 /**
  * Created by Piotr Brzozowski on 2014-04-26.
+ * Second cache level
  */
 public class ImageCacheDatabase extends SQLiteOpenHelper {
 
@@ -50,22 +51,30 @@ public class ImageCacheDatabase extends SQLiteOpenHelper {
         byte[] byteArray = blob.toByteArray();
         values.put(KEY_BITMAP,byteArray);
         values.put(KEY_URL,url);
-        db.insert(TABLE_NAME,null,values);
+        if (db != null) {
+            db.insert(TABLE_NAME,null,values);
+        }
     }
 
     public Bitmap getBitmap(String url){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME,new String[]{
-            KEY_BITMAP},KEY_URL + "='" + url + "'",null,null,null,null);
-        if(cursor.moveToFirst()){
-            Bitmap bitmap = BitmapFactory.decodeByteArray(cursor.getBlob(0),0,cursor.getBlob(0).length);
-            return bitmap;
+        Cursor cursor = null;
+        if (db != null) {
+            cursor = db.query(TABLE_NAME,new String[]{
+                KEY_BITMAP},KEY_URL + "='" + url + "'",null,null,null,null);
+        }
+        if (cursor != null) {
+            if(cursor.moveToFirst()){
+                return BitmapFactory.decodeByteArray(cursor.getBlob(0),0,cursor.getBlob(0).length);
+            }
         }
         return null;
     }
 
     public void clearDatabase(){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_NAME,null,null);
+        if (db != null) {
+            db.delete(TABLE_NAME,null,null);
+        }
     }
 }
