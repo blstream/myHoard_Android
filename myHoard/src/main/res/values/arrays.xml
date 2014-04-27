@@ -19,6 +19,12 @@
         <item>@string/profile</item>
     </string-array>
 
+    <string-array name="drawer_menu_element">
+        <item>@string/search</item>
+        <item>@string/element_category</item>
+        <item>@string/friends</item>
+        <item>@string/profile</item>
+    </string-array>
 
 
 

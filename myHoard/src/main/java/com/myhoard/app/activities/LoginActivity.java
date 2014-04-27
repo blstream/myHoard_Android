@@ -36,7 +36,7 @@ public class LoginActivity extends BaseActivity {
     private Button login_button;
     private TextView txt;
     private User user;
-    private boolean checked = false;
+
 
     @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +70,6 @@ public class LoginActivity extends BaseActivity {
             }
         });
     }
-
-
 
 
             public void setVariables() {

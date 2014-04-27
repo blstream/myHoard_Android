@@ -90,6 +90,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private static final String FRAGMENT = "fragment";
     private static DrawerLayout drawerLayout = null;
 
+
     private Handler handler = new Handler();
     private Thread progressBarThread;
     private NavDrawerListAdapter navDrawerListAdapter;
@@ -527,8 +528,10 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         drawerLayout.closeDrawers();
     }
     List<RowItem> preparing_navigationDrawer() {
-        String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-        int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
+
+            String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+            int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
+
         List<RowItem> list = new ArrayList<>();
         for (int i = 0; i < drawerListItems.length; i++) {
             RowItem item = new RowItem(drawerListItems[i], images[i]);

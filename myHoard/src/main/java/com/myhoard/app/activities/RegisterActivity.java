@@ -122,19 +122,75 @@ public class RegisterActivity extends BaseActivity {
             @Override
             public void afterTextChanged(Editable s) {
 
-                if(s.length() < 4)
-                {
-                    password_strenght.setTextColor(getResources().getColor(R.color.red));
-                    password_strenght.setText("too short");
-                }
-                else if(s.length() > 4 )
-                 {
-                    password_strenght.setTextColor(getResources().getColor(R.color.green));
-                    password_strenght.setText("quite ok");
+                int passwordStrenght = passwordRanking(s);
+
+                switch (passwordStrenght) {
+
+                    case 1: {
+
+                        password_strenght.setTextColor(getResources().getColor(R.color.orange));
+                        password_strenght.setText("low");
+                        break;
+                    }
+                    case 2:
+                    {
+                        password_strenght.setTextColor(getResources().getColor(R.color.yellow_text));
+                        password_strenght.setText("nice");
+                        break;
+
+                    }
+                    case 3:
+                    {
+                        password_strenght.setTextColor(getResources().getColor(R.color.green));
+                        password_strenght.setText("nicely done");
+                        break;
+                    }
+                    case 4:
+                    {
+                        password_strenght.setTextColor(getResources().getColor(R.color.green));
+                        password_strenght.setText("Epic");
+                        break;
+                    }
+
+                    default:
+                        password_strenght.setTextColor(getResources().getColor(R.color.red));
+                        password_strenght.setText("too short");
+                        break;
+
                 }
             }
+
         };
 
+
+
+    public int passwordRanking(Editable password)
+    {
+
+        Pattern numPatt = Pattern.compile("\\d+");
+        Pattern specialPattern = Pattern.compile("[@#$%^&+=]");
+        Pattern bigLetterPattern = Pattern.compile("[A-Z]");
+        Matcher matcher = numPatt.matcher(password);
+        Matcher matcher1 = specialPattern.matcher(password);
+        Matcher matcher2 = bigLetterPattern.matcher(password);
+        int passwordStrenght = 0 ;
+
+        if(password.length() > 5) {
+            passwordStrenght++;
+            if (matcher.find()) {
+                passwordStrenght++;
+            }
+            if (matcher1.find()) {
+                passwordStrenght++;
+            }
+            if (matcher2.find()) {
+                passwordStrenght++;
+            }
+
+
+        }
+        return passwordStrenght;
+    }
 
 
     public boolean validatePassword() {
