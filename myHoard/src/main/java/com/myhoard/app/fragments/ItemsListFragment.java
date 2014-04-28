@@ -13,6 +13,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,9 +36,12 @@ import com.facebook.SessionLoginBehavior;
 import com.facebook.SessionState;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
+import com.myhoard.app.activities.ElementActivity;
 import com.myhoard.app.dialogs.FacebookShareDialog;
+import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.images.ImageAdapterList;
 import com.myhoard.app.images.ImageLoader;
+import com.myhoard.app.model.Item;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -134,30 +138,39 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 			public void onItemClick(AdapterView<?> parent, View view,
 			                        int position, long id) {
 				//TODO item clicked action
-                // Create new fragment and transaction
-                Fragment newFragment = new ElementFragment();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                Intent in = new Intent(getActivity(), ElementActivity.class);
+                Item element = new Item();
 
-                // Add arguments to opened fragment element
-                Bundle b = new Bundle();
-                b.putBoolean(ElementFragment.EDITION, false);
-                b.putLong(ElementFragment.ID,id);
-                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
                 globalCursor.moveToPosition(position);
                 String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
                 String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
-                b.putString(ElementFragment.NAME,name);
-                b.putString(ElementFragment.DESCRIPTION,description);
+                element.setId(String.valueOf(id));
+                element.setCollection(String.valueOf(mCollectionID));
+                element.setName(name);
+                element.setDescription(description);
+                in.putExtra("element",element);
+                startActivity(in);
+                // Create new fragment and transaction
+//                Fragment newFragment = new ElementFragment();
+//                Fragment newFragment = new MapElementFragment();
+//                FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
-                newFragment.setArguments(b);
+                // Add arguments to opened fragment element
+//                Bundle b = new Bundle();
+//                b.putBoolean(ElementFragment.EDITION, false);
+//                b.putLong(ElementFragment.ID,id);
+//                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
+
+//
+//                newFragment.setArguments(b);
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack
-                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
-                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
-
-                // Commit the transaction
-                transaction.commit();
+//                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
+//                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
+//
+//                // Commit the transaction
+//                transaction.commit();
 
             }
         });
@@ -319,18 +332,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 break;
 
             case R.id.action_new_element:
-                newFragment = new ElementFragment();
-                transaction = getFragmentManager().beginTransaction();
-
-                // Add arguments to opened fragment element
-                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
-                b.putInt(ElementFragment.ID, -1);
-                newFragment.setArguments(b);
-                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
-                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
-
-                // Commit the transaction
-                transaction.commit();
+                Intent in = new Intent(getActivity(),ElementActivity.class);
+                in.putExtra("categoryId",mCollectionID);
+                startActivity(in);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -363,21 +367,21 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 }
                 return true;
             case EDIT_ID:
-                Fragment newFragment = new ElementFragment();
+                Fragment newFragment = new ElementAddEditFragment();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
                 // Add arguments to opened fragment element
                 Bundle b = new Bundle();
-                b.putBoolean(ElementFragment.EDITION,true);
+                b.putBoolean(ElementAddEditFragment.EDITION,true);
                 if (info != null) {
                     globalCursor.moveToPosition(info.position);
-                    b.putLong(ElementFragment.ID,info.id);
+                    b.putLong(ElementAddEditFragment.ID,info.id);
                 }
-                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
+                b.putLong(ElementAddEditFragment.COLLECTION_ID,mCollectionID);
                 String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
                 String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
-                b.putString(ElementFragment.NAME,name);
-                b.putString(ElementFragment.DESCRIPTION,description);
+                b.putString(ElementAddEditFragment.NAME,name);
+                b.putString(ElementAddEditFragment.DESCRIPTION,description);
 
                 newFragment.setArguments(b);
 

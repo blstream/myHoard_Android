@@ -47,7 +47,7 @@ import com.myhoard.app.adapters.NavDrawerListAdapter;
 import com.myhoard.app.dialogs.GeneratorDialog;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
-import com.myhoard.app.fragments.ElementFragment;
+import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.model.RowItem;
 import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.services.SynchronizationService;
@@ -532,15 +532,9 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                             .commit();
                 } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
                     //item.setTitle(R.string.action_new_element);//TODO correct
-                    Fragment elementFragment = new ElementFragment();
-                    Bundle b = new Bundle();
-                    b.putLong(ElementFragment.COLLECTION_ID, collectionSelected);
-                    b.putInt(ElementFragment.ID, -1);
-                    elementFragment.setArguments(b);
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.container, elementFragment, NEWELEMENT)
-                            .addToBackStack(NEWELEMENT)
-                            .commit();
+                    Intent in = new Intent(this,ElementActivity.class);
+                    in.putExtra("categoryId",collectionSelected);
+                    startActivity(in);
                 }
                 break;
             //Friends

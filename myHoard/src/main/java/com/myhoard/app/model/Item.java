@@ -31,6 +31,9 @@ package com.myhoard.app.model;
  */
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 import org.json.JSONArray;
@@ -46,7 +49,7 @@ import java.util.List;
  * @author Marcin Łaszcz
  *         Date: 02.04.14
  */
-public class Item implements IModel
+public class Item implements IModel, Parcelable
 {
     public String id;
     public String name;
@@ -60,6 +63,10 @@ public class Item implements IModel
     public String collection;
 
     public Item(){
+    }
+
+    public Item(Parcel in) {
+        readFromParcel(in);
     }
 
     public Item(String id, String name, String description, ItemLocation location, List<ItemMedia> media,
@@ -175,6 +182,36 @@ public class Item implements IModel
 
         return json;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int i) {
+        out.writeString(id);
+        out.writeString(name);
+        out.writeString(description);
+        out.writeString(collection);
+    }
+
+    public void readFromParcel(Parcel in) {
+        this.id = in.readString();
+        this.name = in.readString();
+        this.description = in.readString();
+        this.collection = in.readString();
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Item createFromParcel(Parcel in) {
+            return new Item(in);
+        }
+
+        public Item[] newArray(int size) {
+            return new Item[size];
+        }
+    };
 }
 
 

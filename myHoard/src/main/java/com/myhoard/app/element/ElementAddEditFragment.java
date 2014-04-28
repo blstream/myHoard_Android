@@ -1,25 +1,17 @@
-package com.myhoard.app.fragments;
+package com.myhoard.app.element;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.AsyncQueryHandler;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.IBinder;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -35,8 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.LinearLayout;
@@ -48,23 +38,19 @@ import android.widget.Toast;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.ImageElementAdapterCursor;
 import com.myhoard.app.adapters.ImageElementAdapterList;
-import com.myhoard.app.gps.GPSProvider;
 import com.myhoard.app.images.PhotoManager;
+import com.myhoard.app.model.Item;
 import com.myhoard.app.provider.DataStorage;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 /*
  * Created by Sebastian Peryt on 27.02.14.
  */
-public class ElementFragment extends Fragment implements View.OnClickListener,
+public class ElementAddEditFragment extends Fragment implements View.OnClickListener,
         AdapterView.OnItemClickListener {
 
     public static final String ID = "elementId";
@@ -94,7 +80,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
      * AWA:FIXME: Niepotrzebne prefiksy określające typ Patrz:Ksiazka:Czysty
      * kod:Rozdział 2:Nazwy klas, metod….
      */
-    private TextView tvElementName, tvElementDescription, tvElementPosition,
+    private TextView tvElementPosition,
             tvElementCategory;
     private EditText etElementName, etElementDescription;
     private String sCurrentPhotoPath;
@@ -109,62 +95,16 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     private ArrayList<Uri> imagesUriList;
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
-    private boolean editionMode;
+//    private boolean editionMode;
+    private Item element;
 
     private PhotoManager photoManager;
-
-    GPSProvider mService;
-    boolean mBound = false;
-    /*
-     * Część kodu odpowiedzialna za binder
-     * (http://developer.android.com/guide/components/bound-services.html)
-     */
-    private final ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            // Przywiazano do uslugi i rzutowano IBinder
-            GPSProvider.LocalGPSBinder binder = (GPSProvider.LocalGPSBinder) service;
-            mService = binder.getService();
-            mBound = true;
-            if (D)
-                Log.d(TAG, "Binder");
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
-
-    /*
-     * broadcast reciver dzięki któremu istnieje połączenie z uslugą GPS
-     */
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updatePosition(intent);
-            Bundle b = intent.getExtras();
-			/*
-			 * AWA:FIXME: Hardcoded value Umiesc w private final static String,
-			 * int, etc.... lub w strings.xml lub innym *.xml
-			 */
-            if (b != null && !b.getBoolean("GPS")) {
-                tvElementPosition.setText("brak");
-                tvElementPosition.setTextColor(Color.RED);
-            }
-        }
-    };
-
-	/*
-	 * KONIEC - Część kodu odpowiedzialna za binder
-	 */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        final View v = inflater.inflate(R.layout.fragment_element, container,
+        final View v = inflater.inflate(R.layout.fragment_element_addedit, container,
                 false);
         setHasOptionsMenu(true);
 
@@ -179,8 +119,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         context = getActivity();
         imagesUriList = new ArrayList<Uri>();
 
-        tvElementName = (TextView) v.findViewById(R.id.tvElementName);
-        tvElementDescription = (TextView) v.findViewById(R.id.tvElementDescription);
         tvElementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
         etElementName = (EditText) v.findViewById(R.id.etElementName);
         etElementDescription = (EditText) v.findViewById(R.id.etElementDescription);
@@ -196,36 +134,19 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         elementId = -1;
         iCollectionId = -1;
         imageId = -1;
-        editionMode = false;
+//        editionMode = false;
 
         Bundle b = getArguments();
-        if (b != null) {
-            iCollectionId = (int) b.getLong(ElementFragment.COLLECTION_ID);
-            if (b.getInt(ElementFragment.ID) != -1) {
-                elementId = (int) b.getLong(ElementFragment.ID);
-                gvPhotosList.setAdapter(getPhotosList());
-                editionMode = b.getBoolean(ElementFragment.EDITION);
-                if (!editionMode) {
-                    etElementName.setVisibility(View.GONE);
-                    etElementDescription.setVisibility(View.GONE);
-                    tvElementName.setVisibility(View.VISIBLE);
-                    tvElementDescription.setVisibility(View.VISIBLE);
-                    tvElementName.setText(b.getString(ElementFragment.NAME));
-                    tvElementDescription.setText(b
-                            .getString(ElementFragment.DESCRIPTION));
-                } else {
-                    etElementName.setVisibility(View.VISIBLE);
-                    etElementDescription.setVisibility(View.VISIBLE);
-                    tvElementName.setVisibility(View.GONE);
-                    tvElementDescription.setVisibility(View.GONE);
-                    etElementName.setText(b.getString(ElementFragment.NAME));
-                    etElementDescription.setText(b
-                            .getString(ElementFragment.DESCRIPTION));
-                }
-            } else {
-                gvPhotosList.setAdapter(getPhotosList());
-            }
+        if(b.getLong("categoryId",-1)!=-1) {
+            iCollectionId = (int) b.getLong("categoryId");
+        } else if(b.getParcelable("element")!=null) {
+            element = b.getParcelable("element");
+            elementId = Integer.parseInt(element.getId());
+            iCollectionId = Integer.parseInt(element.getCollection());
+
+            etElementName.setText(element.getName());
         }
+        gvPhotosList.setAdapter(getPhotosList());
         gvPhotosList.setOnItemClickListener(this);
         tvElementCategory.setOnClickListener(this);
         lnEmptyViewClickable.setOnClickListener(this);
@@ -248,14 +169,15 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onClick(View view) {
-        if (!editionMode && elementId != -1) {
-            return;
-        }
+//        if (!editionMode && elementId != -1) {
+//            return;
+//        }
         switch (view.getId()) {
             case R.id.tvElementLocalisation:
                 if (String.valueOf(tvElementPosition.getText()).equals("brak")) {
-                    startActivity(new Intent(
-                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+//                    startActivity(new Intent(
+//                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    startActivityForResult(new Intent(getActivity(),ElementMapFragment.class),9);
                 }
                 break;
             case R.id.tvElementCategory:
@@ -269,9 +191,9 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        if (!editionMode && elementId != -1) {
-            return;
-        }
+//        if (!editionMode && elementId != -1) {
+//            return;
+//        }
         if(i == 0) {
             imagePicker();
         } else {
@@ -497,58 +419,6 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         }
     }
 
-    /*
-     * Część kodu odpowiedzialna za GPS
-     */
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getActivity().getBaseContext().bindService(
-                new Intent(getActivity(), GPSProvider.class), mConnection,
-                Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        context.registerReceiver(broadcastReceiver, new IntentFilter(
-                GPSProvider.BROADCAST_ACTION));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        context.unregisterReceiver(broadcastReceiver);
-    }
-
-    @Override
-    public void onDestroy() {
-        getActivity().getBaseContext().unbindService(mConnection);
-        super.onDestroy();
-    }
-
-    private void updatePosition(Intent intent) {
-        Log.e(TAG, "In");
-        if (intent == null) {
-            Log.e(TAG, "error");
-            return;
-        }
-        Log.e(TAG, "OK");
-        Bundle b = intent.getExtras();
-        double lat = b.getDouble(GPSProvider.POS_LAT);
-        double lon = b.getDouble(GPSProvider.POS_LON);
-
-        tvElementPosition.setText(pos2str(lat, lon));
-        tvElementPosition.setTextColor(Color.GREEN);
-    }
-
-    private String pos2str(double lat, double lon) {
-        return lat + ":" + lon;
-    }
-	/*
-	 * KONIEC - Część kodu odpowiedzialna za GPS
-	 */
-
     private int getCurrentDate() {
         Date d = new Date();
         CharSequence s = DateFormat.format("dMMyyyy", d.getTime());
@@ -572,12 +442,12 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_accept:
-                if (!editionMode && elementId != -1) {
-                    getFragmentManager().popBackStackImmediate();
+                if (elementId != -1) {
+                    getActivity().finish();
+//                    getFragmentManager().popBackStackImmediate();
                     break;
                 }
-                if (tvElementName.getText() == null
-                        || TextUtils.isEmpty(etElementName.getText())) {
+                if (TextUtils.isEmpty(etElementName.getText())) {
                     Toast.makeText(getActivity(),
                             getString(R.string.required_name_element),
                             Toast.LENGTH_SHORT).show();
@@ -612,7 +482,8 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
                         asyncHandler.startInsert(0, null,
                                 DataStorage.Items.CONTENT_URI, values);
                     }
-                    getFragmentManager().popBackStackImmediate();
+                    getActivity().finish();
+//                    getFragmentManager().popBackStackImmediate();
                 }
                 break;
             default:
