@@ -68,7 +68,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
 
     //to receive information from service SynchronizeService
-    private ResponseReceiver receiver;
+    //private ResponseReceiver receiver;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
 
@@ -89,7 +89,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private static final String ITEMSLIST = "ItemsList";
     private static final String FRAGMENT = "fragment";
     private static DrawerLayout drawerLayout = null;
-
+    private ProgressDialog progress;
 
     private Handler handler = new Handler();
     private Thread progressBarThread;
@@ -155,6 +155,19 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER)));
             Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Media.SYNCHRONIZED))>0)).toString());
         }
+        progress = new ProgressDialog(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter("notification"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 
     private void setDrawer() {
@@ -267,14 +280,14 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         actionBarDrawerToggle.syncState();
     }
 
-    @Override
+    /*@Override
     protected void onStart() {
         IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new ResponseReceiver();
         registerReceiver(receiver, filter);
         super.onStart();
-    }
+    }*/
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -282,7 +295,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         outState.putString(FRAGMENT, getVisibleFragmentTag());
     }
 
-    @Override
+    /*@Override
     protected void onStop() {
         if (receiver != null) {
             unregisterReceiver(receiver);
@@ -301,7 +314,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             receiver = null;
         }
         super.onDestroy();
-    }
+    }*/
 
     String getVisibleFragmentTag() {
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
@@ -386,6 +399,23 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 Intent synchronizee = new Intent(this, SynchronizationService.class);
                 synchronizee.putExtra("option","upload");
                 startService(synchronizee);
+                break;
+            case R.id.action_synchronize:
+                progress.setMessage("synchronization in progress...");
+                progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progress.setIndeterminate(true);
+                progress.show();
+
+                final Thread t = new Thread(){
+
+                    @Override
+                    public void run(){
+                        Intent synchronizee = new Intent(MainActivity.this, SynchronizationService.class);
+                        synchronizee.putExtra("option","synchronization");
+                        startService(synchronizee);
+                    }
+                };
+                t.start();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -539,4 +569,17 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         }
         return list;
     }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String stringExtra = intent.getStringExtra("result");
+            if (stringExtra != null) {
+                if (stringExtra.equals("synchronized")){
+                    progress.dismiss();
+                }
+            }
+        }
+    };
 }

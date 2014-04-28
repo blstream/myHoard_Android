@@ -51,7 +51,7 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
     }
 
     @Override
-    public T get(String id, Token token) {
+    public T get(String id, Token token) throws RuntimeException {
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
@@ -68,19 +68,16 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
                 while ((count = inputStream.read(data)) != -1) {
                     bos.write(data, 0, count);
                 }
-
                 return (T) new Media(bos.toByteArray());
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Error: get media");
             }
         }
         return null;
     }
 
         @Override
-        public IModel create (IModel media, Token token){
+        public IModel create (IModel media, Token token)  throws RuntimeException {
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost httpPost = new HttpPost(url);
             httpPost.setHeader(AUTHORIZATION, token.getAccess_token());
@@ -90,26 +87,22 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
             entity.addPart("image",
                     new ByteArrayBody(((Media) media).getFile(), "image/jpeg", "image"));
             httpPost.setEntity(entity);
+            String jsonString = null;
             try {
                 HttpResponse response = httpClient.execute(httpPost);
                 //Read the response
-                String jsonString = EntityUtils.toString(response.getEntity());
+                jsonString = EntityUtils.toString(response.getEntity());
                 IModel imodel = new Gson().fromJson(jsonString, Media.class);
                 Log.d("TAG", "Jsontext = " + jsonString);
                 String id = imodel.getId();
                 return imodel;
-            } catch (ClientProtocolException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new RuntimeException(jsonString);
             }
-            return null;
         }
 
         @Override
-        public T update (IModel media, String id, Token token){
+        public T update (IModel media, String id, Token token) throws RuntimeException {
             HttpClient httpClient = new DefaultHttpClient();
             HttpPut httpPut = new HttpPut(url+id+"/");
             httpPut.setHeader(AUTHORIZATION, token.getAccess_token());
@@ -118,26 +111,22 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
             entity.addPart("image",
                     new ByteArrayBody(((Media) media).getFile(), "image/jpeg", "image"));
             httpPut.setEntity(entity);
+            String jsonString = null;
             try {
                 HttpResponse response = httpClient.execute(httpPut);
                 //Read the response
-                String jsonString = EntityUtils.toString(response.getEntity());
+                jsonString = EntityUtils.toString(response.getEntity());
                 IModel imodel = new Gson().fromJson(jsonString, Media.class);
                 Log.d("TAG", "Jsontext = " + jsonString);
                 String returedId = imodel.getId();
                 return (T)imodel;
-            } catch (ClientProtocolException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new RuntimeException(jsonString);
             }
-            return null;
         }
 
         @Override
-        public boolean remove (String id, Token token){
+        public boolean remove (String id, Token token) throws RuntimeException {
             HttpClient httpClient = new DefaultHttpClient();
             HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
             HttpDelete httpDelete = new HttpDelete(url + id + "/");
@@ -154,10 +143,9 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
                     }
                 }
             } catch (IOException e) {
-                Log.d("TAG","NIEusunieto");
-                e.printStackTrace();
+                throw new RuntimeException("Error: delete media");
             }
             Log.d("TAG","NIEusunieto");
-            return false;
+            throw new RuntimeException("Error: delete media");
         }
     }

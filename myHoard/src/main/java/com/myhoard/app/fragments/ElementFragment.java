@@ -475,17 +475,19 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
                 ContentValues values = new ContentValues();
                 values.put(DataStorage.Media.ID_ITEM, elementId);
                 values.put(DataStorage.Media.FILE_NAME, uri.toString());
-                values.put(DataStorage.Media.AVATAR, true);
                 AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(
                         getActivity().getContentResolver()) {
                 };
                 if (imageId != -1) {
+                    values.put(DataStorage.Media.SYNCHRONIZED, false);
+                    values.put(DataStorage.Media.AVATAR, false);
                     asyncHandler.startUpdate(0, null,
                             DataStorage.Media.CONTENT_URI, values,
                             DataStorage.Media._ID + " = ?",
                             new String[] { String.valueOf(imageId) });
                     imageId = -1;
                 } else {
+                    values.put(DataStorage.Media.AVATAR, true);
                     values.put(DataStorage.Media.CREATED_DATE, Calendar
                             .getInstance().getTime().getTime());
                     asyncHandler.startInsert(0, null,
@@ -598,6 +600,7 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
                     if (elementId != -1) {
                         values.put(DataStorage.Items.MODIFIED_DATE, Calendar
                                 .getInstance().getTime().getTime());
+                        values.put(DataStorage.Items.SYNCHRONIZED, false);
                         asyncHandler.startUpdate(0, null,
                                 DataStorage.Items.CONTENT_URI, values,
                                 DataStorage.Items._ID + " = ?",
@@ -742,7 +745,8 @@ public class ElementFragment extends Fragment implements View.OnClickListener,
         protected void onInsertComplete(int token, Object cookie, Uri uri) {
             super.onInsertComplete(token, cookie, uri);
             int id = Integer.parseInt(uri.getLastPathSegment());
-            imagesUriList.remove(0);
+            if (imagesUriList.size()!=0)
+                imagesUriList.remove(0);
             for (Uri imageUri : imagesUriList) {
                 insertImage(id, imageUri);
             }

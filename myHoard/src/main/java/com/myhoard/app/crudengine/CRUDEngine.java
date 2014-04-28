@@ -1,5 +1,6 @@
 package com.myhoard.app.crudengine;
 
+import android.content.Intent;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -68,13 +69,13 @@ import java.util.List;
     }
 
     @Override
-    public List<T> getList(Token token){
+    public List<T> getList(Token token) throws RuntimeException {
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
             HttpGet httpGet = new HttpGet(url);
             httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
-            String stringResponse;
+            String stringResponse=null;
             try {
                 HttpResponse response = httpClient.execute(httpGet, localContext);
                 HttpEntity entity = response.getEntity();
@@ -96,21 +97,20 @@ import java.util.List;
 
                 return newItems;
             } catch (Exception e) {
-                //return e.getLocalizedMessage();
-                return null;
+                throw new RuntimeException(stringResponse);
             }
         }
         return null;
     }
 
     @Override
-    public T get(String id, Token token) {
+    public T get(String id, Token token) throws RuntimeException  {
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
             HttpGet httpGet = new HttpGet(url+id);
             httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
-            String stringResponse;
+            String stringResponse=null;
             try {
                 HttpResponse response = httpClient.execute(httpGet, localContext);
                 HttpEntity entity = response.getEntity();
@@ -122,19 +122,19 @@ import java.util.List;
 
                 return (T)iModel;
             } catch (Exception e) {
-                //return e.getLocalizedMessage();
-                return null;
+                throw new RuntimeException(stringResponse);
             }
         }
         return null;
     }
 
     @Override
-    public IModel create(IModel item, Token token) {
+    public IModel create(IModel item, Token token) throws RuntimeException  {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpResponse response;
         JSONObject json;
+        String HTTP_response=null;
 
         try {
             HttpPost httpPost = new HttpPost(url);
@@ -153,7 +153,7 @@ import java.util.List;
             if (response != null) {
                 HttpEntity responseEntity = response.getEntity();
                 if (response.getStatusLine().getStatusCode()==STATUS_CREATED) {
-                    String HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
+                    HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                     IModel imodel = new Gson().fromJson(HTTP_response, item.getClass());
                     Log.d("TAG", "Jsontext = " + HTTP_response);
                     String id = imodel.getId();
@@ -163,23 +163,20 @@ import java.util.List;
                     Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
                     return null;
                 }
-                //return HTTP_response.contains(ERROR_STRING) ? ERROR_CODE  : 1;
             }
         } catch (Exception e) {
-            //return ERROR_CODE;
             Log.d("TAG", e.toString());
-            return null;
+            throw new RuntimeException(HTTP_response);
         }
-        //return ERROR_CODE;
         return null;
     }
 
     @Override
-    public T update(IModel item, String id, Token token) {
+    public T update(IModel item, String id, Token token) throws RuntimeException  {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpResponse response;
-
+        String HTTP_response = null;
 
         try {
             HttpPut httpPut = new HttpPut(url + id);
@@ -197,7 +194,7 @@ import java.util.List;
             if (response != null) {
                 HttpEntity responseEntity = response.getEntity();
                 if (response.getStatusLine().getStatusCode()==STATUS_OK) {
-                    String HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
+                    HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                     T model = (T) new Gson().fromJson(HTTP_response, item.getClass());
                     Log.d("TAG", "Jsontext = " + HTTP_response);
                     return model;
@@ -205,23 +202,19 @@ import java.util.List;
             }
             Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
         } catch (Exception e) {
-            /* AWA:FIXME: Obsługa błędów
-                Wypychanie błędów do UI
-            */
             Log.d("TAG", e.toString());
-            e.printStackTrace();
+            throw new RuntimeException(HTTP_response);
         }
         return null;
     }
 
     @Override
-    public boolean remove(String id, Token token) {
+    public boolean remove(String id, Token token) throws RuntimeException  {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpDelete httpDelete = new HttpDelete(url + id);
         HttpResponse response;
 
-        //httpDelete.setHeader("Accept", "application/json");
         httpDelete.setHeader(AUTHORIZATION, token.getAccess_token());
 
         try {
@@ -234,7 +227,7 @@ import java.util.List;
             }
         } catch (IOException e) {
             Log.d("TAG","NIEusunieto");
-            e.printStackTrace();
+            throw new RuntimeException("Error: delete");
         }
         Log.d("TAG","NIEusunieto");
         return false;

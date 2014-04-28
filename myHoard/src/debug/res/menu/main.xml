@@ -38,4 +38,8 @@
         android:id="@+id/action_upload"
         android:title="upload"/>
 
+    <item
+        android:id="@+id/action_synchronize"
+        android:title="synchronize"/>
+
 </menu>

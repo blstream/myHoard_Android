@@ -268,7 +268,7 @@ public final class DataStorage {
 	}
 
     public enum TypeOfCollection {
-        ERROR(-1), OFFLINE(0), PUBLIC(1), PRIVATE(2);
+        ERROR(0), OFFLINE(1), PUBLIC(2), PRIVATE(3);
 
         private int type;
 
