@@ -24,6 +24,6 @@ public class MyHoardApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-//		ACRA.init(this);
+		ACRA.init(this);
 	}
 }

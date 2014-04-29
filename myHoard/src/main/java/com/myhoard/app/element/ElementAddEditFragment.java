@@ -95,7 +95,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private ArrayList<Uri> imagesUriList;
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
-//    private boolean editionMode;
     private Item element;
 
     private PhotoManager photoManager;
@@ -442,11 +441,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_accept:
-                if (elementId != -1) {
-                    getActivity().finish();
-//                    getFragmentManager().popBackStackImmediate();
-                    break;
-                }
                 if (TextUtils.isEmpty(etElementName.getText())) {
                     Toast.makeText(getActivity(),
                             getString(R.string.required_name_element),
@@ -463,7 +457,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     values.put(DataStorage.Items.NAME, sName);
                     values.put(DataStorage.Items.DESCRIPTION, sDescription);
                     values.put(DataStorage.Items.ID_COLLECTION, iCollectionId);
-                    Log.d("TAG", "collection id: " + iCollectionId);
                     AsyncElementQueryHandler asyncHandler = new AsyncElementQueryHandler(
                             getActivity().getContentResolver()) {
                     };
@@ -482,8 +475,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                         asyncHandler.startInsert(0, null,
                                 DataStorage.Items.CONTENT_URI, values);
                     }
-                    getActivity().finish();
-//                    getFragmentManager().popBackStackImmediate();
+                    getFragmentManager().popBackStackImmediate();
+                    getFragmentManager().popBackStackImmediate();
                 }
                 break;
             default:

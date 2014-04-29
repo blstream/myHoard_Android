@@ -137,41 +137,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 			                        int position, long id) {
-				//TODO item clicked action
                 Intent in = new Intent(getActivity(), ElementActivity.class);
-                Item element = new Item();
-
-                globalCursor.moveToPosition(position);
-                String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
-                String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
-                element.setId(String.valueOf(id));
-                element.setCollection(String.valueOf(mCollectionID));
-                element.setName(name);
-                element.setDescription(description);
-                in.putExtra("element",element);
+                in.putExtra("elementId",id);
                 startActivity(in);
-                // Create new fragment and transaction
-//                Fragment newFragment = new ElementFragment();
-//                Fragment newFragment = new MapElementFragment();
-//                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-
-                // Add arguments to opened fragment element
-//                Bundle b = new Bundle();
-//                b.putBoolean(ElementFragment.EDITION, false);
-//                b.putLong(ElementFragment.ID,id);
-//                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
-
-//
-//                newFragment.setArguments(b);
-
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack
-//                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
-//                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
-//
-//                // Commit the transaction
-//                transaction.commit();
-
             }
         });
 

@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -22,6 +24,7 @@ import com.myhoard.app.element.ElementReadFragment;
 import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.gps.GPSProvider;
 import com.myhoard.app.model.Item;
+import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Sebastian Peryt on 27.04.14.
@@ -35,7 +38,9 @@ import com.myhoard.app.model.Item;
 public class ElementActivity extends ActionBarActivity {
 
     private Item element;
+    private long elementId;
     private long categoryId = -1;
+    private AsyncElementRead asyncElementRead;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +55,17 @@ public class ElementActivity extends ActionBarActivity {
                 new Intent(this, GPSProvider.class), mConnection,
                 Context.BIND_AUTO_CREATE);
 
+        asyncElementRead = new AsyncElementRead();
+
         if(getIntent().hasExtra("categoryId")) {
             categoryId = getIntent().getLongExtra("categoryId", 0);
             displayFragment(1);
-        } else if(getIntent().hasExtra("element")) {
-            element = getIntent().getParcelableExtra("element");
+        } else if(getIntent().hasExtra("elementId")) {
+            elementId = getIntent().getLongExtra("elementId", 0);
+            asyncElementRead.execute(elementId);
             displayFragment(0);
+        } else {
+            finish();
         }
     }
 
@@ -86,7 +96,7 @@ public class ElementActivity extends ActionBarActivity {
                         .valueOf(position));
                 if (fragment == null) {
                     fragment = new ElementReadFragment();
-                    bundle.putParcelable("element",element);
+                    bundle.putLong("elementId", elementId);
                     fragment.setArguments(bundle);
                 }
                 break;
@@ -110,7 +120,38 @@ public class ElementActivity extends ActionBarActivity {
         if (fragment != null) {
             fragmentTransaction.replace(R.id.frame_container, fragment,
                     String.valueOf(position));
+            if(!(fragment instanceof ElementReadFragment)) {
+                fragmentTransaction.addToBackStack(null);
+            }
             fragmentTransaction.commit();
+        }
+    }
+
+    private class AsyncElementRead extends AsyncTask<Long, Integer, Item> {
+
+        @Override
+        protected Item doInBackground(Long... params) {
+            String[] projection = {DataStorage.Items.NAME,
+                    DataStorage.Items.DESCRIPTION,
+                    DataStorage.Items.ID_COLLECTION};
+            String[] selection = {String.valueOf(elementId)};
+            Cursor cursorItems = getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID + " =? ", selection, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID + " DESC");
+
+            cursorItems.moveToFirst();
+            Item element = new Item();
+            String name = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.NAME));
+            String description = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.DESCRIPTION));
+            int collection = cursorItems.getInt(cursorItems.getColumnIndex(DataStorage.Items.ID_COLLECTION));
+            element.setId(String.valueOf(elementId));
+            element.setCollection(String.valueOf(collection));
+            element.setName(name);
+            element.setDescription(description);
+            return element;
+        }
+
+        @Override
+        protected void onPostExecute(Item item) {
+            element = item;
         }
     }
 
