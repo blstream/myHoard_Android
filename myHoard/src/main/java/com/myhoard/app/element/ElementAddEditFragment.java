@@ -469,15 +469,15 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                                 DataStorage.Items.CONTENT_URI, values,
                                 DataStorage.Items._ID + " = ?",
                                 new String[] { String.valueOf(elementId) });
-                        fillPhotosData();
+                        getFragmentManager().popBackStackImmediate();
+                        getFragmentManager().popBackStackImmediate();
                     } else {
                         values.put(DataStorage.Items.CREATED_DATE, Calendar
                                 .getInstance().getTime().getTime());
                         asyncHandler.startInsert(0, null,
                                 DataStorage.Items.CONTENT_URI, values);
+                        getActivity().finish();
                     }
-                    getFragmentManager().popBackStackImmediate();
-                    getFragmentManager().popBackStackImmediate();
                 }
                 break;
             default:
