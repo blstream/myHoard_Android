@@ -624,10 +624,10 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             if (first) {
                 values.put(DataStorage.Media.AVATAR, true);
                 first = false;
-            } else
+            } else {
                 values.put(DataStorage.Media.AVATAR, false);
-            AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(cr) {
-            };
+            }
+            AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(cr) {};
             values.put(DataStorage.Media.CREATED_DATE, Calendar.getInstance()
                     .getTime().getTime());
             asyncHandler.startInsert(0, null, DataStorage.Media.CONTENT_URI,
