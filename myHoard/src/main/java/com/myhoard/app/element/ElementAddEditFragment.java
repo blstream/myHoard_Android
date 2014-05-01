@@ -237,10 +237,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         // UI fields in given layout into which elemnts have to be put.
         int[] to = new int[] { android.R.id.text1 };
 
-//        getLoaderManager().initLoader(LOADER_CATEGORIES, null,
-//                new LoaderCategoriesCallbacks());
-//        getLoaderManager().initLoader(3, null, new LoaderItemsCallbacks());
-
         adapterCategories = new SimpleCursorAdapter(context,
                 android.R.layout.simple_list_item_1, null, from, to, NO_FLAGS);
     }
@@ -277,7 +273,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                         } catch (IOException io) {
                             //TODO show error
                         }
-
                     }
                 });
         pickerDialogBuilder
@@ -332,13 +327,16 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private void deleteImage(int id) {
         if (elementId != -1) {
             ContentValues values = new ContentValues();
-            values.put(DataStorage.Media.ID_ITEM, id);
+//            values.put(DataStorage.Media.ID_ITEM, id);
+            values.put(DataStorage.Media.DELETED,true);
             AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(
                     getActivity().getContentResolver()) {
             };
-            asyncHandler.startDelete(0, null, DataStorage.Media.CONTENT_URI,
-                    DataStorage.Media._ID + " =? ",
+            asyncHandler.startUpdate(0, null, DataStorage.Media.CONTENT_URI, values, DataStorage.Media._ID + " =? ",
                     new String[] { String.valueOf(id) });
+//            asyncHandler.startDelete(0, null, DataStorage.Media.CONTENT_URI,
+//                    DataStorage.Media._ID + " =? ",
+//                    new String[] { String.valueOf(id) });
         } else {
             imagesUriList.remove(id);
             if(imagesUriList.size()==1) {
@@ -499,41 +497,17 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            if (adapterCategories == null) {
-                // According to documentation moveToPosition range of values is -1 <= position <= count. This is why there is -1
-                data.moveToPosition(iCollectionId - 1);
-                String category = data.getString(data.getColumnIndex(DataStorage.Collections.NAME));
-                tvElementCategory.setText(category);
-                fillCategoriesData();
-            }
+            // According to documentation moveToPosition range of values is -1 <= position <= count. This is why there is -1
+            data.moveToPosition(iCollectionId - 1);
+            String category = data.getString(data.getColumnIndex(DataStorage.Collections.NAME));
+            tvElementCategory.setText(category);
+            fillCategoriesData();
             adapterCategories.swapCursor(data);
         }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
             adapterCategories.swapCursor(null);
-        }
-    }
-
-    private class LoaderItemsCallbacks implements
-            LoaderManager.LoaderCallbacks<Cursor> {
-        @Override
-        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            String[] projection = { DataStorage.Items.TABLE_NAME + "."
-                    + DataStorage.Items._ID };
-            CursorLoader cursorLoader = new CursorLoader(getActivity(),
-                    DataStorage.Items.CONTENT_URI, projection, null, null, null);
-            return cursorLoader;
-        }
-
-        @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            // Toast.makeText(context,"Ilosc: " +
-            // data.getCount(),Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onLoaderReset(Loader<Cursor> loader) {
         }
     }
 
@@ -547,7 +521,10 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             CursorLoader cursorLoader = new CursorLoader(getActivity(),
                     DataStorage.Media.CONTENT_URI, projection,
                     DataStorage.Media.ID_ITEM + " =? ",
-                    new String[] { String.valueOf(elementId) },
+                    // TODO working on image deleteting
+//                    AND " + DataStorage.Media.DELETED +
+//                    " != ? ",
+                    new String[] { String.valueOf(elementId)/*, String.valueOf(true)*/ },
                     DataStorage.Media.CREATED_DATE + " ASC");
             return cursorLoader;
         }
