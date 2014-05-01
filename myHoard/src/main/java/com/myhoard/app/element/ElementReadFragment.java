@@ -86,7 +86,6 @@ public class ElementReadFragment extends Fragment {
                 pagerAdapter = new ElementFragmentPager(getChildFragmentManager(), data, null);
             }
             pagerAdapter.swapCursor(data);
-            pager.setAdapter(pagerAdapter);
         }
 
         @Override
@@ -135,6 +134,7 @@ public class ElementReadFragment extends Fragment {
 //            }
             // TODO change test data
             pagerAdapter.swapPosition(new LatLng(53.42778,14.553384));
+            pager.setAdapter(pagerAdapter);
         }
     }
 }

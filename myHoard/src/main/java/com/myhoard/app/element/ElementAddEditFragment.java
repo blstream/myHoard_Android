@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.database.MergeCursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -371,6 +373,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     }
 
     private void setImage(Uri uri) {
+        Log.i("TAG","elementId: " + elementId + " " + imageId);
         switch (elementId) {
             case -1:
                 if(imageListAdapter.getCount()==0) {
@@ -406,7 +409,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                             new String[] { String.valueOf(imageId) });
                     imageId = -1;
                 } else {
-                    values.put(DataStorage.Media.AVATAR, true);
+                    values.put(DataStorage.Media.AVATAR, first);
                     values.put(DataStorage.Media.CREATED_DATE, Calendar
                             .getInstance().getTime().getTime());
                     asyncHandler.startInsert(0, null,
@@ -531,7 +534,17 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            adapterImages.swapCursor(data);
+            if(data.getCount()!=0) {
+                first = false;
+            }
+            String[] projection = { DataStorage.Media.FILE_NAME,
+                    DataStorage.Media.CREATED_DATE, DataStorage.Media._ID,
+                    DataStorage.Media.ID_ITEM };
+            MatrixCursor extras = new MatrixCursor(projection);
+            extras.addRow(new String[] { "", "", "-2", String.valueOf(elementId) });
+            Cursor[] cursors = { extras, data };
+            Cursor extendedCursor = new MergeCursor(cursors);
+            adapterImages.swapCursor(extendedCursor);
         }
 
         @Override

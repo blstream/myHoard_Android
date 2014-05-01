@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.element.ElementPhotoFragment;
@@ -17,16 +18,16 @@ import com.myhoard.app.provider.DataStorage;
 public class ElementFragmentPager extends FragmentPagerAdapter {
 
     private Cursor cursor;
-    private LatLng position;
+    private LatLng location;
 
-    public ElementFragmentPager(FragmentManager fm, Cursor cursor, LatLng position) {
+    public ElementFragmentPager(FragmentManager fm, Cursor cursor, LatLng location) {
         super(fm);
         this.cursor = cursor;
-        this.position = position;
+        this.location = location;
     }
 
-    public void swapPosition(LatLng position) {
-        this.position = position;
+    public void swapPosition(LatLng location) {
+        this.location = location;
     }
 
     @Override
@@ -39,7 +40,7 @@ public class ElementFragmentPager extends FragmentPagerAdapter {
         if(position == cursor.getCount()) {
             fragment = new ElementStaticMapFragment();
             Bundle bundle = new Bundle();
-            bundle.putParcelable("position",this.position);
+            bundle.putParcelable("position", this.location);
             fragment.setArguments(bundle);
         } else {
             cursor.moveToPosition(position);
