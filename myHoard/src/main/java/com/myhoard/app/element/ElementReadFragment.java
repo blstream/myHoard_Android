@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
 import com.myhoard.app.model.Item;
 import com.myhoard.app.provider.DataProvider;
@@ -28,17 +29,14 @@ public class ElementReadFragment extends Fragment {
     private ElementFragmentPager pagerAdapter;
     private ViewPager pager;
     private long elementId;
-    private AsyncElementRead asyncElementRead;
     private TextView elementName, elementPosition, elementCollection;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        element = getArguments().getParcelable("element");
         elementId = getArguments().getLong("elementId");
         getLoaderManager().initLoader(1, null, new LoaderImagesCallbacks());
-//        asyncElementRead =
     }
 
     @Override
@@ -53,7 +51,7 @@ public class ElementReadFragment extends Fragment {
         elementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
         elementPosition.setOnClickListener(listener);
 
-        new AsyncElementRead().execute((long) 1);
+        new AsyncElementRead().execute();
 
         pager = (ViewPager) v.findViewById(R.id.pager);
 
@@ -85,7 +83,7 @@ public class ElementReadFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             if(pagerAdapter == null) {
-                pagerAdapter = new ElementFragmentPager(getChildFragmentManager(), data);
+                pagerAdapter = new ElementFragmentPager(getChildFragmentManager(), data, null);
             }
             pagerAdapter.swapCursor(data);
             pager.setAdapter(pagerAdapter);
@@ -97,13 +95,16 @@ public class ElementReadFragment extends Fragment {
         }
     }
 
-    private class AsyncElementRead extends AsyncTask<Long, Integer, Item> {
+    private class AsyncElementRead extends AsyncTask<Void, Integer, Item> {
 
         @Override
-        protected Item doInBackground(Long... params) {
+        protected Item doInBackground(Void... params) {
             String[] projection = {DataStorage.Items.NAME,
                     DataStorage.Items.DESCRIPTION,
-                    DataStorage.Items.ID_COLLECTION};
+                    DataStorage.Items.ID_COLLECTION,
+                    DataStorage.Items.LOCATION_LAT,
+                    DataStorage.Items.LOCATION_LNG,
+                    DataStorage.Items.LOCATION};
             String[] selection = {String.valueOf(elementId)};
             Cursor cursorItems = getActivity().getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID + " =? ", selection, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID + " DESC");
 
@@ -121,6 +122,7 @@ public class ElementReadFragment extends Fragment {
             element.setCollection(collection);
             element.setName(name);
             element.setDescription(description);
+
             return element;
         }
 
@@ -128,6 +130,11 @@ public class ElementReadFragment extends Fragment {
         protected void onPostExecute(Item item) {
             elementName.setText(item.getName());
             elementCollection.setText(item.getCollection());
+//            if(item.getLocation()!=null) {
+//                pagerAdapter.swapPosition(new LatLng(item.getLocation().lat,item.getLocation().lng));
+//            }
+            // TODO change test data
+            pagerAdapter.swapPosition(new LatLng(53.42778,14.553384));
         }
     }
 }
