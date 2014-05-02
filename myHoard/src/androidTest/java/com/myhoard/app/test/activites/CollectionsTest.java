@@ -1,5 +1,6 @@
 package com.myhoard.app.test.activites;
 
+import android.os.Build;
 import android.support.v7.internal.view.menu.MenuView;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
@@ -65,7 +66,7 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
         assertTrue("Not found description", solo.searchText(desc));
         assertTrue("Not found tag", solo.searchText(tag));
         clickOnActionBarItem(R.id.action_accept);
-
+        solo.clickOnActionBarItem(R.id.action_accept);
     }
 
     public void testAddNewCollections() {
@@ -101,6 +102,46 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
             solo.setActivityOrientation(Solo.PORTRAIT);
             solo.clickOnButton("Ok");
         }
+    }
+
+    public void testSearchCollection() {
+        String[] names = {"piwo","kapsle","kufle","auta"};
+        String[] subString = {"le","pi","ps","aa"};
+        int[] count = {2,1,1,0};
+        for(String name : names) {
+            clickOnActionBarHomeButton(solo);
+            solo.clickOnText("Collection");
+            addNewCollection(name,name,name);
+            assertTrue("Expected Toast", solo.waitForText(getActivity().getString(R.string.collection_added)));
+            solo.sleep(TIME);
+        }
+        clickOnActionBarHomeButton(solo);
+        solo.clickOnText("Search");
+        gridView = (GridView) getActivity().findViewById(R.id.gridview);
+        for(int i=0;i<subString.length;i++){
+            solo.clearEditText(0);
+            solo.enterText(0,subString[i]);
+            solo.sleep(TIME);
+            assertEquals(count[i],gridView.getAdapter().getCount());
+            solo.sleep(TIME);
+        }
+    }
+
+    public void testSortCollection() {
+        String[] orderAZ = {"auta","kapsle","kufle","piwo"};
+        gridView = (GridView) getActivity().findViewById(R.id.gridview);
+        int count = gridView.getAdapter().getCount();
+        for(int i=1;i<=count;i++) {
+            solo.clickInList(i);
+            assertTrue("Incorrect order of the collection list", solo.searchText(orderAZ[i-1]));
+            solo.goBack();
+        }
+    }
+
+    // Small trick for showing navigation drawer
+    public void clickOnActionBarHomeButton(Solo solo) {
+        View homeView = solo.getView((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) ? android.R.id.home : R.id.home);
+        solo.clickOnView(homeView);
     }
 
     public void testEmptyCollectionList() {
@@ -139,6 +180,7 @@ public class CollectionsTest extends ActivityInstrumentationTestCase2<MainActivi
             assertTrue("Not found name after edit",solo.searchText(COLLECTION_DESC));
             assertTrue("Not found tag after edit",solo.searchText(COLLECTION_NAME));
             assertTrue("Not found counter of collection items",solo.searchText("0"));
+            testDeleteAllCollection();
         }
     }
 
