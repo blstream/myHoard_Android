@@ -492,36 +492,38 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     public void shareOnFacebook(Session session) {
         if (session != null && session.isOpened()) {
-            mProgressDialog = ProgressDialog.show(getActivity(),"",getString(R.string.progress),true);
-            // Temporary sharing only element name
+            mProgressDialog = ProgressDialog.show(getActivity(), "", getString(R.string.progress), true);
             Bundle postParams = prepareDataToShare(mMessageOnFb);
+            if (postParams != null) {
+                Request.Callback callback = new Request.Callback() {
+                    public void onCompleted(Response response) {
 
-            Request.Callback callback = new Request.Callback() {
-                public void onCompleted(Response response) {
-
-                    FacebookRequestError error = response.getError();
-                    if (error != null) {
-                        if(getActivity().getApplicationContext()!=null) {
-                            makeAndShowToast(error.getErrorMessage());
+                        FacebookRequestError error = response.getError();
+                        if (error != null) {
+                            if (getActivity().getApplicationContext() != null) {
+                                makeAndShowToast(error.getErrorMessage());
+                            }
+                        } else {
+                            makeAndShowToast(getString(R.string.sharing_succeeded));
                         }
-                    } else {
-                       makeAndShowToast(getString(R.string.sharing_succeeded));
+                        mProgressDialog.dismiss();
                     }
-                    mProgressDialog.dismiss();
-                }
-            };
+                };
 
-            Request postRequest = new Request(session, PUBLISH_PHOTOS, postParams, HttpMethod.POST, callback);
+                Request postRequest = new Request(session, PUBLISH_PHOTOS, postParams, HttpMethod.POST, callback);
                 /* AWA:FIXME: Niebezpieczne używanie wątku
         Brak anulowania tej operacji.
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.
         */
-            RequestAsyncTask mFacebookTask = new RequestAsyncTask(postRequest);
-            mFacebookTask.execute();
+                RequestAsyncTask mFacebookTask = new RequestAsyncTask(postRequest);
+                mFacebookTask.execute();
 
+            } else {
+                mProgressDialog.dismiss();
+                makeAndShowToast(getString(R.string.no_photo));
+            }
         }
-
     }
 
     public void makeAndShowToast(String message) {
@@ -561,20 +563,23 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
      */
     private Bundle prepareDataToShare(String message) {
 
-        int photoSizeX = 1000;
-        int photoSizeY = 1000;
+        int photoSizeX = 800;
+        int photoSizeY = 600;
         Bundle bundle = new Bundle();
 
         Cursor cursor = mImageAdapterList.getCursor();
         cursor.moveToPosition(mItemPositionOnList);
         // getting data form cursor
         String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
-        // Decoding image
-        Bitmap image = ImageLoader.decodeSampledBitmapFromResource(data,photoSizeX,photoSizeY);
+        if(data != null) {
+            // Decoding image
+            Bitmap image = ImageLoader.decodeSampledBitmapFromResource(data, photoSizeX, photoSizeY);
 
-        bundle.putParcelable("source",image);
-        bundle.putString("message",message);
-        return  bundle;
+            bundle.putParcelable("source", image);
+            bundle.putString("message", message);
+            return bundle;
+        } else return null;
+
     }
 
     private String setDefaultPostOnFb() {
