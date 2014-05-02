@@ -263,6 +263,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             public void onClick(DialogInterface dialogInterface, int i) {
                 switch(i) {
                     case 0:
+                        startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 10);
                         break;
                     case 1:
                         Intent intent = new Intent(getActivity(), ElementMapActivity.class);
