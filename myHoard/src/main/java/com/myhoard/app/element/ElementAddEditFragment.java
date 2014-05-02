@@ -13,6 +13,7 @@ import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -37,6 +38,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.ImageElementAdapterCursor;
 import com.myhoard.app.adapters.ImageElementAdapterList;
@@ -44,7 +46,18 @@ import com.myhoard.app.images.PhotoManager;
 import com.myhoard.app.model.Item;
 import com.myhoard.app.provider.DataStorage;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -98,8 +111,12 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
     private Item element;
+    private boolean locationUserSet = false;
+    private boolean gpsEnabled = false;
 
     private PhotoManager photoManager;
+
+    private LatLng elementLocation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -129,8 +146,13 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         tvElementPosition.setOnClickListener(this);
 
-        tvElementPosition.setText("ustalam");
-        tvElementPosition.setTextColor(Color.YELLOW);
+        if(!gpsEnabled) {
+            tvElementPosition.setText("brak sygnału gps");
+            tvElementPosition.setTextColor(Color.RED);
+        } else {
+            tvElementPosition.setText("ustalam");
+            tvElementPosition.setTextColor(Color.YELLOW);
+        }
 
         elementId = -1;
         iCollectionId = -1;
@@ -138,12 +160,17 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 //        editionMode = false;
 
         Bundle b = getArguments();
+        LatLng location = b.getParcelable("location");
         if(b.getLong("categoryId",-1)!=-1) {
             iCollectionId = (int) b.getLong("categoryId");
         } else if(b.getParcelable("element")!=null) {
             element = b.getParcelable("element");
             elementId = Integer.parseInt(element.getId());
             iCollectionId = Integer.parseInt(element.getCollection());
+
+            tvElementPosition.setText(element.getLocationTxt());
+            tvElementPosition.setTextColor(Color.GREEN);
+            elementLocation = new LatLng(element.getLocation().lat,element.getLocation().lng);
 
             etElementName.setText(element.getName());
         }
@@ -154,6 +181,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         getLoaderManager().initLoader(LOADER_CATEGORIES, null,
                 new LoaderCategoriesCallbacks());
+        updateLocationData(location,0);
         return v;
     }
 
@@ -170,15 +198,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
     @Override
     public void onClick(View view) {
-//        if (!editionMode && elementId != -1) {
-//            return;
-//        }
         switch (view.getId()) {
             case R.id.tvElementLocalisation:
-                if (String.valueOf(tvElementPosition.getText()).equals("brak")) {
-//                    startActivity(new Intent(
-//                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    startActivityForResult(new Intent(getActivity(),ElementMapFragment.class),9);
+                if(!gpsEnabled){
+                    localisationPicker();
+                } else {
+                    Intent intent = new Intent(getActivity(), ElementMapActivity.class);
+                    intent.putExtra("localisation",elementLocation);
+                    startActivityForResult(intent, 9);
                 }
                 break;
             case R.id.tvElementCategory:
@@ -192,9 +219,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//        if (!editionMode && elementId != -1) {
-//            return;
-//        }
         if(i == 0) {
             imagePicker();
         } else {
@@ -226,6 +250,33 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         AlertDialog choseDialog = categoryDialogBuilder.create();
         choseDialog.show();
 
+    }
+
+    private void localisationPicker() {
+        AlertDialog.Builder localisationDialogBuilder = new AlertDialog.Builder(
+                context);
+
+        final String[] element = new String[]{"włącz gps", "ustal pozycje"};
+
+        localisationDialogBuilder.setItems(element, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                switch(i) {
+                    case 0:
+                        break;
+                    case 1:
+                        Intent intent = new Intent(getActivity(), ElementMapActivity.class);
+                        if(elementLocation!=null){
+                            intent.putExtra("localisation",elementLocation);
+                        }
+                        startActivityForResult(intent, 9);
+                        break;
+                }
+            }
+        });
+
+        AlertDialog choseDialog = localisationDialogBuilder.create();
+        choseDialog.show();
     }
 
     /**
@@ -362,6 +413,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                         Uri imgUri = photoManager.proceedResultPicture(this,data);
                         setImage(imgUri);
                     break;
+                case 9:
+                    LatLng location = data.getParcelableExtra("localisation");
+                    if(location != null) {
+                        locationUserSet = true;
+                        updateLocationData(location,0);
+                    } else {
+                        locationUserSet = false;
+                    }
                 default:
                     break;
             }
@@ -458,6 +517,13 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     values.put(DataStorage.Items.NAME, sName);
                     values.put(DataStorage.Items.DESCRIPTION, sDescription);
                     values.put(DataStorage.Items.ID_COLLECTION, iCollectionId);
+                    if(elementLocation!=null) {
+                        values.put(DataStorage.Items.LOCATION_LAT, elementLocation.latitude);
+                        values.put(DataStorage.Items.LOCATION_LNG, elementLocation.longitude);
+                        values.put(DataStorage.Items.LOCATION, tvElementPosition.getText().toString());
+                    } else {
+                        values.put(DataStorage.Items.LOCATION, "Brak");
+                    }
                     AsyncElementQueryHandler asyncHandler = new AsyncElementQueryHandler(
                             getActivity().getContentResolver()) {
                     };
@@ -622,6 +688,126 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     .getTime().getTime());
             asyncHandler.startInsert(0, null, DataStorage.Media.CONTENT_URI,
                     values);
+        }
+    }
+
+    private class AsyncLocationName extends AsyncTask<LatLng,Integer,JSONObject> {
+        @Override
+        protected JSONObject doInBackground(LatLng... params) {
+            JSONObject json = getLocationInfo(params[0].latitude, params[0].longitude);
+            return json;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject object) {
+            JSONObject location, geometryLocation, geometry;
+            String location_string;
+            try {
+                //Get JSON Array called "results" and then get the 0th complete object as JSON
+                location = object.getJSONArray("results").getJSONObject(0);
+                geometry = object.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
+                geometryLocation = geometry.getJSONObject("location");
+                // Get the value of the attribute whose name is "formatted_string"
+                location_string = location.getString("formatted_address");
+                double lat = Double.parseDouble(geometryLocation.getString("lat"));
+                double lon = Double.parseDouble(geometryLocation.getString("lng"));
+                LatLng latLng = new LatLng(lat,lon);
+                elementLocation = latLng;
+                tvElementPosition.setText(location_string);
+                tvElementPosition.setTextColor(Color.GREEN);
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        public JSONObject getLocationInfo( double lat, double lng) {
+            Log.d("test", "start: " + lat + ":" + lng);
+            HttpGet httpGet = new HttpGet("http://maps.google.com/maps/api/geocode/json?latlng="+lat+","+lng+"&language=pl&sensor=false");
+            HttpClient client = new DefaultHttpClient();
+            HttpResponse response;
+            StringBuilder stringBuilder = new StringBuilder();
+            InputStream stream = null;
+
+            try {
+                response = client.execute(httpGet);
+                HttpEntity entity = response.getEntity();
+                stream = entity.getContent();
+                int b;
+                while ((b = stream.read()) != -1) {
+                    stringBuilder.append((char) b);
+                }
+            } catch (IOException e) {
+                //TODO push to UI
+//                Toast.makeText(getActivity(),"Brak połaczenia internetowego",Toast.LENGTH_SHORT).show();
+            } finally {
+                try{
+                    if(stream != null) {
+                        stream.close();
+                    }
+                } catch(IOException e) {
+
+                }
+            }
+
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject = new JSONObject(stringBuilder.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e) {
+                return null;
+            }
+            return jsonObject;
+        }
+    }
+
+    public void gpsEnabled(boolean gpsEnabled) {
+        this.gpsEnabled = gpsEnabled;
+        if(tvElementPosition!=null && elementLocation==null) {
+            if(!gpsEnabled) {
+                tvElementPosition.setText("brak sygnału gps");
+                tvElementPosition.setTextColor(Color.RED);
+            } else {
+                tvElementPosition.setText("ustalam");
+                tvElementPosition.setTextColor(Color.YELLOW);
+            }
+        } else {
+            // TODO loading
+            // TODO after return when wifi off with no location change don't change text
+            tvElementPosition.setText("ustalam");
+            tvElementPosition.setTextColor(Color.YELLOW);
+        }
+    }
+
+    public void putLocation(LatLng location) {
+        if(tvElementPosition != null) {
+            updateLocationData(location,1);
+        }
+    }
+
+    private void updateLocationData(LatLng location, int source) {
+        if(location==null || (location.latitude == 0 && location.longitude == 0)) {
+            return;
+        }
+
+        if(location == elementLocation) {
+            return;
+        }
+
+        switch(source) {
+            case 0:
+                new AsyncLocationName().execute(location);
+//                elementLocation = location;
+                break;
+            case 1:
+                if(locationUserSet) {
+                    break;
+                }
+                new AsyncLocationName().execute(location);
+                elementLocation = location;
+                break;
+            default:
+                break;
         }
     }
 }

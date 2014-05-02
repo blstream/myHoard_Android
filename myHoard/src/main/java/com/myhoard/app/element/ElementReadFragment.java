@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
 import com.myhoard.app.model.Item;
+import com.myhoard.app.model.ItemLocation;
 import com.myhoard.app.provider.DataProvider;
 import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.views.ElementFragmentPager;
@@ -29,7 +30,7 @@ public class ElementReadFragment extends Fragment {
     private ElementFragmentPager pagerAdapter;
     private ViewPager pager;
     private long elementId;
-    private TextView elementName, elementPosition, elementCollection;
+    private TextView elementName, elementPosition, elementCollection, elementDescription;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,7 @@ public class ElementReadFragment extends Fragment {
 
         elementName = (TextView) v.findViewById(R.id.tvElementName);
         elementCollection = (TextView) v.findViewById(R.id.tvElementCategory);
+        elementDescription = (TextView) v.findViewById(R.id.tvElementDescription);
         elementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
         elementPosition.setOnClickListener(listener);
 
@@ -117,10 +119,15 @@ public class ElementReadFragment extends Fragment {
             String name = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.NAME));
             String description = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.DESCRIPTION));
             String collection = cursorCollections.getString(cursorCollections.getColumnIndex(DataStorage.Collections.NAME));
+            String locationTxt = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.LOCATION));
+            float lat = cursorItems.getFloat(cursorItems.getColumnIndex(DataStorage.Items.LOCATION_LAT));
+            float lon = cursorItems.getFloat(cursorItems.getColumnIndex(DataStorage.Items.LOCATION_LNG));
             element.setId(String.valueOf(elementId));
             element.setCollection(collection);
             element.setName(name);
             element.setDescription(description);
+            element.setLocationTxt(locationTxt);
+            element.setLocation(new ItemLocation(lat,lon));
 
             return element;
         }
@@ -129,11 +136,13 @@ public class ElementReadFragment extends Fragment {
         protected void onPostExecute(Item item) {
             elementName.setText(item.getName());
             elementCollection.setText(item.getCollection());
-//            if(item.getLocation()!=null) {
-//                pagerAdapter.swapPosition(new LatLng(item.getLocation().lat,item.getLocation().lng));
-//            }
-            // TODO change test data
-            pagerAdapter.swapPosition(new LatLng(53.42778,14.553384));
+            elementDescription.setText(item.getDescription());
+            elementPosition.setText(item.getLocationTxt());
+            if(item.getLocation()!=null) {
+                pagerAdapter.swapPosition(new LatLng(item.getLocation().lat,item.getLocation().lng));
+            }
+//            // TODO change test data
+//            pagerAdapter.swapPosition(new LatLng(53.42778,14.553384));
             pager.setAdapter(pagerAdapter);
         }
     }

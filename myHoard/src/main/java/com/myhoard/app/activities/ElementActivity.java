@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -18,12 +17,15 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
 import com.myhoard.app.element.ElementReadFragment;
 import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.gps.GPSProvider;
 import com.myhoard.app.model.Item;
+import com.myhoard.app.model.ItemLocation;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -41,6 +43,7 @@ public class ElementActivity extends ActionBarActivity {
     private long elementId;
     private long categoryId = -1;
     private AsyncElementRead asyncElementRead;
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +54,10 @@ public class ElementActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
-        getBaseContext().bindService(
-                new Intent(this, GPSProvider.class), mConnection,
+        intent = new Intent(this, GPSProvider.class);
+
+        bindService(
+                intent, mConnection,
                 Context.BIND_AUTO_CREATE);
 
         asyncElementRead = new AsyncElementRead();
@@ -105,6 +110,7 @@ public class ElementActivity extends ActionBarActivity {
                         .valueOf(position));
                 if (fragment == null) {
                     fragment = new ElementAddEditFragment();
+                    bundle.putParcelable("location",location);
                     if(categoryId == -1){
                         bundle.putParcelable("element",element);
                     } else {
@@ -133,7 +139,10 @@ public class ElementActivity extends ActionBarActivity {
         protected Item doInBackground(Long... params) {
             String[] projection = {DataStorage.Items.NAME,
                     DataStorage.Items.DESCRIPTION,
-                    DataStorage.Items.ID_COLLECTION};
+                    DataStorage.Items.ID_COLLECTION,
+                    DataStorage.Items.LOCATION,
+                    DataStorage.Items.LOCATION_LAT,
+                    DataStorage.Items.LOCATION_LNG};
             String[] selection = {String.valueOf(elementId)};
             Cursor cursorItems = getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID + " =? ", selection, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID + " DESC");
 
@@ -142,10 +151,15 @@ public class ElementActivity extends ActionBarActivity {
             String name = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.NAME));
             String description = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.DESCRIPTION));
             int collection = cursorItems.getInt(cursorItems.getColumnIndex(DataStorage.Items.ID_COLLECTION));
+            String locationTxt = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.LOCATION));
+            float lat = cursorItems.getFloat(cursorItems.getColumnIndex(DataStorage.Items.LOCATION_LAT));
+            float lon = cursorItems.getFloat(cursorItems.getColumnIndex(DataStorage.Items.LOCATION_LNG));
             element.setId(String.valueOf(elementId));
             element.setCollection(String.valueOf(collection));
             element.setName(name);
             element.setDescription(description);
+            element.setLocationTxt(locationTxt);
+            element.setLocation(new ItemLocation(lat,lon));
             return element;
         }
 
@@ -161,6 +175,7 @@ public class ElementActivity extends ActionBarActivity {
 
     GPSProvider mService;
     boolean mBound = false;
+    private LatLng location;
     /*
      * Część kodu odpowiedzialna za binder
      * (http://developer.android.com/guide/components/bound-services.html)
@@ -187,15 +202,16 @@ public class ElementActivity extends ActionBarActivity {
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updatePosition(intent);
-            Bundle b = intent.getExtras();
-			/*
-			 * AWA:FIXME: Hardcoded value Umiesc w private final static String,
-			 * int, etc.... lub w strings.xml lub innym *.xml
-			 */
-            if (b != null && !b.getBoolean("GPS")) {
-//                tvElementPosition.setText("brak");
-//                tvElementPosition.setTextColor(Color.RED);
+            Bundle bundle = intent.getExtras();
+            boolean gpsEnabled = bundle.getBoolean("gps");
+
+            ElementAddEditFragment elementAdd = (ElementAddEditFragment) getSupportFragmentManager().findFragmentByTag(String.valueOf(1));
+            if(elementAdd != null) {
+                elementAdd.gpsEnabled(gpsEnabled);
+            }
+
+            if(gpsEnabled) {
+                updatePosition(intent);
             }
         }
     };
@@ -203,6 +219,28 @@ public class ElementActivity extends ActionBarActivity {
 	/*
 	 * KONIEC - Część kodu odpowiedzialna za binder
 	 */
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mBound) {
+            try {
+                unbindService(mConnection);
+                Log.d("TAG", "unbind ok");
+            } catch (Exception e) {
+                Log.d("TAG", "nie unbind");
+            }
+            mBound = false;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!mBound) {
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
 
     @Override
     public void onResume() {
@@ -219,7 +257,11 @@ public class ElementActivity extends ActionBarActivity {
 
     @Override
     public void onDestroy() {
-        getBaseContext().unbindService(mConnection);
+        try{
+            unbindService(mConnection);
+        } catch (IllegalArgumentException iae) {
+            // TODO
+        }
         super.onDestroy();
     }
 
@@ -234,12 +276,12 @@ public class ElementActivity extends ActionBarActivity {
         double lat = b.getDouble(GPSProvider.POS_LAT);
         double lon = b.getDouble(GPSProvider.POS_LON);
 
-//        tvElementPosition.setText(pos2str(lat, lon));
-//        tvElementPosition.setTextColor(Color.GREEN);
-    }
+        location = new LatLng(lat, lon);
 
-    private String pos2str(double lat, double lon) {
-        return lat + ":" + lon;
+        ElementAddEditFragment elementAdd = (ElementAddEditFragment) getSupportFragmentManager().findFragmentByTag(String.valueOf(1));
+        if(elementAdd != null) {
+            elementAdd.putLocation(location);
+        }
     }
 	/*
 	 * KONIEC - Część kodu odpowiedzialna za GPS

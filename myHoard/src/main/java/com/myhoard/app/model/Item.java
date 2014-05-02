@@ -61,6 +61,7 @@ public class Item implements IModel, Parcelable
     @SerializedName("modified_date")
     public String modifiedDate;
     public String collection;
+    public String locationTxt;
 
     public Item(){
     }
@@ -137,6 +138,14 @@ public class Item implements IModel, Parcelable
         this.modifiedDate = modifiedDate;
     }
 
+    public String getLocationTxt() {
+        return locationTxt;
+    }
+
+    public void setLocationTxt(String locationTxt) {
+        this.locationTxt = locationTxt;
+    }
+
     @Override
     public String getId() {
         return id;
@@ -194,6 +203,7 @@ public class Item implements IModel, Parcelable
         out.writeString(name);
         out.writeString(description);
         out.writeString(collection);
+        out.writeString(locationTxt);
     }
 
     public void readFromParcel(Parcel in) {
@@ -201,6 +211,7 @@ public class Item implements IModel, Parcelable
         this.name = in.readString();
         this.description = in.readString();
         this.collection = in.readString();
+        this.locationTxt = in.readString();
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
