@@ -413,7 +413,7 @@ public class CollectionsListFragment extends Fragment implements
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String stringExtra = intent.getStringExtra("result");
+            String stringExtra = intent.getStringExtra("result2");
             if (stringExtra != null) {
                 if (stringExtra.equals("downloaded")){
                     fillGridView();

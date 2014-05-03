@@ -55,6 +55,7 @@ public class SynchronizationService extends IntentService {
     ArrayList<ContentProviderOperation> operations;
     private static final int INDEX_OF_FIRST_ELEMENT = 0;
     private static final int ERROR = -1;
+    private static final String ERROR_CREATING_FOLDER = "Error creating folder myHoardFiles";
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -83,7 +84,7 @@ public class SynchronizationService extends IntentService {
                 downloadItems();
 
                 Intent intentt = new Intent("notification");
-                intentt.putExtra("result", "downloaded");
+                intentt.putExtra("result2", "downloaded");
                 sendBroadcast(intentt);
                 break;
             case "upload":
@@ -98,6 +99,7 @@ public class SynchronizationService extends IntentService {
 
                 Intent intenttt = new Intent("notification");
                 intenttt.putExtra("result", "synchronized");
+                intenttt.putExtra("result2", "downloaded");
                 sendBroadcast(intenttt);
                 break;
         }
@@ -174,9 +176,11 @@ public class SynchronizationService extends IntentService {
         if (cursor.getInt(cursor.getColumnIndex(Items.SYNCHRONIZED)) == 0) {
             String where = String.format("%s = %s", Collections._ID, cursor.getString(cursor.getColumnIndex(Items.ID_COLLECTION)));
             Cursor c = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.TYPE}, where, null, null);
-            if (c != null) c.moveToFirst();
-            if (c.getInt(c.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
-                createOrUpdateItemOnServerAndUpdateInDatabase(itemCrud, cursor, c);
+            if (c != null) {
+                c.moveToFirst();
+                if (c.getInt(c.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
+                    createOrUpdateItemOnServerAndUpdateInDatabase(itemCrud, cursor, c);
+                }
             }
         }
     }
@@ -193,7 +197,7 @@ public class SynchronizationService extends IntentService {
                 item.setMedia(mediaId);
 
             ContentValues values = new ContentValues();
-            String where = null;
+            String where;
             if (cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)) != null) {
                 itemCrud.update(item, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)), userManager.getToken());
                 where = String.format("%s = %s", Items.ID_SERVER, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)));
@@ -252,30 +256,31 @@ public class SynchronizationService extends IntentService {
     private void downloadItems() {
         operations = new ArrayList<>();
         CRUDEngine<Item> itemReadForSpecificCollection = new CRUDEngine<>(userManager.getIp() + ITEM_ENDPOINT, Item.class);
-        List<Item> items = null;
+        List<Item> items;
         try {
             items = itemReadForSpecificCollection.getList(userManager.getToken());
+
+            HashMap<String, Long> idServerToModifiedDate = new HashMap<>();
+            if (items.size() > 0) {
+                addItemsIdServerAndModifiedDateToHashMap(items, idServerToModifiedDate);
+            }
+            for (Item item : items) {
+                if (idServerToModifiedDate.get(item.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
+                    insert(item);
+                } else { //jezeli data modyfikacji jest wieksza
+                    Long dataMod = idServerToModifiedDate.get(item.getId()); //TODO sprawdzenie czy data modyfikacji wieksza.. narazie brakuje tego na serwerach
+                    //c.getString(c.getColumnIndex(Collections.MODIFIED_DATE));
+                    update(item);
+                }
+            }
+            executeOperations();
+
+            for (Item item : items) {
+                if (item.getMedia() != null)
+                    downloadMedia(item.getMedia(), item.getId());
+            }
         } catch (RuntimeException re) {
             sendError(re.getMessage());
-        }
-        HashMap<String, Long> idServerToModifiedDate = new HashMap<>();
-        if (items.size() > 0) {
-            addItemsIdServerAndModifiedDateToHashMap(items, idServerToModifiedDate);
-        }
-        for (Item item : items) {
-            if (idServerToModifiedDate.get(item.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
-                insert(item);
-            } else { //jezeli data modyfikacji jest wieksza
-                Long dataMod = idServerToModifiedDate.get(item.getId()); //TODO sprawdzenie czy data modyfikacji wieksza.. narazie brakuje tego na serwerach
-                //c.getString(c.getColumnIndex(Collections.MODIFIED_DATE));
-                update(item);
-            }
-        }
-        executeOperations();
-
-        for (Item item : items) {
-            if (item.getMedia() != null)
-                downloadMedia(item.getMedia(), item.getId());
         }
     }
 
@@ -314,7 +319,7 @@ public class SynchronizationService extends IntentService {
         try {
             getContentResolver().applyBatch(DataStorage.AUTHORITY, operations);
         } catch (RemoteException | OperationApplicationException e) {
-            e.printStackTrace();
+            sendError(e.toString());
         }
     }
 
@@ -359,7 +364,7 @@ public class SynchronizationService extends IntentService {
         ContentValues values = new ContentValues();
 
         String path = Environment.getExternalStorageDirectory().toString();
-        OutputStream fOut = null;
+        OutputStream fOut;
 
         File folder = new File(path + "/myHoardFiles");
         boolean success = true;
@@ -411,11 +416,10 @@ public class SynchronizationService extends IntentService {
 
                 getContentResolver().insert(DataStorage.Media.CONTENT_URI, values);
             } catch (IOException e) {
-                e.printStackTrace();
-                //TODO: throw error;
+                sendError(e.toString());
             }
         } else {
-            //TODO: throw error;
+            sendError(ERROR_CREATING_FOLDER);
         }
     }
 
@@ -430,7 +434,6 @@ public class SynchronizationService extends IntentService {
 
         String selection = String.format(Collections.ID_SERVER + " IN (");
         for (Collection collection : collections) {
-            //listOfId.add(collection.getId());
             if (selection.charAt(selection.length() - 1) != '(') {
                 selection += ",";
             }
@@ -447,7 +450,6 @@ public class SynchronizationService extends IntentService {
 
         for (Collection collection : collections) {
             if (mapka.get(collection.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
-                //insert
                 insert(collection);
 
             } else { //jezeli data modyfikacji jest wieksza
@@ -466,28 +468,8 @@ public class SynchronizationService extends IntentService {
 
 
     private void update(Collection collection) {
-        ContentValues values = new ContentValues();
-        values.put(Collections.ID_SERVER, collection.getId());
-        values.put(Collections.NAME, collection.getName());
-        if (collection.getDescription() != null)
-            values.put(Collections.DESCRIPTION, collection.getDescription());
-        values.put(Collections.TAGS, collection.getTags().toString());
-        values.put(Collections.TYPE, TypeOfCollection.PUBLIC.toString());
-        values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
-        values.put(Collections.SYNCHRONIZED, true);
+        ContentValues values = getContentValuesForCollection(collection);
 
-        try {
-            java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getModified_date());
-            java.util.Date creDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getCreated_date());
-            long modifiedDate = modDate.getTime();
-            long createdDate = creDate.getTime();
-            values.put(Collections.MODIFIED_DATE, modifiedDate);
-            values.put(Collections.CREATED_DATE, createdDate);
-        } catch (ParseException e) {
-            values.put(Collections.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
-            values.put(Collections.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
-            e.printStackTrace();
-        }
         String where = String.format("%s = %s", Collections.ID_SERVER, collection.getId());
         operations.add(ContentProviderOperation.
                         newUpdate(Collections.CONTENT_URI)
@@ -499,6 +481,15 @@ public class SynchronizationService extends IntentService {
 
 
     private void insert(Collection collection) {
+        ContentValues values = getContentValuesForCollection(collection);
+
+        operations.add(ContentProviderOperation
+                .newInsert(Collections.CONTENT_URI)
+                .withValues(values)
+                .build());
+    }
+
+    private ContentValues getContentValuesForCollection(Collection collection) {
         ContentValues values = new ContentValues();
         values.put(Collections.ID_SERVER, collection.getId());
         values.put(Collections.NAME, collection.getName());
@@ -519,51 +510,14 @@ public class SynchronizationService extends IntentService {
         } catch (ParseException e) {
             values.put(Collections.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
             values.put(Collections.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
-            e.printStackTrace();
+            sendError(e.toString());
         }
-
-        operations.add(ContentProviderOperation
-                .newInsert(Collections.CONTENT_URI)
-                .withValues(values)
-                .build());
-        //Uri insert = getContentResolver().insert(Collections.CONTENT_URI, values);
+        return values;
     }
 
-
     private void update(Item item) {
-        ContentValues values = new ContentValues();
+        ContentValues values = getContentValuesForItem(item);
 
-        values.put(DataStorage.Items.ID_SERVER, item.id);
-        if (item.name != null) values.put(DataStorage.Items.NAME, item.name);
-        if (item.description != null) values.put(DataStorage.Items.DESCRIPTION, item.description);
-        if (item.location != null) {
-            values.put(DataStorage.Items.LOCATION_LAT, item.location.lat);
-            values.put(DataStorage.Items.LOCATION_LNG, item.location.lng);
-        }
-
-        try {
-            java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(item.modifiedDate);
-            java.util.Date creDate = new SimpleDateFormat(DATE_FORMAT).parse(item.createdDate);
-
-            long modifiedDate = modDate.getTime();
-            long createdDate = creDate.getTime();
-
-            values.put(Items.MODIFIED_DATE, modifiedDate);
-            values.put(Items.CREATED_DATE, createdDate);
-
-        } catch (ParseException e) {
-            values.put(Items.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
-            values.put(Items.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
-        }
-
-        Uri uri = Collections.CONTENT_URI;
-        String[] projection = new String[]{Collections._ID};
-        String selection = String.format("%s = %s", Collections.ID_SERVER, item.collection);
-        Cursor cursor = getContentResolver().query(uri, projection, selection, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-            values.put(DataStorage.Items.ID_COLLECTION, cursor.getString(0));
-        }
         String where = String.format("%s = %s", Items.ID_SERVER, item.getId());
         operations.add(ContentProviderOperation.
                         newUpdate(Items.CONTENT_URI)
@@ -574,8 +528,17 @@ public class SynchronizationService extends IntentService {
     }
 
     private void insert(Item item) {
-        ContentValues values = new ContentValues();
+        ContentValues values = getContentValuesForItem(item);
+        values.put(Collections.SYNCHRONIZED, true);
 
+        operations.add(ContentProviderOperation
+                .newInsert(Items.CONTENT_URI)
+                .withValues(values)
+                .build());
+    }
+
+    private ContentValues getContentValuesForItem(Item item) {
+        ContentValues values = new ContentValues();
         values.put(DataStorage.Items.ID_SERVER, item.id);
         if (item.name != null) values.put(DataStorage.Items.NAME, item.name);
         if (item.description != null) values.put(DataStorage.Items.DESCRIPTION, item.description);
@@ -583,7 +546,6 @@ public class SynchronizationService extends IntentService {
             values.put(DataStorage.Items.LOCATION_LAT, item.location.lat);
             values.put(DataStorage.Items.LOCATION_LNG, item.location.lng);
         }
-        values.put(Collections.SYNCHRONIZED, true);
         try {
             java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(item.modifiedDate);
             java.util.Date creDate = new SimpleDateFormat(DATE_FORMAT).parse(item.createdDate);
@@ -598,7 +560,6 @@ public class SynchronizationService extends IntentService {
             values.put(Items.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
             values.put(Items.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
         }
-
         Uri uri = Collections.CONTENT_URI;
         String[] projection = new String[]{Collections._ID};
         String selection = String.format("%s = %s", Collections.ID_SERVER, item.collection);
@@ -607,9 +568,6 @@ public class SynchronizationService extends IntentService {
             cursor.moveToFirst();
             values.put(DataStorage.Items.ID_COLLECTION, cursor.getString(0));
         }
-        operations.add(ContentProviderOperation
-                .newInsert(Items.CONTENT_URI)
-                .withValues(values)
-                .build());
+        return values;
     }
 }

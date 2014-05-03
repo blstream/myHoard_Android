@@ -8,10 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import com.myhoard.app.model.Collection;
-import com.myhoard.app.model.IModel;
-import com.myhoard.app.model.Token;
-import com.myhoard.app.model.User;
+import com.myhoard.app.model.*;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -97,7 +94,7 @@ import java.util.List;
 
                 return newItems;
             } catch (Exception e) {
-                throw new RuntimeException(stringResponse);
+                throw new RuntimeException(handleError(stringResponse));
             }
         }
         return null;
@@ -122,7 +119,7 @@ import java.util.List;
 
                 return (T)iModel;
             } catch (Exception e) {
-                throw new RuntimeException(stringResponse);
+                throw new RuntimeException(handleError(stringResponse));
             }
         }
         return null;
@@ -152,8 +149,8 @@ import java.util.List;
             /*Checking response */
             if (response != null) {
                 HttpEntity responseEntity = response.getEntity();
+                HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                 if (response.getStatusLine().getStatusCode()==STATUS_CREATED) {
-                    HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                     IModel imodel = new Gson().fromJson(HTTP_response, item.getClass());
                     Log.d("TAG", "Jsontext = " + HTTP_response);
                     String id = imodel.getId();
@@ -161,12 +158,12 @@ import java.util.List;
                 }
                 else {
                     Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
-                    return null;
+                    throw new RuntimeException(HTTP_response);
                 }
             }
         } catch (Exception e) {
             Log.d("TAG", e.toString());
-            throw new RuntimeException(HTTP_response);
+            throw new RuntimeException(handleError(HTTP_response));
         }
         return null;
     }
@@ -203,7 +200,7 @@ import java.util.List;
             Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
         } catch (Exception e) {
             Log.d("TAG", e.toString());
-            throw new RuntimeException(HTTP_response);
+            throw new RuntimeException(handleError(HTTP_response));
         }
         return null;
     }
@@ -247,5 +244,13 @@ import java.util.List;
             if (n > ZERO) out.append(new String(b, ZERO, n));
         }
         return out.toString();
+    }
+
+    private String handleError(String http_response) {
+        if (http_response.contains("errors")) {
+            String myHoardError = http_response.split("\\}")[0].split("\\{")[2];
+            return myHoardError.split("\"")[3];
+        }
+        else return "unrecognizable error";
     }
 }

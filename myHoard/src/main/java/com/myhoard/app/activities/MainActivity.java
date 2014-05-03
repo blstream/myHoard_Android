@@ -16,6 +16,7 @@
 package com.myhoard.app.activities;
 
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -65,7 +66,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private CollectionsListFragment collectionsListFragment;
     private UserManager userManager;
     private Menu actionBarMenu;
-
+    AlertDialog.Builder builder;
 
     //to receive information from service SynchronizeService
     //private ResponseReceiver receiver;
@@ -156,6 +157,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Media.SYNCHRONIZED))>0)).toString());
         }
         progress = new ProgressDialog(this);
+        builder = new AlertDialog.Builder(MainActivity.this);
     }
 
     @Override
@@ -407,7 +409,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 progress.show();
 
                 final Thread t = new Thread(){
-
                     @Override
                     public void run(){
                         Intent synchronizee = new Intent(MainActivity.this, SynchronizationService.class);
@@ -566,13 +567,33 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
 
+        List <String> errorSynchronizationList = new ArrayList<>();
+
         @Override
         public void onReceive(Context context, Intent intent) {
             String stringExtra = intent.getStringExtra("result");
             if (stringExtra != null) {
                 if (stringExtra.equals("synchronized")){
                     progress.dismiss();
+                    showErrors();
                 }
+            }
+            stringExtra = intent.getStringExtra("error");
+            if (stringExtra != null) {
+                errorSynchronizationList.add(stringExtra);
+            }
+        }
+
+        private void showErrors() {
+            if (errorSynchronizationList.size()>0) {
+                builder.setMessage(errorSynchronizationList.toString())
+                        .setTitle("Errors")
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
+                builder.create();
+                builder.show();
             }
         }
     };
