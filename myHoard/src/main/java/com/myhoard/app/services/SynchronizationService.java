@@ -126,6 +126,12 @@ public class SynchronizationService extends IntentService {
             } else if (cursor.getInt(cursor.getColumnIndex(Collections.SYNCHRONIZED)) == 0) {
                 createCollectionOnServerAndUpdateInDatabase(collectionCrud, cursor, collection);
             }
+        } else if (cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)) != null) {
+            collectionCrud.remove(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)), userManager.getToken());
+            String where = String.format("%s = %s", Collections.ID_SERVER, cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)));
+            ContentValues values = new ContentValues();
+            values.putNull(Collections.ID_SERVER);
+            getContentResolver().update(Collections.CONTENT_URI, values, where, null);
         }
     }
 
@@ -496,7 +502,7 @@ public class SynchronizationService extends IntentService {
         if (collection.getDescription() != null)
             values.put(Collections.DESCRIPTION, collection.getDescription());
         values.put(Collections.TAGS, collection.getTags().toString());
-        values.put(Collections.TYPE, TypeOfCollection.PUBLIC.toString());
+        values.put(Collections.TYPE, TypeOfCollection.PUBLIC.getType());
         values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
         values.put(Collections.SYNCHRONIZED, true);
 
@@ -517,29 +523,31 @@ public class SynchronizationService extends IntentService {
 
     private void update(Item item) {
         ContentValues values = getContentValuesForItem(item);
-
-        String where = String.format("%s = %s", Items.ID_SERVER, item.getId());
-        operations.add(ContentProviderOperation.
-                        newUpdate(Items.CONTENT_URI)
-                        .withSelection(where, null)
-                        .withValues(values)
-                        .build()
-        );
+        if (values != null) {
+            String where = String.format("%s = %s", Items.ID_SERVER, item.getId());
+            operations.add(ContentProviderOperation.
+                            newUpdate(Items.CONTENT_URI)
+                            .withSelection(where, null)
+                            .withValues(values)
+                            .build()
+            );
+        }
     }
 
     private void insert(Item item) {
         ContentValues values = getContentValuesForItem(item);
-        values.put(Collections.SYNCHRONIZED, true);
-
-        operations.add(ContentProviderOperation
-                .newInsert(Items.CONTENT_URI)
-                .withValues(values)
-                .build());
+        if (values != null) {
+            operations.add(ContentProviderOperation
+                    .newInsert(Items.CONTENT_URI)
+                    .withValues(values)
+                    .build());
+        }
     }
 
     private ContentValues getContentValuesForItem(Item item) {
         ContentValues values = new ContentValues();
         values.put(DataStorage.Items.ID_SERVER, item.id);
+        values.put(Collections.SYNCHRONIZED, true);
         if (item.name != null) values.put(DataStorage.Items.NAME, item.name);
         if (item.description != null) values.put(DataStorage.Items.DESCRIPTION, item.description);
         if (item.location != null) {
@@ -561,12 +569,15 @@ public class SynchronizationService extends IntentService {
             values.put(Items.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
         }
         Uri uri = Collections.CONTENT_URI;
-        String[] projection = new String[]{Collections._ID};
+        String[] projection = new String[]{Collections._ID, Collections.TYPE};
         String selection = String.format("%s = %s", Collections.ID_SERVER, item.collection);
         Cursor cursor = getContentResolver().query(uri, projection, selection, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
-            values.put(DataStorage.Items.ID_COLLECTION, cursor.getString(0));
+            if (cursor.getInt(1) != TypeOfCollection.OFFLINE.getType()) {
+                values.put(DataStorage.Items.ID_COLLECTION, cursor.getString(0));
+            }
+            else return null;
         }
         return values;
     }

@@ -26,7 +26,6 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -48,7 +47,6 @@ import com.myhoard.app.adapters.NavDrawerListAdapter;
 import com.myhoard.app.dialogs.GeneratorDialog;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
-import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.model.RowItem;
 import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.services.SynchronizationService;
@@ -64,23 +62,13 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private static final String TAG = "MainActivity";
 
     private CollectionsListFragment collectionsListFragment;
-    private UserManager userManager;
     private Menu actionBarMenu;
-    AlertDialog.Builder builder;
+    private AlertDialog.Builder builder;
+    private Intent synchronizationIntent;
+    private SynchronizationThread synchronizationThread;
 
-    //to receive information from service SynchronizeService
-    //private ResponseReceiver receiver;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
-
-    //variables to progressBar
-    private ProgressDialog progressBar;
-    private Double progressBarStatusIn = 0.;
-    private Double progressBarStatusOut = 0.;
-
-    private double maxProgressBarStatus = Double.POSITIVE_INFINITY;
-    private static final int MIN_VALUE = 0;
-    private static final int MAX_VALUE = 100;
     private static final int XOFFSET = 0;
     private static final int YOFFSET = 0;
     private static final String NEWCOLLECTION = "NewCollection";
@@ -92,8 +80,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private static DrawerLayout drawerLayout = null;
     private ProgressDialog progress;
 
-    private Handler handler = new Handler();
-    private Thread progressBarThread;
     private NavDrawerListAdapter navDrawerListAdapter;
 
     public static long collectionSelected = -1;
@@ -113,49 +99,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         openFragment(savedInstanceState, fm);
         setDrawer();
 
-        //Kod potrzebny do debugowania, prosze go nie uswuac
-        Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
-            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
-        }
-        Log.d(TAG,"<-----KOLKECJE----->");
-        cursor = getContentResolver().query(DataStorage.Collections.CONTENT_URI, null, null, null, null);
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections._ID)));
-            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.SYNCHRONIZED))>0)).toString());
-            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.DELETED))>0)).toString());
-            Log.d(TAG, (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.MODIFIED_DATE))).toString());
-            Log.d(TAG, ((Integer)cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))).toString());
-            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TYPE)));
-            Log.d(TAG, DataStorage.TypeOfCollection.values()[cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))].toString());
-        }
-
-        Log.d(TAG,"<--------ITEMY-------->");
-        //String selection = String.format(DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_SERVER
-        String[] projection = new String[] { DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_SERVER,
-                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,
-                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_COLLECTION,
-                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.SYNCHRONIZED,
-                //DataStorage.Media.TABLE_NAME + "." + DataStorage.Media.FILE_NAME,
-                };
-        cursor = getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, null, null, null);
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d(TAG,"<-ITEM->");
-            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Items._ID)));
-            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_SERVER)));
-            Log.d(TAG, "id_collection "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_COLLECTION)));
-            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Items.SYNCHRONIZED))>0)).toString());
-            //Log.d(TAG, "file name "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
-        }
-
-        cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d(TAG, "<-Media->");
-            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
-            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER)));
-            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Media.SYNCHRONIZED))>0)).toString());
-        }
         progress = new ProgressDialog(this);
         builder = new AlertDialog.Builder(MainActivity.this);
     }
@@ -164,6 +107,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter("notification"));
+        needItForDebugging();
     }
 
     @Override
@@ -191,8 +135,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 displayView(i);
 
             }
-
-
         });
     }
 
@@ -297,26 +239,15 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         outState.putString(FRAGMENT, getVisibleFragmentTag());
     }
 
-    /*@Override
+    @Override
     protected void onStop() {
-        if (receiver != null) {
-            unregisterReceiver(receiver);
-            receiver = null;
-        }
         super.onStop();
-        if (progressBarThread != null) {
-            progressBarThread.interrupt();
-        }
+        if (synchronizationIntent!=null)
+            stopService(synchronizationIntent);
+        if (synchronizationThread != null)
+            synchronizationThread.interrupt();
     }
 
-    @Override
-    protected void onDestroy() {
-        if (receiver != null) {
-            unregisterReceiver(receiver);
-            receiver = null;
-        }
-        super.onDestroy();
-    }*/
 
     String getVisibleFragmentTag() {
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
@@ -361,7 +292,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
                 break;
             case R.id.action_login:
-                userManager = UserManager.getInstance();
+                UserManager userManager = UserManager.getInstance();
                 if (!userManager.isLoggedIn()) {
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);
@@ -398,30 +329,38 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 startService(synchronize);
                 break;
             case R.id.action_upload:
-                Intent synchronizee = new Intent(this, SynchronizationService.class);
-                synchronizee.putExtra("option","upload");
-                startService(synchronizee);
+                synchronizationIntent = new Intent(this, SynchronizationService.class);
+                synchronizationIntent.putExtra("option","upload");
+                startService(synchronizationIntent);
                 break;
             case R.id.action_synchronize:
                 progress.setMessage("synchronization in progress...");
                 progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progress.setIndeterminate(true);
-                progress.show();
-
-                final Thread t = new Thread(){
+                progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
                     @Override
-                    public void run(){
-                        Intent synchronizee = new Intent(MainActivity.this, SynchronizationService.class);
-                        synchronizee.putExtra("option","synchronization");
-                        startService(synchronizee);
+                    public void onClick(DialogInterface dialog, int which) {
+                        progress.dismiss();
+                        stopService(synchronizationIntent);
                     }
-                };
-                t.start();
+                });
+                progress.show();
+                synchronizationThread = new SynchronizationThread();
+                synchronizationThread.start();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private class SynchronizationThread extends Thread {
+        @Override
+        public void run() {
+            synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
+            synchronizationIntent.putExtra("option","synchronization");
+            startService(synchronizationIntent);
+        }
     }
 
     @Override
@@ -440,74 +379,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         //This method is called when the up button is pressed. Just the pop back stack.
         //   getSupportFragmentManager().popBackStack();
         return true;
-    }
-
-    public class ResponseReceiver extends BroadcastReceiver {
-        public static final String ACTION_RESP = "MESSAGE_SYNCHRONIZE";
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //String status = intent.getStringExtra(SynchronizeService.currentStatus);
-            //progressBarStatusOut = Double.parseDouble(status);
-            //status = intent.getStringExtra(SynchronizeService.maxStatus);
-            //maxProgressBarStatus = Double.parseDouble(status);
-        }
-
-    }
-
-
-    private void startProgressBar() {
-        // prepare for a progress bar dialog
-        progressBar = new ProgressDialog(this);
-        progressBar.setCancelable(true);
-        progressBar.setMessage(getString(R.string.file_synchroniznig));
-        progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressBar.setProgress(MIN_VALUE);
-        progressBar.setMax(MAX_VALUE);
-
-        progressBar.setCancelable(false);
-        progressBar.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        progressBar.show();
-        //reset progress bar status
-        progressBarStatusIn = 0.;
-        progressBarStatusOut = 0.;
-
-        /* AWA:FIXME: Niebezpieczne używanie wątku
-        Brak anulowania tej operacji.
-        Wyjście z Activity nie kończy wątku,
-        należy o to zadbać.
-        */
-        progressBarThread = new Thread() {
-            public void run() {
-                while (progressBarStatusIn < MAX_VALUE) {
-
-                    // calculate progress bar status
-                    progressBarStatusIn = progressBarStatusOut / maxProgressBarStatus * MAX_VALUE;
-
-                    // Update the progress bar
-                    handler.post(new Runnable() {
-                        public void run() {
-                            progressBar.setProgress((int) progressBarStatusIn.doubleValue());
-                        }
-                    });
-                }
-
-                // ok, file is downloaded,
-                if (progressBarStatusIn >= MAX_VALUE) {
-                    maxProgressBarStatus = Double.POSITIVE_INFINITY;
-                    // close the progress bar dialog
-                    progressBar.dismiss();
-                }
-
-            }
-        };
-        progressBarThread.start();
     }
 
     private void displayView(int position)
@@ -597,4 +468,50 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             }
         }
     };
+
+    private void needItForDebugging() {
+        //Kod potrzebny do debugowania, prosze go nie uswuac
+        Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
+            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+        }
+        Log.d(TAG,"<-----KOLKECJE----->");
+        cursor = getContentResolver().query(DataStorage.Collections.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections._ID)));
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.SYNCHRONIZED))>0)).toString());
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.DELETED))>0)).toString());
+            Log.d(TAG, (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.MODIFIED_DATE))).toString());
+            Log.d(TAG, ((Integer)cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))).toString());
+            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TYPE)));
+            Log.d(TAG, DataStorage.TypeOfCollection.values()[cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))].toString());
+        }
+
+        Log.d(TAG,"<--------ITEMY-------->");
+        //String selection = String.format(DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_SERVER
+        String[] projection = new String[] { DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_SERVER,
+                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,
+                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_COLLECTION,
+                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.SYNCHRONIZED,
+                //DataStorage.Media.TABLE_NAME + "." + DataStorage.Media.FILE_NAME,
+        };
+        cursor = getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG,"<-ITEM->");
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Items._ID)));
+            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_SERVER)));
+            Log.d(TAG, "id_collection "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_COLLECTION)));
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Items.SYNCHRONIZED))>0)).toString());
+            //Log.d(TAG, "file name "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+        }
+
+        cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG, "<-Media->");
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
+            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER)));
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Media.SYNCHRONIZED))>0)).toString());
+        }
+    }
 }
