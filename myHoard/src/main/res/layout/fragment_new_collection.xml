@@ -55,7 +55,6 @@
                 android:textColor="@color/yellow_main"
                 android:textCursorDrawable="@null"
                 android:layout_gravity="center_horizontal"
-                android:digits="AaĄąBbCcĆćDdEeĘęFfGgHhIiJjKkLlŁłMmNnŃńOoÓóPpQqRrSsŚśTtUuVvWwXxYyZzŹźŻż1234567890 "
                 android:inputType="textNoSuggestions"
                 tools:ignore="UnusedAttribute" /> <!--Poniżej
                 api 12 "android:textCursorDrawable="@null"" nie jest używane-->
