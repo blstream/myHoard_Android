@@ -10,12 +10,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.crudengine.ConnectionDetector;
+import com.myhoard.app.model.PasswordStrenghtMetter;
 import com.myhoard.app.model.User;
 
 import java.util.regex.Matcher;
@@ -32,8 +34,9 @@ public class RegisterActivity extends BaseActivity {
     private EditText emailRegistry;
     private EditText passwordRegistry;
     private EditText usernameRegistry;
-    private EditText passwordConfirm;
     private TextView password_strenght;
+    private ImageView imageView;
+    private TextView txt;
 
 
     @Override
@@ -44,10 +47,10 @@ public class RegisterActivity extends BaseActivity {
         emailRegistry = (EditText) findViewById(R.id.email_register);
         passwordRegistry = (EditText) findViewById(R.id.password_register);
         usernameRegistry = (EditText) findViewById(R.id.username_register);
-        passwordConfirm = (EditText)findViewById(R.id.password_confirm);
         Button registryButton = (Button) findViewById(R.id.reg_button);
         passwordRegistry.addTextChangedListener(PasswordEditorMatcher);
         password_strenght = (TextView) findViewById(R.id.passwordStrenghtText);
+        imageView = (ImageView)findViewById(R.id.imageViewRegistry);
 
         registryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,14 +67,14 @@ public class RegisterActivity extends BaseActivity {
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
         if(!cd.isConnectingToInternet())
         {
-            TextView txt = (TextView)findViewById(R.id.NoInternetTextView);
+            txt = (TextView)findViewById(R.id.NoInternetTextView);
             txt.setText(getString(R.string.no_internet_connection));
 
         }
         else {
             boolean passwordFound = validatePassword();
             boolean emailFound = validateEmail();
-            boolean passwordCheck = PasswordChecking(String.valueOf(passwordConfirm.getText()));
+
             if (!emailFound) {
 
                 emailRegistry.setError(getString(R.string.wrong_email_format));
@@ -80,13 +83,9 @@ public class RegisterActivity extends BaseActivity {
 
                 passwordRegistry.setError(getString(R.string.password_information));
             }
-            if (!passwordCheck) {
-                passwordConfirm.setError(getString(R.string.password_not_match));
-                passwordConfirm.setBackgroundResource(R.drawable.registration_border_wrong);
-            }
 
 
-            if (passwordFound && emailFound && passwordCheck) {
+            if (passwordFound && emailFound) {
                 User user = new User();
                 user.setEmail(String.valueOf(emailRegistry.getText()));
                 if (String.valueOf(usernameRegistry.getText()).length() > 0) {
@@ -108,89 +107,6 @@ public class RegisterActivity extends BaseActivity {
         }
     }
 
-        private final TextWatcher PasswordEditorMatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                password_strenght.setText("Empty");
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-                int passwordStrenght = passwordRanking(s);
-
-                switch (passwordStrenght) {
-
-                    case 1: {
-
-                        password_strenght.setTextColor(getResources().getColor(R.color.orange));
-                        password_strenght.setText("low");
-                        break;
-                    }
-                    case 2:
-                    {
-                        password_strenght.setTextColor(getResources().getColor(R.color.yellow_text));
-                        password_strenght.setText("nice");
-                        break;
-
-                    }
-                    case 3:
-                    {
-                        password_strenght.setTextColor(getResources().getColor(R.color.green));
-                        password_strenght.setText("nicely done");
-                        break;
-                    }
-                    case 4:
-                    {
-                        password_strenght.setTextColor(getResources().getColor(R.color.green));
-                        password_strenght.setText("Epic");
-                        break;
-                    }
-
-                    default:
-                        password_strenght.setTextColor(getResources().getColor(R.color.red));
-                        password_strenght.setText("too short");
-                        break;
-
-                }
-            }
-
-        };
-
-
-
-    public int passwordRanking(Editable password)
-    {
-
-        Pattern numPatt = Pattern.compile("\\d+");
-        Pattern specialPattern = Pattern.compile("[@#$%^&+=]");
-        Pattern bigLetterPattern = Pattern.compile("[A-Z]");
-        Matcher matcher = numPatt.matcher(password);
-        Matcher matcher1 = specialPattern.matcher(password);
-        Matcher matcher2 = bigLetterPattern.matcher(password);
-        int passwordStrenght = 0 ;
-
-        if(password.length() > 5) {
-            passwordStrenght++;
-            if (matcher.find()) {
-                passwordStrenght++;
-            }
-            if (matcher1.find()) {
-                passwordStrenght++;
-            }
-            if (matcher2.find()) {
-                passwordStrenght++;
-            }
-
-
-        }
-        return passwordStrenght;
-    }
 
 
     public boolean validatePassword() {
@@ -213,10 +129,7 @@ public class RegisterActivity extends BaseActivity {
         if (!m.matches()) Log.d(TAG,getString(R.string.invalid_password));
         return m.matches();
     }
-    public boolean PasswordChecking(String password)
-    {
-        return password.equals(String.valueOf(passwordRegistry.getText()));
-    }
+
 
     private class RegisterUser extends AsyncTask<Void, Void, Boolean> {
 
@@ -244,4 +157,63 @@ public class RegisterActivity extends BaseActivity {
             Log.d(TAG,"error");
         }
     }
-}
+
+
+
+        private final TextWatcher PasswordEditorMatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                password_strenght.setText("Empty");
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                PasswordStrenghtMetter psm = new PasswordStrenghtMetter();
+                int passwordStrenght = psm.passwordRanking(s);
+
+                switch (passwordStrenght) {
+
+                    case 1: {
+
+                        password_strenght.setTextColor(getResources().getColor(R.color.orange));
+                        password_strenght.setText("low");
+
+                        break;
+                    }
+                    case 2:
+                    {
+                        password_strenght.setTextColor(getResources().getColor(R.color.yellow_text));
+                        password_strenght.setText("nice");
+                        break;
+                    }
+                    case 3:
+                    {
+                        password_strenght.setTextColor(getResources().getColor(R.color.green));
+                        password_strenght.setText("nicely done");
+                        break;
+                    }
+                    case 4:
+                    {
+                        password_strenght.setTextColor(getResources().getColor(R.color.green));
+                        password_strenght.setText("Epic");
+                        break;
+                    }
+
+                    default:
+                        password_strenght.setTextColor(getResources().getColor(R.color.red));
+                        password_strenght.setText("too short");
+
+                        break;
+                }
+            }
+
+        };
+
+
+    }

@@ -27,6 +27,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -273,6 +274,20 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                     mNamesList.add(cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME)));
                     cursor.moveToNext();
                 }
+
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser == true) {
+            Log.d("appka", "this fragment is now visible");
+
+        }
+
+        else if (isVisibleToUser == false) {
+            Log.d("appka", "this fragment is now invisible");
 
         }
     }
