@@ -35,8 +35,10 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -116,10 +118,7 @@ public class SynchronizationService extends IntentService {
 
     private void uploadCollection(CRUDEngine<Collection> collectionCrud, Cursor cursor) {
         if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
-            //TODO: wyslac na serwer czy public czy private
-            Collection collection = new Collection();
-            collection.setName(cursor.getString(cursor.getColumnIndex(Collections.NAME)));
-            collection.setDescription(cursor.getString(cursor.getColumnIndex(Collections.DESCRIPTION)));
+            Collection collection = getCollectionFromDatabase(cursor);
             if (cursor.getInt(cursor.getColumnIndex(Collections.SYNCHRONIZED)) == 0
                     && cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)) != null) {
                 updateCollectionOnServerAndUpdateInDatabase(collectionCrud, cursor, collection);
@@ -133,6 +132,21 @@ public class SynchronizationService extends IntentService {
             values.putNull(Collections.ID_SERVER);
             getContentResolver().update(Collections.CONTENT_URI, values, where, null);
         }
+    }
+
+    private Collection getCollectionFromDatabase(Cursor cursor) {
+        //TODO: wyslac na serwer czy public czy private
+        Collection collection = new Collection();
+        collection.setName(cursor.getString(cursor.getColumnIndex(Collections.NAME)));
+        collection.setDescription(cursor.getString(cursor.getColumnIndex(Collections.DESCRIPTION)));
+        String [] tags = cursor.getString(cursor.getColumnIndex(Collections.TAGS)).split("#");
+        List<String> list = new LinkedList<String>(Arrays.asList(tags));
+        list.remove(0); //zero element is always empty, remove it
+        for(int i=0; i<list.size();i++){
+            list.set(i, list.get(i).trim());
+        }
+        collection.setTags(list);
+        return collection;
     }
 
     private void updateCollectionOnServerAndUpdateInDatabase(CRUDEngine<Collection> collectionCrud, Cursor cursor, Collection collection) {
@@ -501,7 +515,11 @@ public class SynchronizationService extends IntentService {
         values.put(Collections.NAME, collection.getName());
         if (collection.getDescription() != null)
             values.put(Collections.DESCRIPTION, collection.getDescription());
-        values.put(Collections.TAGS, collection.getTags().toString());
+        String tags="";
+        for (String s : collection.getTags()){
+            tags=tags+"#"+s+" ";
+        }
+        values.put(Collections.TAGS, tags.trim());
         values.put(Collections.TYPE, TypeOfCollection.PUBLIC.getType());
         values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
         values.put(Collections.SYNCHRONIZED, true);
