@@ -3,6 +3,7 @@ package com.myhoard.app.provider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,9 +11,11 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.provider.DataStorage.Items;
 import com.myhoard.app.provider.DataStorage.Media;
+import com.myhoard.app.services.SynchronizationService;
 
 /**
  * Description
@@ -42,6 +45,8 @@ public class ItemsTable extends DatabaseTable {
                 .append(Items.LOCATION + " TEXT, ")
                 .append(Items.CREATED_DATE + " NUMERIC, ")
                 .append(Items.MODIFIED_DATE + " NUMERIC, ")
+                .append(Items.SYNCHRONIZED + " BOOLEAN DEFAULT FALSE, ")
+                .append(Items.DELETED + " BOOLEAN DEFAULT FALSE, ")
                 .append("FOREIGN KEY(" + Items.ID_COLLECTION + ") REFERENCES " + Collections.TABLE_NAME + "(" + Collections._ID + "))");
         db.execSQL(sql.toString());
     }
@@ -55,7 +60,8 @@ public class ItemsTable extends DatabaseTable {
     public Cursor query(SQLiteDatabase db, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         //JOIN tables to get element name with its specific avatar
-        qb.setTables(tableName + " LEFT OUTER JOIN " + Media.TABLE_NAME + " ON (" + Items.TABLE_NAME + "." + Items._ID + "=" + Media.TABLE_NAME + "." + Media.ID_ITEM + ")");
+        qb.setDistinct(true);
+        qb.setTables(tableName + " LEFT JOIN " + Media.TABLE_NAME + " ON (" + Items.TABLE_NAME + "." + Items._ID + "=" + Media.TABLE_NAME + "." + Media.ID_ITEM + ")");
 
         String orderBy;
         // If no sort order is specified, uses the default

@@ -16,8 +16,11 @@
 package com.myhoard.app.fragments;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -48,7 +51,7 @@ import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Rafał Soudani on 20/02/2014
- * Modified by Maciej Plewko
+ * Modified by Maciej Plewko, Tomasz Nosal
  */
 public class CollectionsListFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -72,13 +75,15 @@ public class CollectionsListFragment extends Fragment implements
     private static final String LABEL_BY_DATE_ASC = "< DATE";
     private static final String LABEL_BY_DATE_DESC = "> DATE";
     private static final String DEFAULT_SORT = DataStorage.Collections.NAME;
-    private static String sortByNameAscending = DataStorage.Collections.NAME + " ASC";
-    private static String sortByDateAscending = DataStorage.Collections.TABLE_NAME + "." +
+    private static final String sortByNameAscending = DataStorage.Collections.NAME + " ASC";
+    private static final String sortByDateAscending = DataStorage.Collections.TABLE_NAME + "." +
             DataStorage.Collections.CREATED_DATE + " ASC";
-    private static String sortByNameDescending = DataStorage.Collections.NAME + " DESC";
-    private static String sortByDateDescending = DataStorage.Collections.TABLE_NAME + "." +
+    private static final String sortByNameDescending = DataStorage.Collections.NAME + " DESC";
+    private static final String sortByDateDescending = DataStorage.Collections.TABLE_NAME + "." +
             DataStorage.Collections.CREATED_DATE + " DESC";
     private static String sortOrder = DEFAULT_SORT;
+
+    boolean gridViewWasFilled=false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -115,12 +120,21 @@ public class CollectionsListFragment extends Fragment implements
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         UserManager userManager = UserManager.getInstance();
+        MenuItem menuItem;
         if (userManager.isLoggedIn()) {
-            menu.findItem(R.id.action_login).setTitle("Logout");
-            menu.findItem(R.id.action_synchronize).setVisible(true);
+            menuItem = menu.findItem(R.id.action_upload);
+            if(menuItem!=null) menuItem.setVisible(true);
+            menuItem = menu.findItem(R.id.action_download);
+            if(menuItem!=null) menuItem.setVisible(true);
+            menuItem = menu.findItem(R.id.action_synchronize);
+            if(menuItem!=null) menuItem.setVisible(true);
         } else {
-            menu.findItem(R.id.action_login).setTitle("Login");
-            menu.findItem(R.id.action_synchronize).setVisible(false);
+            menuItem = menu.findItem(R.id.action_upload);
+            if(menuItem!=null) menuItem.setVisible(false);
+            menuItem = menu.findItem(R.id.action_download);
+            if(menuItem!=null) menuItem.setVisible(false);
+            menuItem = menu.findItem(R.id.action_synchronize);
+            if(menuItem!=null) menuItem.setVisible(false);
         }
         super.onPrepareOptionsMenu(menu);
     }
@@ -165,7 +179,10 @@ public class CollectionsListFragment extends Fragment implements
         ActionBar.TabListener sortByNameTabListener = new ActionBar.TabListener() {
             @Override
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-                sortByName();
+                if(!gridViewWasFilled) {
+                    sortByName();
+                    gridViewWasFilled=false;
+                }
             }
 
             @Override
@@ -217,14 +234,27 @@ public class CollectionsListFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
+        getActivity().registerReceiver(receiver, new IntentFilter("notification"));
         fillGridView(null);
         setSortTabs();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(receiver);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         resetActionBarNavigationMode();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        adapter.mImageLoader.clearCache();
     }
 
     @Override
@@ -289,12 +319,17 @@ public class CollectionsListFragment extends Fragment implements
         if (args != null) {
             getLoaderManager().restartLoader(SEARCH, args, this);
         }else{
-            getLoaderManager().restartLoader(0, args, this);
+            gridViewWasFilled = true;
+            getLoaderManager().restartLoader(0, null, this);
         }
     }
 
+    private void fillGridView() {
+        getLoaderManager().restartLoader(0, null, this);
+    }
+
     private void sortByName() {
-        if (sortOrder == sortByNameAscending) {
+        if (sortByNameAscending.equals(sortOrder)) {
             sortOrder = sortByNameDescending;
             setSelectedTabByNameText(LABEL_BY_NAME_DESC);
         } else {
@@ -305,7 +340,7 @@ public class CollectionsListFragment extends Fragment implements
     }
 
     private void sortByDate() {
-        if (sortOrder == sortByDateAscending) {
+        if (sortOrder.equals(sortByDateAscending)) {
             sortOrder = sortByDateDescending;
             setSelectedTabByDateText(LABEL_BY_DATE_DESC);
         } else {
@@ -373,4 +408,17 @@ public class CollectionsListFragment extends Fragment implements
     public void onLoaderReset(Loader loader) {
         adapter.swapCursor(null);
     }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String stringExtra = intent.getStringExtra("result2");
+            if (stringExtra != null) {
+                if (stringExtra.equals("downloaded")){
+                    fillGridView();
+                }
+            }
+        }
+    };
 }

@@ -29,10 +29,31 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:textColor="@color/yellow_text"
-                android:background="@color/black_background"
+                android:background="@drawable/login_and_registration_border"
                 android:inputType="textEmailAddress"
+
                 android:ems="10"
                 android:id="@+id/email_register"
+                android:layout_margin="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/gray_text"
+
+                android:text="@string/Username"
+                android:id="@+id/textViewUser"
+                android:layout_marginLeft="20dp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:textColor="@color/yellow_text"
+                android:background="@drawable/login_and_registration_border"
+                android:inputType="textEmailAddress"
+                android:ems="10"
+                android:id="@+id/username_register"
                 android:layout_margin="20dp" />
 
             <TextView
@@ -47,12 +68,51 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
-                android:background="@color/black_background"
+                android:background="@drawable/login_and_registration_border"
                 android:textColor="@color/yellow_text"
                 android:inputType="textPassword"
                 android:ems="10"
                 android:id="@+id/password_register"
                 android:layout_margin="20dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="20dp"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/gray_text"
+                    android:text="@string/password_strenght_text"
+                    android:layout_marginLeft="20dp"
+                    android:id="@+id/textView4" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/gray_text"
+                    android:id="@+id/passwordStrenghtText"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_toRightOf="@+id/textView4" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageViewRegistry" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/gray_text"
+                android:id="@+id/NoInternetTextView"
+                android:layout_gravity="center_horizontal" />
 
             <Button
                 android:layout_width="match_parent"

@@ -16,6 +16,7 @@
 package com.myhoard.app.activities;
 
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,15 +24,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,9 +47,9 @@ import com.myhoard.app.adapters.NavDrawerListAdapter;
 import com.myhoard.app.dialogs.GeneratorDialog;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
-import com.myhoard.app.fragments.ElementFragment;
 import com.myhoard.app.model.RowItem;
-import com.myhoard.app.services.SynchronizeService;
+import com.myhoard.app.provider.DataStorage;
+import com.myhoard.app.services.SynchronizationService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,25 +57,18 @@ import java.util.List;
 /*
 Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 */
-public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
+public class MainActivity extends BaseActivity implements FragmentManager.OnBackStackChangedListener {
+
+    private static final String TAG = "MainActivity";
+
     private CollectionsListFragment collectionsListFragment;
-    private UserManager userManager;
     private Menu actionBarMenu;
+    private AlertDialog.Builder builder;
+    private Intent synchronizationIntent;
+    private SynchronizationThread synchronizationThread;
 
-
-    //to receive information from service SynchronizeService
-    private ResponseReceiver receiver;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
-
-    //variables to progressBar
-    private ProgressDialog progressBar;
-    private Double progressBarStatusIn = 0.;
-    private Double progressBarStatusOut = 0.;
-
-    private double maxProgressBarStatus = Double.POSITIVE_INFINITY;
-    private static final int MIN_VALUE = 0;
-    private static final int MAX_VALUE = 100;
     private static final int XOFFSET = 0;
     private static final int YOFFSET = 0;
     private static final String NEWCOLLECTION = "NewCollection";
@@ -83,9 +77,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     private static final String NEWELEMENT = "NewElement";
     private static final String ITEMSLIST = "ItemsList";
     private static final String FRAGMENT = "fragment";
+    private static DrawerLayout drawerLayout = null;
+    private ProgressDialog progress;
 
-    private Handler handler = new Handler();
-    private Thread progressBarThread;
     private NavDrawerListAdapter navDrawerListAdapter;
 
     public static long collectionSelected = -1;
@@ -105,10 +99,26 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         openFragment(savedInstanceState, fm);
         setDrawer();
 
+        progress = new ProgressDialog(this);
+        builder = new AlertDialog.Builder(MainActivity.this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter("notification"));
+        needItForDebugging();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 
     private void setDrawer() {
-        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         final ListView navigationList = (ListView) findViewById(R.id.drawer_list);
         navigationList.setAdapter(navDrawerListAdapter);
 
@@ -121,63 +131,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int i, final long l) {
-                drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
 
-                    @Override
-                    public void onDrawerClosed(View drawerView) {
-                        super.onDrawerClosed(drawerView);
-
-                        int w = i;
-
-                        switch (w) {
-                            case 0:
-                                if (getVisibleFragmentTag().equals(MAIN)) {
-                                    search();
-                                }
-                                break;
-                            /* AWA:FIXME: Hardcoded value
-                            Magiczne numerki co oznaczaja 1, 2, 3....
-                            Musze z kodu wyczytac gdzie trafiłem ???
-                            */
-                            case 1:
-                                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
-                                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
-                                        !getVisibleFragmentTag().equals(NEWELEMENT)) {
-                                    //item.setTitle(R.string.action_new_collection);//TODO correct
-                                    getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
-                                            .addToBackStack(NEWCOLLECTION)
-                                            .commit();
-                                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
-                                    //item.setTitle(R.string.action_new_element);//TODO correct
-                                    Fragment elementFragment = new ElementFragment();
-                                    Bundle b = new Bundle();
-                                    b.putLong(ElementFragment.COLLECTION_ID, collectionSelected);
-                                    b.putInt(ElementFragment.ID, -1);
-                                    elementFragment.setArguments(b);
-                                    getSupportFragmentManager().beginTransaction()
-                                            .replace(R.id.container, elementFragment, NEWELEMENT)
-                                            .addToBackStack(NEWELEMENT)
-                                            .commit();
-                                }
-                                break;
-                            case 2:
-                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
-                                break;
-                            case 3:
-                                Toast.makeText(getBaseContext(),"Not implemented yet",Toast.LENGTH_SHORT).show();
-                                break;
-                            default:
-                                break;
-
-                        }
-                    }
-                });
-                drawerLayout.closeDrawer(navigationList);
+                displayView(i);
 
             }
         });
     }
+
 
     private void search() {
         //Set zgodnie z grafikami oparty na drawerze, jesli bedzie zmiana i przeniesienie
@@ -264,14 +224,14 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         actionBarDrawerToggle.syncState();
     }
 
-    @Override
+    /*@Override
     protected void onStart() {
         IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new ResponseReceiver();
         registerReceiver(receiver, filter);
         super.onStart();
-    }
+    }*/
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -281,24 +241,13 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     @Override
     protected void onStop() {
-        if (receiver != null) {
-            unregisterReceiver(receiver);
-            receiver = null;
-        }
         super.onStop();
-        if (progressBarThread != null) {
-            progressBarThread.interrupt();
-        }
+        if (synchronizationIntent!=null)
+            stopService(synchronizationIntent);
+        if (synchronizationThread != null)
+            synchronizationThread.interrupt();
     }
 
-    @Override
-    protected void onDestroy() {
-        if (receiver != null) {
-            unregisterReceiver(receiver);
-            receiver = null;
-        }
-        super.onDestroy();
-    }
 
     String getVisibleFragmentTag() {
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
@@ -343,7 +292,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
                 break;
             case R.id.action_login:
-                userManager = UserManager.getInstance();
+                UserManager userManager = UserManager.getInstance();
                 if (!userManager.isLoggedIn()) {
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);
@@ -374,15 +323,44 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                     fragment.itemsSortOrderChange(item);
                 }
                 break;*/
-            case R.id.action_synchronize:
-                startProgressBar();
-                Intent synchronize = new Intent(this, SynchronizeService.class);
+            case R.id.action_download:
+                Intent synchronize = new Intent(this, SynchronizationService.class);
+                synchronize.putExtra("option","download");
                 startService(synchronize);
+                break;
+            case R.id.action_upload:
+                synchronizationIntent = new Intent(this, SynchronizationService.class);
+                synchronizationIntent.putExtra("option","upload");
+                startService(synchronizationIntent);
+                break;
+            case R.id.action_synchronize:
+                progress.setMessage("synchronization in progress...");
+                progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progress.setIndeterminate(true);
+                progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        progress.dismiss();
+                        stopService(synchronizationIntent);
+                    }
+                });
+                progress.show();
+                synchronizationThread = new SynchronizationThread();
+                synchronizationThread.start();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private class SynchronizationThread extends Thread {
+        @Override
+        public void run() {
+            synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
+            synchronizationIntent.putExtra("option","synchronization");
+            startService(synchronizationIntent);
+        }
     }
 
     @Override
@@ -403,79 +381,52 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         return true;
     }
 
-    public class ResponseReceiver extends BroadcastReceiver {
-        public static final String ACTION_RESP = "MESSAGE_SYNCHRONIZE";
+    private void displayView(int position)
+    {
+        
+        switch (position) {
+            //search option
+            case 0:
+                if (getVisibleFragmentTag().equals(MAIN)) {
+                    search();
+                }
+                break;
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String status = intent.getStringExtra(SynchronizeService.currentStatus);
-            progressBarStatusOut = Double.parseDouble(status);
-            status = intent.getStringExtra(SynchronizeService.maxStatus);
-            maxProgressBarStatus = Double.parseDouble(status);
+              //new collection
+            case 1:
+                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
+                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
+                        !getVisibleFragmentTag().equals(NEWELEMENT)) {
+                    //item.setTitle(R.string.action_new_collection);//TODO correct
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
+                            .addToBackStack(NEWCOLLECTION)
+                            .commit();
+                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
+                    //item.setTitle(R.string.action_new_element);//TODO correct
+                    Intent in = new Intent(this,ElementActivity.class);
+                    in.putExtra("categoryId",collectionSelected);
+                    startActivity(in);
+                }
+                break;
+            //Friends
+            case 2:
+                Toast.makeText(getBaseContext(),getString(R.string.not_implement_yet),Toast.LENGTH_SHORT).show();
+                break;
+            //profile
+            case 3:
+                Toast.makeText(getBaseContext(),getString(R.string.not_implement_yet),Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+
         }
-
+        drawerLayout.closeDrawers();
     }
-
-
-    private void startProgressBar() {
-        // prepare for a progress bar dialog
-        progressBar = new ProgressDialog(this);
-        progressBar.setCancelable(true);
-        progressBar.setMessage(getString(R.string.file_synchroniznig));
-        progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressBar.setProgress(MIN_VALUE);
-        progressBar.setMax(MAX_VALUE);
-
-        progressBar.setCancelable(false);
-        progressBar.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        progressBar.show();
-        //reset progress bar status
-        progressBarStatusIn = 0.;
-        progressBarStatusOut = 0.;
-
-        /* AWA:FIXME: Niebezpieczne używanie wątku
-        Brak anulowania tej operacji.
-        Wyjście z Activity nie kończy wątku,
-        należy o to zadbać.
-        */
-        progressBarThread = new Thread() {
-            public void run() {
-                while (progressBarStatusIn < MAX_VALUE) {
-
-                    // calculate progress bar status
-                    progressBarStatusIn = progressBarStatusOut / maxProgressBarStatus * MAX_VALUE;
-
-                    // Update the progress bar
-                    handler.post(new Runnable() {
-                        public void run() {
-                            progressBar.setProgress((int) progressBarStatusIn.doubleValue());
-                        }
-                    });
-                }
-
-                // ok, file is downloaded,
-                if (progressBarStatusIn >= MAX_VALUE) {
-                    maxProgressBarStatus = Double.POSITIVE_INFINITY;
-                    // close the progress bar dialog
-                    progressBar.dismiss();
-                }
-
-            }
-        };
-        progressBarThread.start();
-    }
-
     List<RowItem> preparing_navigationDrawer() {
-        String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-        int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
 
-
+            String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+            int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
 
         List<RowItem> list = new ArrayList<>();
         for (int i = 0; i < drawerListItems.length; i++) {
@@ -483,5 +434,84 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
             list.add(item);
         }
         return list;
+    }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        List <String> errorSynchronizationList = new ArrayList<>();
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String stringExtra = intent.getStringExtra("result");
+            if (stringExtra != null) {
+                if (stringExtra.equals("synchronized")){
+                    progress.dismiss();
+                    showErrors();
+                }
+            }
+            stringExtra = intent.getStringExtra("error");
+            if (stringExtra != null) {
+                errorSynchronizationList.add(stringExtra);
+            }
+        }
+
+        private void showErrors() {
+            if (errorSynchronizationList.size()>0) {
+                builder.setMessage(errorSynchronizationList.toString())
+                        .setTitle("Errors")
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
+                builder.create();
+                builder.show();
+            }
+        }
+    };
+
+    private void needItForDebugging() {
+        //Kod potrzebny do debugowania, prosze go nie uswuac
+        Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
+            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+        }
+        Log.d(TAG,"<-----KOLKECJE----->");
+        cursor = getContentResolver().query(DataStorage.Collections.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections._ID)));
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.SYNCHRONIZED))>0)).toString());
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.DELETED))>0)).toString());
+            Log.d(TAG, (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.MODIFIED_DATE))).toString());
+            Log.d(TAG, ((Integer)cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))).toString());
+            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TYPE)));
+            Log.d(TAG, DataStorage.TypeOfCollection.values()[cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))].toString());
+        }
+
+        Log.d(TAG,"<--------ITEMY-------->");
+        //String selection = String.format(DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_SERVER
+        String[] projection = new String[] { DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_SERVER,
+                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,
+                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_COLLECTION,
+                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.SYNCHRONIZED,
+                //DataStorage.Media.TABLE_NAME + "." + DataStorage.Media.FILE_NAME,
+        };
+        cursor = getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG,"<-ITEM->");
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Items._ID)));
+            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_SERVER)));
+            Log.d(TAG, "id_collection "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_COLLECTION)));
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Items.SYNCHRONIZED))>0)).toString());
+            //Log.d(TAG, "file name "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+        }
+
+        cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Log.d(TAG, "<-Media->");
+            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
+            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER)));
+            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Media.SYNCHRONIZED))>0)).toString());
+        }
     }
 }

@@ -40,8 +40,6 @@ public class GPSProvider extends Service implements LocationListener {
 	private double lat;
 	private boolean enabledGPS = false; // dostępny jest provider GPS
 
-	// KONIEC - Zmienne sieci
-
 	public GPSProvider() {
 		if (D)
 			Log.d(TAG, "Konstruktor");
@@ -58,18 +56,26 @@ public class GPSProvider extends Service implements LocationListener {
 		enabledGPS = locationManager
 				.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
+        Bundle b = new Bundle();
+        // Przygotowanie broadcasta
+        Intent out = new Intent(BROADCAST_ACTION);
+        b.putBoolean("gps",enabledGPS);
+        out.putExtras(b);
+        // Wyslanie broadcasta
+        sendBroadcast(out);
+
 		// Uruchamianie providera
 		locationProvider = LocationManager.GPS_PROVIDER;
 
 		// Pobranie i ew. ustawienie ostatniej wartości
 		lastLocation = locationManager.getLastKnownLocation(locationProvider);
 		if (lastLocation != null) {
-			onLocationChanged(lastLocation);
+            onLocationChanged(lastLocation);
 			if (D)
 				Log.d(TAG, "Jest lastLocation");
 			if (D)
 				Log.d(TAG, "lastLocation: " + lastLocation.getLatitude()
-						+ " / " + lastLocation.getLongitude());
+                        + " / " + lastLocation.getLongitude());
 		} else {
 			if (D)
 				Log.d(TAG, "Brak lastLocation");
@@ -93,91 +99,9 @@ public class GPSProvider extends Service implements LocationListener {
 /* AWA:FIXME: Magic numbers
 */
 		locationManager
-				.requestLocationUpdates(locationProvider, 10000, 2, this);
+				.requestLocationUpdates(locationProvider, 10000, 5, this);
 
 		return mBinder;
-	}
-
-	/**
-	 * Metoda uruchamiana przy zmianie pozycji, lub po ustalonym czasie
-	 */
-	@Override
-	public void onLocationChanged(Location location) {
-		if (D)
-			Log.d(TAG, "Uruchomiono onLocationChaged");
-		if (location == null)
-			return;
-
-		if (lastLocation != null && lastLocation.equals(location))
-			return;
-
-		lon = location.getLongitude();
-		lat = location.getLatitude();
-
-		Bundle b = new Bundle();
-		// Przygotowanie broadcasta
-		Intent out = new Intent(BROADCAST_ACTION);
-		b.putDouble(GPSProvider.POS_LON, lon);
-		b.putDouble(GPSProvider.POS_LAT, lat);
-        b.putBoolean("GPS",true);
-		out.putExtras(b);
-		// Wyslanie broadcasta
-		sendBroadcast(out);
-
-		lastLocation = location;
-	}
-
-	@Override
-	public void onStatusChanged(String provider, int status, Bundle bundle) {
-		switch (status) {
-		case LocationProvider.AVAILABLE:
-			if (D)
-				Log.d(TAG, "GPS available again");
-			enabledGPS = true;
-			break;
-		case LocationProvider.OUT_OF_SERVICE:
-			if (D)
-				Log.d(TAG, "GPS out of service");
-			break;
-		case LocationProvider.TEMPORARILY_UNAVAILABLE:
-			if (D)
-				Log.d(TAG, "GPS temporarily unavailable");
-			enabledGPS = false;
-			break;
-		}
-		Bundle b = new Bundle();
-		// Przygotowanie broadcasta
-		Intent out = new Intent(BROADCAST_ACTION);
-		b.putBoolean("GPS", enabledGPS);
-		out.putExtras(b);
-		// Wyslanie broadcasta
-		sendBroadcast(out);
-	}
-
-	/**
-	 * Metoda od LocationListener
-	 * ?? Never called ??
-	 */
-	@Override
-	public void onProviderEnabled(String provider) {
-		if (D)
-			Log.d(TAG, "onProviderEnabled");
-	}
-
-	/**
-	 * Metoda od LocationListener
-	 */
-	@Override
-	public void onProviderDisabled(String arg0) {
-		if (D)
-			Log.d(TAG, "onProviderDisabled");
-		Bundle b = new Bundle();
-		// Przygotowanie broadcasta
-		Intent out = new Intent(BROADCAST_ACTION);
-		b.putBoolean("GPS", false);
-		out.putExtras(b);
-		// Wyslanie broadcasta
-		sendBroadcast(out);
 	}
 
 	/**
@@ -190,4 +114,45 @@ public class GPSProvider extends Service implements LocationListener {
 			return GPSProvider.this;
 		}
 	}
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if (D)
+            Log.d(TAG, "Uruchomiono onLocationChaged");
+        if (location == null)
+            return;
+
+        if (lastLocation != null && lastLocation.equals(location))
+            return;
+
+        lon = location.getLongitude();
+        lat = location.getLatitude();
+
+        Bundle b = new Bundle();
+        // Przygotowanie broadcasta
+        Intent out = new Intent(BROADCAST_ACTION);
+        b.putDouble(GPSProvider.POS_LON, lon);
+        b.putDouble(GPSProvider.POS_LAT, lat);
+        b.putBoolean("gps",enabledGPS);
+        out.putExtras(b);
+        // Wyslanie broadcasta
+        sendBroadcast(out);
+
+        lastLocation = location;
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+        Log.e("TAG","enabled: " + s);
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+        Log.e("TAG","disabled: " + s);
+    }
 }

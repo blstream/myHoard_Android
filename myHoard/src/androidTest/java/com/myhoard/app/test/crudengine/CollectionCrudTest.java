@@ -29,7 +29,7 @@ public class CollectionCrudTest extends TestCase {
     private Token token;
     private CRUDEngine<Collection> collectionEngine;
     TestCollections testCollections;
-    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2180/");
+    public static final List<String> URLS = Arrays.asList("http://78.133.154.39:2080/");
             //"http://78.133.154.39:1080/");
 
     public CollectionCrudTest(String name) {

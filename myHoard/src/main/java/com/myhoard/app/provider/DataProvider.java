@@ -1,14 +1,19 @@
 package com.myhoard.app.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentValues;
+import android.content.OperationApplicationException;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.provider.DataStorage.Items;
 import com.myhoard.app.provider.DataStorage.Media;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,7 +53,23 @@ public class DataProvider extends ContentProvider {
 		return false;
 	}
 
-	@Override
+    @Override
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        ContentProviderResult[] result;
+        try {
+            result = super.applyBatch(operations);
+            db.setTransactionSuccessful();
+        } catch (OperationApplicationException e) {
+            db.endTransaction();
+            throw e;
+        }
+        db.endTransaction();
+        return result;
+    }
+
+    @Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		DatabaseTable table = findTable(uri);
 		return table.query(helper.getWritableDatabase(), projection, selection, selectionArgs, sortOrder);
@@ -85,4 +106,5 @@ public class DataProvider extends ContentProvider {
 		DatabaseTable table = findTable(uri);
 		return table.update(helper.getWritableDatabase(), values, selection, selectionArgs);
 	}
+
 }

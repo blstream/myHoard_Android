@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/gray_background"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/tvElementNameLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/element_name"
+                android:textColor="@color/gray_text"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/tvElementName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/yellow_main"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/tvElementCategoryLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/element_category"
+                android:textColor="@color/gray_text"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/tvElementCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/edittext_background_color"
+                android:textColor="@color/yellow_main"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/tvElementLocalisationLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/element_localisation"
+                android:textColor="@color/gray_text"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/tvElementLocalisation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/edittext_background_color"
+                android:textColor="@color/yellow_main"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/tvElementDescriptionLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/element_description"
+                android:textColor="@color/gray_text"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/tvElementDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/yellow_main"
+                android:textSize="24sp" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

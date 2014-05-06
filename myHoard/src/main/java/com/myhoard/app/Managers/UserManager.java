@@ -4,6 +4,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.myhoard.app.crudengine.CRUDEngine;
+import com.myhoard.app.model.Token;
+import com.myhoard.app.model.User;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -19,11 +22,6 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 
-import com.myhoard.app.crudengine.CRUDEngine;
-import com.myhoard.app.crudengine.ICRUDEngine;
-import com.myhoard.app.model.Token;
-import com.myhoard.app.model.User;
-
 
 /**
  * Singleton class for managing currently logged user and new user registration
@@ -34,7 +32,7 @@ import com.myhoard.app.model.User;
 public class UserManager {
     private static UserManager instance = null;
     private static Object mutex = new Object();
-
+    private static final String TAG = "UserManager";
     private User user;
     private Token token;
     private UserHttpEngine userHttpEngine;
@@ -75,6 +73,9 @@ public class UserManager {
     }
     public void setIp(String ip){
         this.ip = ip;
+    }
+    public String getIp() {
+        return ip;
     }
     /**
      * Login to a server
@@ -160,10 +161,10 @@ public class UserManager {
                     HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
 
                     if (HTTP_response.contains(ERROR_STRING)){
-                        Log.d("TAG", "nieudalo sie pobrac tokena");
+                        Log.d(TAG, "nieudalo sie pobrac tokena");
                         return null;
                     } else {
-                        Log.d("TAG", HTTP_response);
+                        Log.d(TAG, HTTP_response);
                         Type tokenType = new TypeToken<Token>(){}.getType();
                         Token token = new Gson().fromJson( HTTP_response , tokenType);
                         return token;

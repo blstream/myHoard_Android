@@ -18,6 +18,7 @@ package com.myhoard.app.fragments;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,68 +43,85 @@ import com.myhoard.app.provider.DataStorage;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
 /**
  * Created by Rafał Soudani on 20.02.2014
  */
 public class CollectionFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
-        View.OnFocusChangeListener {
+        View.OnFocusChangeListener, View.OnClickListener {
 
     private static final int LOAD_DATA_FOR_EDIT = 20;
     private static final int LOAD_NAMES = 30;
     private static final int MIN_NUMBER_OF_CHARAKCTERS = 2;
+    private static final int TYPE_REQUEST_CODE = 100;
+
     private Context context;
     private Long mEditId;
     private String mName, mDescription;
     private final ArrayList<String> mNamesList = new ArrayList<>();
     private String mTags = "";
     private EditText etCollectionName, etCollectionDescription, etCollectionTags, etCollectionType;
+    private final HashMap<Integer, String> typesMap = new HashMap<>();
     Toast toast;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         context = getActivity();
-        final View v = inflater.inflate(R.layout.fragment_new_collection, container, false);
+        final View view = inflater.inflate(R.layout.fragment_new_collection, container, false);
         getLoaderManager().initLoader(LOAD_NAMES, null, this);
         setHasOptionsMenu(true);
 
-        Bundle args = getArguments();
-        if (args != null){
-            mEditId = args.getLong("id");
-        }
+        setTypesMap();
+        setEditId();
 
-        if (v != null) {
-            etCollectionName = (EditText) v.findViewById(R.id.etCollectionName);
-            etCollectionName.setOnFocusChangeListener(this);
-            etCollectionDescription = (EditText) v.findViewById(R.id.etCollectionDescription);
-            etCollectionDescription.setOnFocusChangeListener(this);
-            etCollectionTags = (EditText) v.findViewById(R.id.etCollectionTags);
-            etCollectionTags.setOnFocusChangeListener(this);
-            etCollectionType = (EditText) v.findViewById(R.id.etCollectionType);
-            etCollectionType.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    TypeDialog typeDialog = new TypeDialog();
-                    typeDialog.show(getFragmentManager(), "");
+        if (view != null) {
+
+            findViewsByIds(view);
+            setListeners();
+
+            if (this.getTag().equals("EditCollection")) {
+                if (savedInstanceState != null) {
+                    mEditId = savedInstanceState.getLong("editId");
+                    mTags = savedInstanceState.getString("tags");
+                    etCollectionTags.setText(mTags);
+                } else {
+                    getLoaderManager().restartLoader(LOAD_DATA_FOR_EDIT, null, this);
                 }
-            });
-
-            if (!this.getTag().equals("EditCollection")) {
+            } else {
                 getActivity().setTitle(context.getString(R.string.new_collection));
             }
-
-            if (savedInstanceState != null) {
-                mEditId = savedInstanceState.getLong("editId");
-                mTags = savedInstanceState.getString("tags");
-                etCollectionTags.setText(mTags);
-            } else if (this.getTag().equals("EditCollection")) {
-                getLoaderManager().restartLoader(LOAD_DATA_FOR_EDIT, null, this);
-            }
-
         }
 
-        return v;
+        return view;
+    }
+
+    private void setTypesMap() {
+        typesMap.put(DataStorage.TypeOfCollection.OFFLINE.getType(), getString(R.string.offline));
+        typesMap.put(DataStorage.TypeOfCollection.PUBLIC.getType(), getString(R.string.publics));
+        typesMap.put(DataStorage.TypeOfCollection.PRIVATE.getType(), getString(R.string.privates));
+    }
+
+    private void setEditId() {
+        Bundle args = getArguments();
+        if (args != null) {
+            mEditId = args.getLong("id");
+        }
+    }
+
+    private void findViewsByIds(View view) {
+        etCollectionName = (EditText) view.findViewById(R.id.etCollectionName);
+        etCollectionDescription = (EditText) view.findViewById(R.id.etCollectionDescription);
+        etCollectionTags = (EditText) view.findViewById(R.id.etCollectionTags);
+        etCollectionType = (EditText) view.findViewById(R.id.etCollectionType);
+    }
+
+    private void setListeners() {
+        etCollectionName.setOnFocusChangeListener(this);
+        etCollectionDescription.setOnFocusChangeListener(this);
+        etCollectionTags.setOnFocusChangeListener(this);
+        etCollectionType.setOnClickListener(this);
     }
 
     @Override
@@ -181,8 +200,9 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
         values.put(DataStorage.Collections.TAGS, mTags);
         values.put(DataStorage.Collections.MODIFIED_DATE, Calendar.getInstance()
                 .getTime().getTime());
-        values.put(DataStorage.Collections.TYPE, getTypeOfCollection());
+        values.put(DataStorage.Collections.TYPE, getTypeOfCollection(String.valueOf(etCollectionType.getText())));
         if (this.getTag().equals("EditCollection")) {
+            values.put(DataStorage.Collections.SYNCHRONIZED,false);
             Toast.makeText(getActivity(), context.getString(R.string
                     .collection_edited), Toast.LENGTH_LONG).show();
 
@@ -222,7 +242,6 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                 Uri uri3 = DataStorage.Collections.CONTENT_URI;
                 String[] projection3 = {DataStorage.Collections._ID, DataStorage.Collections.NAME};
                 return new CursorLoader(context, uri3, projection3, null, null, null);
-
             default:
                 throw new IllegalArgumentException("there is no action for id: " + id);
         }
@@ -241,7 +260,8 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                 etCollectionDescription.setText(mDescription);
                 mTags = cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TAGS));
                 etCollectionTags.setText(mTags);
-                break;
+                int type = cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE));
+                etCollectionType.setText(getNameOfCollectionType(type));
             case LOAD_NAMES:
                 while (!cursor.isAfterLast()) {
                     if (mEditId != null) {
@@ -259,6 +279,20 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser == true) {
+            Log.d("appka", "this fragment is now visible");
+
+        }
+
+        else if (isVisibleToUser == false) {
+            Log.d("appka", "this fragment is now invisible");
+
+        }
+    }
+
+    @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
@@ -267,15 +301,17 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
         return s != null && s.matches("\\s+");
     }
 
-    private int getTypeOfCollection() {
-        if (String.valueOf(etCollectionType.getText()).equals(getString(R.string.offline))) {
-            return DataStorage.TypeOfCollection.OFFLINE.getType();
-        } else if (String.valueOf(etCollectionType.getText()).equals(getString(R.string.publics))) {
-            return DataStorage.TypeOfCollection.PUBLIC.getType();
-        } else if (String.valueOf(etCollectionType.getText()).equals(getString(R.string.privates))) {
-            return DataStorage.TypeOfCollection.PRIVATE.getType();
+    private int getTypeOfCollection(String name) {
+
+        for (Integer i : typesMap.keySet()) {
+            if (typesMap.get(i).equals(name)) return i;
         }
         return DataStorage.TypeOfCollection.ERROR.getType();
+    }
+
+    private String getNameOfCollectionType(int type) {
+        if (typesMap.containsKey(type)) return typesMap.get(type);
+        return typesMap.get(DataStorage.TypeOfCollection.OFFLINE.getType());
     }
 
     @Override
@@ -285,5 +321,24 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
             et.setTextColor(getResources().getColor(R.color.white));
         } else
             et.setTextColor(getResources().getColor(R.color.yellow_main));
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case TYPE_REQUEST_CODE:
+                etCollectionType.setText(data.getStringExtra("type"));
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        Bundle args = new Bundle();
+        args.putString("type", String.valueOf(etCollectionType.getText()));
+        TypeDialog typeDialog = new TypeDialog();
+        typeDialog.setArguments(args);
+        typeDialog.setTargetFragment(this, TYPE_REQUEST_CODE);
+        typeDialog.show(getFragmentManager(), "");
     }
 }

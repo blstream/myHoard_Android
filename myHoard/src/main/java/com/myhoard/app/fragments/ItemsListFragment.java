@@ -1,7 +1,6 @@
 package com.myhoard.app.fragments;
 
 import android.app.ProgressDialog;
-import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,6 +13,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,8 +36,12 @@ import com.facebook.SessionLoginBehavior;
 import com.facebook.SessionState;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
+import com.myhoard.app.activities.ElementActivity;
 import com.myhoard.app.dialogs.FacebookShareDialog;
+import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.images.ImageAdapterList;
+import com.myhoard.app.images.ImageLoader;
+import com.myhoard.app.model.Item;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -63,7 +67,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private ProgressDialog mProgressDialog; //Facebook
     private int mItemPositionOnList;
     private String mMessageOnFb;
-    private RequestAsyncTask mFacebookTask;
 
     private Cursor globalCursor;
 
@@ -81,12 +84,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private static final String LABEL_BY_DATE_ASC = "< DATE";
     private static final String LABEL_BY_DATE_DESC = "> DATE";
     private static final String DEFAULT_SORT = DataStorage.Items.NAME;
-    private static String sortByNameAscending = DataStorage.Items.NAME + " ASC";
-    private static String sortByDateAscending = DataStorage.Items.TABLE_NAME + "." +
-            DataStorage.Items.CREATED_DATE + " ASC";
-    private static String sortByNameDescending = DataStorage.Items.NAME + " DESC";
-    private static String sortByDateDescending = DataStorage.Items.TABLE_NAME + "." +
-            DataStorage.Items.CREATED_DATE + " DESC";
     private static String sortOrder = DEFAULT_SORT;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -140,32 +137,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 			                        int position, long id) {
-				//TODO item clicked action
-                // Create new fragment and transaction
-                Fragment newFragment = new ElementFragment();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-
-                // Add arguments to opened fragment element
-                Bundle b = new Bundle();
-                b.putBoolean(ElementFragment.EDITION, false);
-                b.putLong(ElementFragment.ID,id);
-                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
-                globalCursor.moveToPosition(position);
-                String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
-                String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
-                b.putString(ElementFragment.NAME,name);
-                b.putString(ElementFragment.DESCRIPTION,description);
-
-                newFragment.setArguments(b);
-
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack
-                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
-                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
-
-                // Commit the transaction
-                transaction.commit();
-
+                Intent in = new Intent(getActivity(), ElementActivity.class);
+                in.putExtra("elementId",id);
+                startActivity(in);
             }
         });
 
@@ -256,6 +230,12 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mImageAdapterList.mImageLoader.clearCache();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
@@ -279,14 +259,10 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         if (userManager.isLoggedIn()) {
             item = menu.findItem(R.id.action_login);
             if(item!=null) item.setTitle(R.string.logout);
-            item = menu.findItem(R.id.action_synchronize);
-            if(item!=null) item.setVisible(true);
         }
         else {
             item = menu.findItem(R.id.action_login);
             if(item!=null) item.setTitle(R.string.Login);
-            item = menu.findItem(R.id.action_synchronize);
-            if(item!=null) item.setVisible(false);
         }
         super.onPrepareOptionsMenu(menu);
     }
@@ -294,7 +270,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     //create options menu with a MenuInflater to have all needed options visible in this fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
         inflater.inflate(R.menu.item_list, menu);
         super.onCreateOptionsMenu(menu, inflater);
@@ -325,18 +300,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 break;
 
             case R.id.action_new_element:
-                newFragment = new ElementFragment();
-                transaction = getFragmentManager().beginTransaction();
-
-                // Add arguments to opened fragment element
-                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
-                b.putInt(ElementFragment.ID, -1);
-                newFragment.setArguments(b);
-                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
-                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
-
-                // Commit the transaction
-                transaction.commit();
+                Intent in = new Intent(getActivity(),ElementActivity.class);
+                in.putExtra("categoryId",mCollectionID);
+                startActivity(in);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -369,19 +335,21 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 }
                 return true;
             case EDIT_ID:
-                Fragment newFragment = new ElementFragment();
+                Fragment newFragment = new ElementAddEditFragment();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
                 // Add arguments to opened fragment element
                 Bundle b = new Bundle();
-                b.putBoolean(ElementFragment.EDITION,true);
-                globalCursor.moveToPosition(info.position);
-                b.putLong(ElementFragment.ID,info.id);
-                b.putLong(ElementFragment.COLLECTION_ID,mCollectionID);
+                b.putBoolean(ElementAddEditFragment.EDITION,true);
+                if (info != null) {
+                    globalCursor.moveToPosition(info.position);
+                    b.putLong(ElementAddEditFragment.ID,info.id);
+                }
+                b.putLong(ElementAddEditFragment.COLLECTION_ID,mCollectionID);
                 String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
                 String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
-                b.putString(ElementFragment.NAME,name);
-                b.putString(ElementFragment.DESCRIPTION,description);
+                b.putString(ElementAddEditFragment.NAME,name);
+                b.putString(ElementAddEditFragment.DESCRIPTION,description);
 
                 newFragment.setArguments(b);
 
@@ -416,9 +384,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         switch(i){
             //Get all elements from collection
             case 0:
-                selection = String.format("%s = %s",mCollectionID,DataStorage.Items.ID_COLLECTION);
+                selection = String.format("%s = %s and (%s=%d or %s is null)",mCollectionID,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR);
                 cursorLoader =  new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
-                        new String[]{DataStorage.Items.NAME, DataStorage.Media.AVATAR,
+                        new String[]{DataStorage.Items.NAME, DataStorage.Media.FILE_NAME,
                                 DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,DataStorage.Items.DESCRIPTION},
                         selection, null, sortOrder);
                 break;
@@ -456,8 +424,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	}
 
     private void sortByName() {
-        if (sortOrder == sortByNameAscending) {
-            sortOrder = sortByNameDescending;
+        String sortByNameAscending = DataStorage.Items.NAME + " ASC";
+        if (sortOrder.equals(sortByNameAscending)) {
+            sortOrder = DataStorage.Items.NAME + " DESC";
             setSelectedTabByNameText(LABEL_BY_NAME_DESC);
         } else {
             sortOrder = sortByNameAscending;
@@ -467,8 +436,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     private void sortByDate() {
-        if (sortOrder == sortByDateAscending) {
-            sortOrder = sortByDateDescending;
+        String sortByDateAscending = DataStorage.Items.TABLE_NAME + "." +
+                DataStorage.Items.CREATED_DATE + " ASC";
+        if (sortOrder.equals(sortByDateAscending)) {
+            sortOrder = DataStorage.Items.TABLE_NAME + "." +
+                    DataStorage.Items.CREATED_DATE + " DESC";
             setSelectedTabByDateText(LABEL_BY_DATE_DESC);
         } else {
             sortOrder = sortByDateAscending;
@@ -520,36 +492,38 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     public void shareOnFacebook(Session session) {
         if (session != null && session.isOpened()) {
-            mProgressDialog = ProgressDialog.show(getActivity(),"",getString(R.string.progress),true);
-            // Temporary sharing only element name
+            mProgressDialog = ProgressDialog.show(getActivity(), "", getString(R.string.progress), true);
             Bundle postParams = prepareDataToShare(mMessageOnFb);
+            if (postParams != null) {
+                Request.Callback callback = new Request.Callback() {
+                    public void onCompleted(Response response) {
 
-            Request.Callback callback = new Request.Callback() {
-                public void onCompleted(Response response) {
-
-                    FacebookRequestError error = response.getError();
-                    if (error != null) {
-                        if(getActivity().getApplicationContext()!=null) {
-                            makeAndShowToast(error.getErrorMessage());
+                        FacebookRequestError error = response.getError();
+                        if (error != null) {
+                            if (getActivity().getApplicationContext() != null) {
+                                makeAndShowToast(error.getErrorMessage());
+                            }
+                        } else {
+                            makeAndShowToast(getString(R.string.sharing_succeeded));
                         }
-                    } else {
-                       makeAndShowToast(getString(R.string.sharing_succeeded));
+                        mProgressDialog.dismiss();
                     }
-                    mProgressDialog.dismiss();
-                }
-            };
+                };
 
-            Request postRequest = new Request(session, PUBLISH_PHOTOS, postParams, HttpMethod.POST, callback);
+                Request postRequest = new Request(session, PUBLISH_PHOTOS, postParams, HttpMethod.POST, callback);
                 /* AWA:FIXME: Niebezpieczne używanie wątku
         Brak anulowania tej operacji.
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.
         */
-            mFacebookTask = new RequestAsyncTask(postRequest);
-            mFacebookTask.execute();
+                RequestAsyncTask mFacebookTask = new RequestAsyncTask(postRequest);
+                mFacebookTask.execute();
 
+            } else {
+                mProgressDialog.dismiss();
+                makeAndShowToast(getString(R.string.no_photo));
+            }
         }
-
     }
 
     public void makeAndShowToast(String message) {
@@ -589,20 +563,23 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
      */
     private Bundle prepareDataToShare(String message) {
 
-        int photoSizeX = 1000;
-        int photoSizeY = 1000;
+        int photoSizeX = 800;
+        int photoSizeY = 600;
         Bundle bundle = new Bundle();
 
         Cursor cursor = mImageAdapterList.getCursor();
         cursor.moveToPosition(mItemPositionOnList);
         // getting data form cursor
-        String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.AVATAR));
-        // Decoding image
-        Bitmap image  = ImageAdapterList.decodeSampledBitmapFromResource(data,photoSizeX,photoSizeY);
+        String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
+        if(data != null) {
+            // Decoding image
+            Bitmap image = ImageLoader.decodeSampledBitmapFromResource(data, photoSizeX, photoSizeY);
 
-        bundle.putParcelable("source",image);
-        bundle.putString("message",message);
-        return  bundle;
+            bundle.putParcelable("source", image);
+            bundle.putString("message", message);
+            return bundle;
+        } else return null;
+
     }
 
     private String setDefaultPostOnFb() {

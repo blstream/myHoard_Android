@@ -1,13 +1,14 @@
 package com.myhoard.app.crudengine;
 
+import android.content.Intent;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import com.myhoard.app.model.Collection;
-import com.myhoard.app.model.IModel;
-import com.myhoard.app.model.Token;
-import com.myhoard.app.model.User;
+import com.myhoard.app.model.*;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -27,8 +28,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -63,47 +66,48 @@ import java.util.List;
     }
 
     @Override
-    public List<T> getList(Token token){
+    public List<T> getList(Token token) throws RuntimeException {
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
             HttpGet httpGet = new HttpGet(url);
             httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
-            String stringResponse;
+            String stringResponse=null;
             try {
                 HttpResponse response = httpClient.execute(httpGet, localContext);
                 HttpEntity entity = response.getEntity();
-                stringResponse = getASCIIContentFromEntity(entity);
 
-                Type listType = new TypeToken<List<T>>(){}.getType();
-                List<T> items = (List<T>) new Gson().fromJson(stringResponse, listType);
 
                 List<T> newItems = new ArrayList<T>();
+                stringResponse = getASCIIContentFromEntity(entity);
 
-                Iterator iter = items.iterator();
-                while(iter.hasNext()) {
-                    stringResponse = iter.next().toString();
-                    T item = new Gson().fromJson(stringResponse, clazz);
+                JsonElement json = new JsonParser().parse(stringResponse);
+                JsonArray array= json.getAsJsonArray();
+                Iterator iterator = array.iterator();
+
+                while(iterator.hasNext()){
+                    JsonElement json2 = (JsonElement)iterator.next();
+                    Gson gson = new Gson();
+                    T item = gson.fromJson(json2, clazz);
                     newItems.add(item);
                 }
 
                 return newItems;
             } catch (Exception e) {
-                //return e.getLocalizedMessage();
-                return null;
+                throw new RuntimeException(handleError(stringResponse));
             }
         }
         return null;
     }
 
     @Override
-    public T get(String id, Token token) {
+    public T get(String id, Token token) throws RuntimeException  {
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
             HttpGet httpGet = new HttpGet(url+id);
             httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
-            String stringResponse;
+            String stringResponse=null;
             try {
                 HttpResponse response = httpClient.execute(httpGet, localContext);
                 HttpEntity entity = response.getEntity();
@@ -115,19 +119,19 @@ import java.util.List;
 
                 return (T)iModel;
             } catch (Exception e) {
-                //return e.getLocalizedMessage();
-                return null;
+                throw new RuntimeException(handleError(stringResponse));
             }
         }
         return null;
     }
 
     @Override
-    public IModel create(IModel item, Token token) {
+    public IModel create(IModel item, Token token) throws RuntimeException  {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpResponse response;
         JSONObject json;
+        String HTTP_response=null;
 
         try {
             HttpPost httpPost = new HttpPost(url);
@@ -145,8 +149,8 @@ import java.util.List;
             /*Checking response */
             if (response != null) {
                 HttpEntity responseEntity = response.getEntity();
+                HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                 if (response.getStatusLine().getStatusCode()==STATUS_CREATED) {
-                    String HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                     IModel imodel = new Gson().fromJson(HTTP_response, item.getClass());
                     Log.d("TAG", "Jsontext = " + HTTP_response);
                     String id = imodel.getId();
@@ -154,25 +158,22 @@ import java.util.List;
                 }
                 else {
                     Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
-                    return null;
+                    throw new RuntimeException(HTTP_response);
                 }
-                //return HTTP_response.contains(ERROR_STRING) ? ERROR_CODE  : 1;
             }
         } catch (Exception e) {
-            //return ERROR_CODE;
             Log.d("TAG", e.toString());
-            return null;
+            throw new RuntimeException(handleError(HTTP_response));
         }
-        //return ERROR_CODE;
         return null;
     }
 
     @Override
-    public T update(IModel item, String id, Token token) {
+    public T update(IModel item, String id, Token token) throws RuntimeException  {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpResponse response;
-
+        String HTTP_response = null;
 
         try {
             HttpPut httpPut = new HttpPut(url + id);
@@ -190,7 +191,7 @@ import java.util.List;
             if (response != null) {
                 HttpEntity responseEntity = response.getEntity();
                 if (response.getStatusLine().getStatusCode()==STATUS_OK) {
-                    String HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
+                    HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                     T model = (T) new Gson().fromJson(HTTP_response, item.getClass());
                     Log.d("TAG", "Jsontext = " + HTTP_response);
                     return model;
@@ -198,23 +199,19 @@ import java.util.List;
             }
             Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
         } catch (Exception e) {
-            /* AWA:FIXME: Obsługa błędów
-                Wypychanie błędów do UI
-            */
             Log.d("TAG", e.toString());
-            e.printStackTrace();
+            throw new RuntimeException(handleError(HTTP_response));
         }
         return null;
     }
 
     @Override
-    public boolean remove(String id, Token token) {
+    public boolean remove(String id, Token token) throws RuntimeException  {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
         HttpDelete httpDelete = new HttpDelete(url + id);
         HttpResponse response;
 
-        //httpDelete.setHeader("Accept", "application/json");
         httpDelete.setHeader(AUTHORIZATION, token.getAccess_token());
 
         try {
@@ -227,7 +224,7 @@ import java.util.List;
             }
         } catch (IOException e) {
             Log.d("TAG","NIEusunieto");
-            e.printStackTrace();
+            throw new RuntimeException("Error: delete");
         }
         Log.d("TAG","NIEusunieto");
         return false;
@@ -247,5 +244,13 @@ import java.util.List;
             if (n > ZERO) out.append(new String(b, ZERO, n));
         }
         return out.toString();
+    }
+
+    private String handleError(String http_response) {
+        if (http_response.contains("errors")) {
+            String myHoardError = http_response.split("\\}")[0].split("\\{")[2];
+            return myHoardError.split("\"")[3];
+        }
+        else return "unrecognizable error";
     }
 }

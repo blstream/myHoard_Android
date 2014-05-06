@@ -6,13 +6,16 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
 import com.myhoard.app.R;
 import com.myhoard.app.provider.DataStorage;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -38,6 +41,7 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
     private int mNumberOfCollection;
     private int mNumberOfElements;
     private Context mAppContext;
+    private Uri mUriAddress;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -116,6 +120,7 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         }
         //Create new file in mContext.getFilesDir() path
         File file = new File(mAppContext.getFilesDir(), ASSETS_LIST[random_number]);
+        mUriAddress = Uri.fromFile(file);
         try {
             //New stream used to write data in file
             file_stream = new FileOutputStream(file);
@@ -159,8 +164,7 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             createFile(am,random_number);
             if(getActivity().getFilesDir() != null){
                 //Put avatar file path to contentValues object
-                valuesCollection.put(DataStorage.Collections.AVATAR_FILE_NAME,
-                        getActivity().getFilesDir().getPath() + "/" + ASSETS_LIST[random_number]);
+                valuesCollection.put(DataStorage.Collections.AVATAR_FILE_NAME,mUriAddress.toString());
                 //Insert data of collection to database asynchronously
                 asyncHandler.startInsert(-1, null, DataStorage.Collections.CONTENT_URI, valuesCollection);
             }
@@ -210,7 +214,7 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             //Put data of media to valuesMedia object
             valuesMedia.put(DataStorage.Media.ID_ITEM,element_id);
             if(mAppContext.getFilesDir() !=null){
-                valuesMedia.put(DataStorage.Media.AVATAR,mAppContext.getFilesDir().getPath() + "/" + ASSETS_LIST[random_number]);
+                valuesMedia.put(DataStorage.Media.FILE_NAME,mUriAddress.toString());
                 //Insert data of element media to database asynchronously
                 asyncHandler.startInsert(-1,null,DataStorage.Media.CONTENT_URI,valuesMedia);
             }

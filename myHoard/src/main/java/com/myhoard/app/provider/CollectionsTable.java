@@ -3,19 +3,29 @@ package com.myhoard.app.provider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-import com.myhoard.app.provider.DataStorage.Collections;
 
-/* AWA:FIXME: Brak Autora oraz nagłowka
-*/
+import com.myhoard.app.Managers.UserManager;
+import com.myhoard.app.provider.DataStorage.Collections;
+import com.myhoard.app.services.SynchronizationService;
+
+/**
+ * Description
+ *
+ * @author Tomasz Nosal
+ *         Date: 08.04.14
+ */
 public class CollectionsTable extends DatabaseTable {
 
 	private static final String DEFAULT_SORT_ORDER = Collections.NAME + " DESC";
+    public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_throw__";
+    private static final int ERROR = -1;
 
 	public CollectionsTable(Context context, int code) {
 		super(context, code, Collections.TABLE_NAME);
@@ -35,6 +45,8 @@ public class CollectionsTable extends DatabaseTable {
 				.append(Collections.MODIFIED_DATE + " NUMERIC, ")
                 .append(Collections.SERVERS + " TEXT, ")
 				.append(Collections.TYPE + " NUMERIC, ")
+                .append(Collections.SYNCHRONIZED + " BOOLEAN DEFAULT FALSE, ")
+                .append(Collections.DELETED + " BOOLEAN DEFAULT FALSE, ")
                 .append(Collections.ITEMS_NUMBER + " NUMERIC)");
 		db.execSQL(sql.toString());
 	}
@@ -47,6 +59,8 @@ public class CollectionsTable extends DatabaseTable {
 	@Override
 	public Cursor query(SQLiteDatabase db, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
+        db.beginTransaction();
 
 		qb.setTables(tableName);
 
@@ -74,6 +88,9 @@ public class CollectionsTable extends DatabaseTable {
 				orderBy        // The sort order
 		);
 
+        db.setTransactionSuccessful();
+        db.endTransaction();
+
 		// Tells the Cursor what URI to watch, so it knows when its source data changes
 		c.setNotificationUri(getContext().getContentResolver(), Collections.CONTENT_URI);
 		return c;
@@ -81,23 +98,40 @@ public class CollectionsTable extends DatabaseTable {
 
 	@Override
 	public Uri insert(SQLiteDatabase db, ContentValues initialValues) {
+        // A variable, which decide, if insertOrThrow will be perform
+        boolean insertOrThrow = false;
+
 		// A map to hold the new record's values.
 		ContentValues values;
 
 		// If the incoming values map is not null, uses it for the new values.
 		if (initialValues != null) {
-			values = new ContentValues(initialValues);
+            if ( initialValues.containsKey(SQL_INSERT_OR_REPLACE)) {
+                insertOrThrow = initialValues.getAsBoolean(SQL_INSERT_OR_REPLACE);
+                initialValues.remove(SQL_INSERT_OR_REPLACE);
+            }
 
+			values = new ContentValues(initialValues);
 		} else {
 			// Otherwise, create a new value map
 			values = new ContentValues();
 		}
 
-		long rowId = db.insert(
-				tableName,      // The table to insert into.
-				null,           // A hack, SQLite sets this column value to null if values is empty.
-				values          // A map of column names, and the values to insert into the columns.
-		);
+
+        long rowId = ERROR;
+        if (insertOrThrow) {
+            rowId = db.insertOrThrow(
+                    tableName,      // The table to insert into.
+                    null,           // A hack, SQLite sets this column value to null if values is empty.
+                    values          // A map of column names, and the values to insert into the columns.
+            );
+        } else {
+            rowId = db.insert(
+                    tableName,      // The table to insert into.
+                    null,           // A hack, SQLite sets this column value to null if values is empty.
+                    values          // A map of column names, and the values to insert into the columns.
+            );
+        }
 
 		// If the insert succeeded, the row ID exists.
 		if (rowId > 0) {
