@@ -49,7 +49,8 @@ import java.util.List;
  */
 public class SynchronizationService extends IntentService {
 
-    private static final String COLLECTION_ENDPOINT = "collections/";
+    private static final String COLLECTIONS_ENDPOINT = "collections/";
+    private static final String USERS_ENDPOINT = "users/";
     private static final String ITEM_ENDPOINT = "items/";
     private static final String MEDIA_ENDPOINT = "media/";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
@@ -108,7 +109,7 @@ public class SynchronizationService extends IntentService {
     }
 
     private void uploadCollections() {
-        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTION_ENDPOINT, Collection.class);
+        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTIONS_ENDPOINT, Collection.class);
         Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, null, null, null, null);
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -444,8 +445,9 @@ public class SynchronizationService extends IntentService {
     }
 
     private void downloadCollections() {
-        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTION_ENDPOINT, Collection.class);
-        List<Collection> collections = null;
+        String url = userManager.getIp() + USERS_ENDPOINT + UserManager.getInstance().getToken().getUserId() + "/" + COLLECTIONS_ENDPOINT;
+        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(url, Collection.class);
+        List<Collection> collections = new ArrayList<>();
         try {
             collections = collectionCrud.getList(userManager.getToken());
         } catch (RuntimeException re) {
