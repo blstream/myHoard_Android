@@ -140,6 +140,8 @@ public class SynchronizationService extends IntentService {
         Collection collection = new Collection();
         collection.setName(cursor.getString(cursor.getColumnIndex(Collections.NAME)));
         collection.setDescription(cursor.getString(cursor.getColumnIndex(Collections.DESCRIPTION)));
+        if(cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) == TypeOfCollection.PUBLIC.getType())
+            collection.setIfPublic(true);
         String [] tags = cursor.getString(cursor.getColumnIndex(Collections.TAGS)).split("#");
         List<String> list = new LinkedList<String>(Arrays.asList(tags));
         list.remove(0); //zero element is always empty, remove it
@@ -522,7 +524,10 @@ public class SynchronizationService extends IntentService {
             tags=tags+"#"+s+" ";
         }
         values.put(Collections.TAGS, tags.trim());
-        values.put(Collections.TYPE, TypeOfCollection.PUBLIC.getType());
+        if (collection.getIfPublic())
+            values.put(Collections.TYPE, TypeOfCollection.PUBLIC.getType());
+        else
+            values.put(Collections.TYPE, TypeOfCollection.PRIVATE.getType());
         values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
         values.put(Collections.SYNCHRONIZED, true);
 
