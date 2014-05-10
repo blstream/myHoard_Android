@@ -13,7 +13,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +41,6 @@ import com.myhoard.app.dialogs.FacebookShareDialog;
 import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.images.ImageAdapterList;
 import com.myhoard.app.images.ImageLoader;
-import com.myhoard.app.model.Item;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -72,6 +71,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
     private Context mContext;
     private GridView mGridView;
+    private ImageView mEmptyView;
 	private Long mCollectionID;
     private ImageAdapterList mImageAdapterList;
     private TextView mItemsDescription;
@@ -96,6 +96,10 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         assert v != null;
         mItemsDescription = (TextView) v.findViewById(R.id.tvItemsListDescription);
         mItemsTags = (TextView)v.findViewById(R.id.tvItemsListTags);
+        mEmptyView = (ImageView)v.findViewById(R.id.imageViewEmptyList);
+        mItemsDescription.setVisibility(View.INVISIBLE);
+        mItemsTags.setVisibility(View.INVISIBLE);
+        mEmptyView.setVisibility(View.INVISIBLE);
         return v;
 	}
 
@@ -142,8 +146,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 startActivity(in);
             }
         });
-
-		registerForContextMenu(mGridView);
+        registerForContextMenu(mGridView);
 	}
 
     private void setSortTabs() {
@@ -411,6 +414,15 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             getActivity().setTitle(data.getString(2));
         }
         else {
+            if(data.getCount()==0){
+                mItemsDescription.setVisibility(View.INVISIBLE);
+                mItemsTags.setVisibility(View.INVISIBLE);
+                mEmptyView.setVisibility(View.VISIBLE);
+            } else{
+                mItemsDescription.setVisibility(View.VISIBLE);
+                mItemsTags.setVisibility(View.VISIBLE);
+                mEmptyView.setVisibility(View.INVISIBLE);
+            }
             mImageAdapterList.swapCursor(data);
         }
         globalCursor = data;

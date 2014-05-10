@@ -40,7 +40,7 @@
             android:layout_marginLeft="9dp"
             android:layout_marginRight="9dp"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp"/>
+            android:paddingRight="10dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -60,5 +60,13 @@
             android:layout_marginRight="9dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageViewEmptyList"
+            android:src="@drawable/empty_element_list"
+            android:layout_below="@+id/tvItemsListDescription"
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
 </FrameLayout>
