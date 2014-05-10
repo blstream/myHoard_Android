@@ -19,19 +19,25 @@ import com.myhoard.app.R;
 
 public class ImageLoader{
 
+    private static final int COLLECTION_NO_PHOTO = 1;
+    private static final int ELEMENT_NO_PHOTO = 2;
     MemoryCache memoryCache = new MemoryCache();
     ImageCacheDatabase imageCacheDatabase;
     private Map<ImageView, String> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
     ExecutorService executorService;
     Handler handler = new Handler();//handler to display images in UI thread
     private static Context mContext;
-    public ImageLoader(Context mContext) {
+    private int mStubId;
+    public ImageLoader(Context mContext, int no_photo_resource) {
         ImageLoader.mContext = mContext;
         imageCacheDatabase = new ImageCacheDatabase(mContext);
         executorService = Executors.newFixedThreadPool(5);
+        if(no_photo_resource == ELEMENT_NO_PHOTO){
+            mStubId = R.drawable.element_empty;
+        } else if(no_photo_resource == COLLECTION_NO_PHOTO){
+            mStubId = R.drawable.collection_empty;
+        }
     }
-
-    final int stub_id = R.drawable.nophoto;
 
     public void DisplayImage(String url, ImageView imageView) {
         imageViews.put(imageView, url);
@@ -40,7 +46,7 @@ public class ImageLoader{
             imageView.setImageBitmap(bitmap);
         else {
             queuePhoto(url, imageView);
-            imageView.setImageResource(stub_id);
+            imageView.setImageResource(mStubId);
         }
     }
 
@@ -158,7 +164,7 @@ public class ImageLoader{
             if (bitmap != null)
                 photoToLoad.imageView.setImageBitmap(bitmap);
             else
-                photoToLoad.imageView.setImageResource(stub_id);
+                photoToLoad.imageView.setImageResource(mStubId);
         }
     }
 

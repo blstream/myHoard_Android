@@ -25,7 +25,7 @@ import java.io.IOException;
  */
 
 public class ImageElementAdapterCursor extends CursorAdapter {
-
+    private static final int NO_PHOTO_RESOURCES = 2;
     private static class ViewHolder {
         ImageView img;
         Uri path;
@@ -34,7 +34,7 @@ public class ImageElementAdapterCursor extends CursorAdapter {
     private final ImageLoader mImageLoader;
 	public ImageElementAdapterCursor(Context context, Cursor c, int flags) {
 	    super(context, c, flags);
-	    mImageLoader = new ImageLoader(context);
+	    mImageLoader = new ImageLoader(context,NO_PHOTO_RESOURCES);
     }
 
 	@Override
