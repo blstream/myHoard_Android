@@ -20,6 +20,9 @@ import com.myhoard.app.R;
 public class ImageAdapterList extends CursorAdapter {
 
     private static final int ELEMENT_NO_PHOTO = 2;
+    private static final int ELEMENT_FILE_NAME_FROM_LOADER = 1;
+    private static final int ELEMENT_ITEM_NAME_FROM_LOADER = 0;
+
     private static class ViewHolder {
         TextView name;
         ImageView img;
@@ -49,12 +52,12 @@ public class ImageAdapterList extends CursorAdapter {
 	public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 		//Set text for TextView in search_listitem
-		viewHolder.name.setText(cursor.getString(0));
+		viewHolder.name.setText(cursor.getString(ELEMENT_ITEM_NAME_FROM_LOADER));
 		//Set image for ImageView in search_listitem
 		if (cursor.getString(1) == null) {
 			viewHolder.img.setImageResource(R.drawable.element_empty);
 		} else {
-            viewHolder.path = cursor.getString(1);
+            viewHolder.path = cursor.getString(ELEMENT_FILE_NAME_FROM_LOADER);
             //Use LazyLoading for elements list
 		    mImageLoader.DisplayImage(viewHolder.path,viewHolder.img);
         }

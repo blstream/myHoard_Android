@@ -21,6 +21,8 @@ public class ImageLoader{
 
     private static final int COLLECTION_NO_PHOTO = 1;
     private static final int ELEMENT_NO_PHOTO = 2;
+    private static final int NUMBER_OF_THREADS = 5;
+
     MemoryCache memoryCache = new MemoryCache();
     ImageCacheDatabase imageCacheDatabase;
     private Map<ImageView, String> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
@@ -31,7 +33,7 @@ public class ImageLoader{
     public ImageLoader(Context mContext, int no_photo_resource) {
         ImageLoader.mContext = mContext;
         imageCacheDatabase = new ImageCacheDatabase(mContext);
-        executorService = Executors.newFixedThreadPool(5);
+        executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
         if(no_photo_resource == ELEMENT_NO_PHOTO){
             mStubId = R.drawable.element_empty;
         } else if(no_photo_resource == COLLECTION_NO_PHOTO){

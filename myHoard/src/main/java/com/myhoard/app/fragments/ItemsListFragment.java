@@ -386,7 +386,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         String selection;
         switch(i){
             //Get all elements from collection
-            case 0:
+            case LOAD_COLLECTION_ELEMENTS:
                 selection = String.format("%s = %s and (%s=%d or %s is null)",mCollectionID,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR);
                 cursorLoader =  new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
                         new String[]{DataStorage.Items.NAME, DataStorage.Media.FILE_NAME,
@@ -394,7 +394,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                         selection, null, sortOrder);
                 break;
             //Get name and description of elements collection
-            case 2:
+            case LOAD_COLLECTION_NAME_AND_DESCRIPTION:
                 selection = String.format("%s = %s",mCollectionID,DataStorage.Collections._ID);
                 cursorLoader = new CursorLoader(mContext, DataStorage.Collections.CONTENT_URI,
                         new String[]{DataStorage.Collections.DESCRIPTION,DataStorage.Collections.TAGS,DataStorage.Collections.NAME},
