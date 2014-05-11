@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Random;
 
 /**
@@ -31,12 +32,13 @@ import java.util.Random;
  */
 public class GeneratorDialog extends DialogFragment implements View.OnClickListener {
 
-    private final static String[] ASSETS_LIST = new String[]{"flower1.jpg","flower2.jpg","beer1.jpg","snack1.jpg",
+    private static final String[] ASSETS_LIST = new String[]{"flower1.jpg","flower2.jpg","beer1.jpg","snack1.jpg",
             "ball1.jpg","coins1.jpg","pizza1.jpg","pizza2.jpg","snack2.jpg"};
-    private final static String SET_OF_CHARACTERS = "abcdefgijklmnouprstwuxyz";
-    private final static int MAX_BYTE_TABLE_LENGTH = 2048;
-    private final static int START_PROGRESS = 0;
-    private final static int STOP_PROGRESS = 100;
+    private static final String SET_OF_CHARACTERS = "abcdefgijklmnouprstwuxyz";
+    private static final int MAX_BYTE_TABLE_LENGTH = 2048;
+    private static final int START_PROGRESS = 0;
+    private static final int STOP_PROGRESS = 100;
+    private static final int COLLECTION_TYPE_RANGE = 4;
     private EditText collectionNumber;
     private EditText elementNumber;
     private ProgressBar mProgressBar;
@@ -88,14 +90,22 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
     public void getDataToGenerate() {
         mAssetManager = mAppContext.getAssets();
         if(collectionNumber.getText() != null){
-            //Get text from Collection number label
-            mNumberOfCollection = Integer.parseInt(collectionNumber.getText().toString());
-            //Set ProgressBar scale
-            mProgressBar.setMax(mNumberOfCollection);
+            if(collectionNumber.getText().length() != 0){
+                //Get text from Collection number label
+                mNumberOfCollection = Integer.parseInt(collectionNumber.getText().toString());
+                //Set ProgressBar scale
+                mProgressBar.setMax(mNumberOfCollection);
+            } else{
+                mNumberOfCollection = 0;
+            }
         }
-        if(elementNumber.getText() != null){
-            //Get text from Element number label
-            mNumberOfElements = Integer.parseInt(elementNumber.getText().toString());
+        if(elementNumber.getText() != null) {
+            if(elementNumber.getText().length() != 0){
+                //Get text from Element number label
+                mNumberOfElements = Integer.parseInt(elementNumber.getText().toString());
+            } else{
+                mNumberOfElements = 0;
+            }
         }
     }
 
@@ -155,6 +165,7 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
 
     public void createCollections(AssetManager am){
         int random_number;
+        int random_type;
         Random r = new Random();
         //Generate collection and element of this collection
         ContentValues valuesCollection = new ContentValues();
@@ -162,6 +173,9 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         String mCollectionName;
         valuesCollection.put(DataStorage.Collections.NAME, mCollectionName = generateString(new Random(), SET_OF_CHARACTERS, 10));
         valuesCollection.put(DataStorage.Collections.DESCRIPTION, generateString(new Random(), SET_OF_CHARACTERS, 20));
+        valuesCollection.put(DataStorage.Collections.MODIFIED_DATE, Calendar.getInstance().getTime().getTime());
+        random_type = r.nextInt(COLLECTION_TYPE_RANGE-1)+1;
+        valuesCollection.put(DataStorage.Collections.TYPE,random_type);
         random_number = r.nextInt(ASSETS_LIST.length);
         //Get random image from assets folder
         createFile(am,random_number);
