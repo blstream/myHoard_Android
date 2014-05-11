@@ -65,9 +65,12 @@ public class ImageCacheDatabase extends SQLiteOpenHelper {
         }
         if (cursor != null) {
             if(cursor.moveToFirst()){
-                return BitmapFactory.decodeByteArray(cursor.getBlob(0),0,cursor.getBlob(0).length);
+                Bitmap bmp =  BitmapFactory.decodeByteArray(cursor.getBlob(0),0,cursor.getBlob(0).length);
+                cursor.close();
+                return bmp;
             }
         }
+        cursor.close();
         return null;
     }
 
