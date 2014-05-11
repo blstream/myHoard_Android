@@ -17,6 +17,7 @@ package com.myhoard.app.fragments;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -48,6 +50,9 @@ import com.myhoard.app.R;
 import com.myhoard.app.activities.MainActivity;
 import com.myhoard.app.images.ImageAdapter;
 import com.myhoard.app.provider.DataStorage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Rafał Soudani on 20/02/2014
@@ -277,9 +282,7 @@ public class CollectionsListFragment extends Fragment implements
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (info != null) {
-                                    getActivity().getContentResolver().delete(
-                                            DataStorage.Collections.CONTENT_URI,
-                                            String.format("%s = %s", DataStorage.Collections._ID, info.id), null);
+                                    deleteCollection(info.id);
                                     fillGridView(null);
                                 }
                             }
@@ -303,6 +306,19 @@ public class CollectionsListFragment extends Fragment implements
                 return true;
         }
         return super.onContextItemSelected(item);
+    }
+
+    private void deleteCollection(long collection_id) {
+
+        ContentValues values = new ContentValues();
+        values.put(DataStorage.Collections.DELETED, true);
+        getActivity().getContentResolver().update(
+                DataStorage.Collections.CONTENT_URI,values,
+                String.format("%s = %s", DataStorage.Collections._ID, collection_id), null);
+
+        fillGridView();
+
+
     }
 
     @Override
@@ -383,9 +399,9 @@ public class CollectionsListFragment extends Fragment implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         final String[] projection = DataStorage.Collections.TABLE_COLUMNS;
-        String selection = null;
+        String selection = String.format("NOT %s", DataStorage.Collections.DELETED);
         if (args != null) {
-            selection = String.format("%s LIKE '%%%s%%'", DataStorage.Collections.NAME, args.getString(QUERY));
+            selection = String.format("%s LIKE '%%%s%%' AND NOT %s", DataStorage.Collections.NAME, args.getString(QUERY), DataStorage.Collections.DELETED);
         }
 
         return new CursorLoader(context, DataStorage.Collections.CONTENT_URI,
