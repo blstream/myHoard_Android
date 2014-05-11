@@ -1,17 +1,18 @@
 package com.myhoard.app.dialogs;
 
 import android.app.Dialog;
-import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.myhoard.app.R;
 import com.myhoard.app.provider.DataStorage;
@@ -34,32 +35,41 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             "ball1.jpg","coins1.jpg","pizza1.jpg","pizza2.jpg","snack2.jpg"};
     private final static String SET_OF_CHARACTERS = "abcdefgijklmnouprstwuxyz";
     private final static int MAX_BYTE_TABLE_LENGTH = 2048;
+    private final static int START_PROGRESS = 0;
+    private final static int STOP_PROGRESS = 100;
     private EditText collectionNumber;
     private EditText elementNumber;
+    private ProgressBar mProgressBar;
+    private Button mGenerateButton;
     private String collection_id;
     private String element_id;
     private int mNumberOfCollection;
     private int mNumberOfElements;
     private Context mAppContext;
     private Uri mUriAddress;
+    private AssetManager mAssetManager;
+    private Dialog mDialog;
+    private GenerateAsyncTask generateAsyncTask;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         //Create dialog to generate data
-        Dialog dialog = new Dialog(getActivity());
-        dialog.setContentView(R.layout.generator_dialog);
+        mDialog = new Dialog(getActivity(),R.style.GeneratorDialog);
+        mDialog.setContentView(R.layout.generator_dialog);
         //Set mContext
         mAppContext = getActivity().getApplicationContext();
         //Set EditText for dialog
-        collectionNumber = (EditText)dialog.findViewById(R.id.editTextGeneratorDialog);
-        elementNumber = (EditText)dialog.findViewById(R.id.editText2GeneratorDialog);
+        collectionNumber = (EditText)mDialog.findViewById(R.id.editTextGeneratorDialog);
+        elementNumber = (EditText)mDialog.findViewById(R.id.editText2GeneratorDialog);
+        mProgressBar = (ProgressBar)mDialog.findViewById(R.id.progressBarGeneratorDialog);
         //Set Button for dialog
-        Button cancelButton = (Button) dialog.findViewById(R.id.buttonGeneratorDialog);
-        Button generateButton = (Button) dialog.findViewById(R.id.button2GeneratorDialog);
+        Button mCancelButton = (Button) mDialog.findViewById(R.id.buttonGeneratorDialog);
+        mGenerateButton = (Button)mDialog.findViewById(R.id.button2GeneratorDialog);
         //Set interact with cancel and generate button
-        cancelButton.setOnClickListener(this);
-        generateButton.setOnClickListener(this);
-        return dialog;
+        mCancelButton.setOnClickListener(this);
+        mGenerateButton.setOnClickListener(this);
+        generateAsyncTask = new GenerateAsyncTask();
+        return mDialog;
     }
 
     @Override
@@ -67,32 +77,26 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         //Get id of clicked button
         switch(v.getId()){
             case R.id.buttonGeneratorDialog:
-                //Cancel button
-                dismiss();
+                generateAsyncTask.cancel(true);
                 break;
             case R.id.button2GeneratorDialog:
-                //Generate button
-                generateData();
-                dismiss();
+                generateAsyncTask.execute();
                 break;
         }
     }
     
-    public void generateData() {
-        AssetManager am = mAppContext.getAssets();
+    public void getDataToGenerate() {
+        mAssetManager = mAppContext.getAssets();
         if(collectionNumber.getText() != null){
             //Get text from Collection number label
             mNumberOfCollection = Integer.parseInt(collectionNumber.getText().toString());
+            //Set ProgressBar scale
+            mProgressBar.setMax(mNumberOfCollection);
         }
         if(elementNumber.getText() != null){
             //Get text from Element number label
             mNumberOfElements = Integer.parseInt(elementNumber.getText().toString());
         }
-        //asyncHandler use to do insert, asynchronous
-        AsyncQueryHandler asyncHandler =
-                new AsyncQueryHandler(getActivity().getContentResolver()) {
-                };
-        createCollections(asyncHandler,am);
     }
 
     public String generateString(Random rng, String characters, int length)
@@ -149,30 +153,28 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         }
     }
 
-    public void createCollections(AsyncQueryHandler asyncHandler,AssetManager am){
+    public void createCollections(AssetManager am){
         int random_number;
         Random r = new Random();
         //Generate collection and element of this collection
-        for (int i = 0; i < mNumberOfCollection; i++) {
-            ContentValues valuesCollection = new ContentValues();
-            //Put value about collection to valuesCollection
-            String mCollectionName;
-            valuesCollection.put(DataStorage.Collections.NAME, mCollectionName = generateString(new Random(), SET_OF_CHARACTERS, 10));
-            valuesCollection.put(DataStorage.Collections.DESCRIPTION, generateString(new Random(), SET_OF_CHARACTERS, 20));
-            random_number = r.nextInt(ASSETS_LIST.length);
-            //Get random image from assets folder
-            createFile(am,random_number);
-            if(getActivity().getFilesDir() != null){
-                //Put avatar file path to contentValues object
-                valuesCollection.put(DataStorage.Collections.AVATAR_FILE_NAME,mUriAddress.toString());
-                //Insert data of collection to database asynchronously
-                asyncHandler.startInsert(-1, null, DataStorage.Collections.CONTENT_URI, valuesCollection);
-            }
-            createElements(asyncHandler,mCollectionName,am);
+        ContentValues valuesCollection = new ContentValues();
+        //Put value about collection to valuesCollection
+        String mCollectionName;
+        valuesCollection.put(DataStorage.Collections.NAME, mCollectionName = generateString(new Random(), SET_OF_CHARACTERS, 10));
+        valuesCollection.put(DataStorage.Collections.DESCRIPTION, generateString(new Random(), SET_OF_CHARACTERS, 20));
+        random_number = r.nextInt(ASSETS_LIST.length);
+        //Get random image from assets folder
+        createFile(am,random_number);
+        if(mAppContext.getFilesDir() != null) {
+            //Put avatar file path to contentValues object
+            valuesCollection.put(DataStorage.Collections.AVATAR_FILE_NAME, mUriAddress.toString());
+            //Insert data of collection to database
+            mAppContext.getContentResolver().insert(DataStorage.Collections.CONTENT_URI, valuesCollection);
         }
+        createElements(mCollectionName,am);
     }
 
-    public void createElements(AsyncQueryHandler asyncHandler,String mCollectionName,AssetManager am){
+    public void createElements(String mCollectionName,AssetManager am){
         int random_number;
         Random r;
         for (int j = 0; j < mNumberOfElements; j++) {
@@ -193,8 +195,8 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             valuesElement.put(DataStorage.Items.NAME, element_name = generateString(new Random(), SET_OF_CHARACTERS, 6));
             valuesElement.put(DataStorage.Items.DESCRIPTION, generateString(new Random(), SET_OF_CHARACTERS, 15));
             valuesElement.put(DataStorage.Items.ID_COLLECTION, collection_id);
-            //Insert data of collection element to database asynchronously
-            asyncHandler.startInsert(1, null, DataStorage.Items.CONTENT_URI, valuesElement);
+            //Insert data of collection element to database
+            mAppContext.getContentResolver().insert(DataStorage.Items.CONTENT_URI, valuesElement);
             //Get id of added element to database
             Cursor cursor1 = mAppContext.getContentResolver().query(DataStorage.Items.CONTENT_URI,
                     new String[]{DataStorage.Items.TABLE_NAME+"."+DataStorage.Items._ID,DataStorage.Media.AVATAR},
@@ -216,8 +218,44 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
             if(mAppContext.getFilesDir() !=null){
                 valuesMedia.put(DataStorage.Media.FILE_NAME,mUriAddress.toString());
                 //Insert data of element media to database asynchronously
-                asyncHandler.startInsert(-1,null,DataStorage.Media.CONTENT_URI,valuesMedia);
+                mAppContext.getContentResolver().insert(DataStorage.Media.CONTENT_URI, valuesMedia);
             }
+        }
+    }
+
+    private class GenerateAsyncTask extends AsyncTask<Void,Integer,Void>{
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            getDataToGenerate();
+            for (int i = 0;(i < mNumberOfCollection) && !isCancelled(); i++) {
+                createCollections(mAssetManager);
+                publishProgress(i+1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            mProgressBar.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Void s) {
+            mProgressBar.setProgress(STOP_PROGRESS);
+            mGenerateButton.setEnabled(true);
+            mDialog.dismiss();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mProgressBar.setProgress(START_PROGRESS);
+            mGenerateButton.setEnabled(false);
+        }
+
+        @Override
+        protected void onCancelled() {
+            mDialog.dismiss();
         }
     }
 }

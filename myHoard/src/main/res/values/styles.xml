@@ -60,4 +60,9 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <!-- Generator Dialog styles -->
+    <style name="GeneratorDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowIsFloating">true</item>
+    </style>
+
 </resources>

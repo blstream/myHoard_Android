@@ -1,60 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/gray_background">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/generate_collection"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
         android:id="@+id/textViewGeneratorDialog"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:padding="10dp" />
 
     <EditText
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
         android:id="@+id/editTextGeneratorDialog"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/textViewGeneratorDialog" />
+        android:layout_toRightOf="@+id/textViewGeneratorDialog"
+        android:layout_alignBottom="@+id/textViewGeneratorDialog" />
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/generate_elements"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
         android:id="@+id/textView2GeneratorDialog"
         android:layout_below="@+id/editTextGeneratorDialog"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:padding="10dp" />
 
     <EditText
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
         android:id="@+id/editText2GeneratorDialog"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
         android:layout_below="@+id/editTextGeneratorDialog"
-        android:layout_toRightOf="@+id/textView2GeneratorDialog" />
+        android:layout_toRightOf="@+id/textView2GeneratorDialog"
+        android:layout_alignBottom="@+id/textView2GeneratorDialog" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/cancel"
-        android:id="@+id/buttonGeneratorDialog"
-        android:layout_below="@+id/editText2GeneratorDialog"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/generator"
+        android:background="@color/yellow_main"
         android:id="@+id/button2GeneratorDialog"
-        android:layout_alignTop="@+id/buttonGeneratorDialog"
-        android:layout_toRightOf="@+id/buttonGeneratorDialog" />
+        android:padding="20dp"
+        android:layout_below="@+id/progressBarGeneratorDialog"
+        android:layout_alignRight="@+id/editText2GeneratorDialog"
+        android:layout_alignEnd="@+id/editText2GeneratorDialog"
+        android:layout_marginTop="3dp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:background="@color/yellow_main"
+        android:id="@+id/buttonGeneratorDialog"
+        android:layout_below="@+id/button2GeneratorDialog"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:padding="20dp"
+        android:layout_marginTop="3dp" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBarGeneratorDialog"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView2GeneratorDialog"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:padding="6dp" />
+
+
 </RelativeLayout>
