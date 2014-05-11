@@ -107,7 +107,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter("notification"));
-        needItForDebugging();
+        //needItForDebugging();
     }
 
     @Override
