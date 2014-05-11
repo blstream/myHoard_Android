@@ -38,7 +38,7 @@ public class MediaTable extends DatabaseTable {
 				.append(Media.CREATED_DATE + " NUMERIC, ")
                 .append(Media.SYNCHRONIZED + " BOOLEAN DEFAULT FALSE, ")
                 .append(Media.DELETED + " BOOLEAN DEFAULT FALSE, ")
-				.append("FOREIGN KEY(" + Media.ID_ITEM + ") REFERENCES " + Items.TABLE_NAME + "(" + Items._ID + "))");
+				.append("FOREIGN KEY(" + Media.ID_ITEM + ") REFERENCES " + Items.TABLE_NAME + "(" + Items._ID + ") ON DELETE CASCADE)");
 		db.execSQL(sql.toString());
 	}
 

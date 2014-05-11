@@ -47,7 +47,7 @@ public class ItemsTable extends DatabaseTable {
                 .append(Items.MODIFIED_DATE + " NUMERIC, ")
                 .append(Items.SYNCHRONIZED + " BOOLEAN DEFAULT FALSE, ")
                 .append(Items.DELETED + " BOOLEAN DEFAULT FALSE, ")
-                .append("FOREIGN KEY(" + Items.ID_COLLECTION + ") REFERENCES " + Collections.TABLE_NAME + "(" + Collections._ID + "))");
+                .append("FOREIGN KEY(" + Items.ID_COLLECTION + ") REFERENCES " + Collections.TABLE_NAME + "(" + Collections._ID + ") ON DELETE CASCADE)");
         db.execSQL(sql.toString());
     }
 
