@@ -28,7 +28,6 @@ import com.myhoard.app.model.Media;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -118,7 +117,10 @@ public class SynchronizationService extends IntentService {
     }
 
     private void uploadCollection(CRUDEngine<Collection> collectionCrud, Cursor cursor) {
-        if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
+        if (cursor.getInt(cursor.getColumnIndex(Collections.DELETED)) == 1) {
+            deleteCollectionOnServerAndInDatabase(collectionCrud, cursor);
+        }
+        else if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
             Collection collection = getCollectionFromDatabase(cursor);
             if (cursor.getInt(cursor.getColumnIndex(Collections.SYNCHRONIZED)) == 0
                     && cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)) != null) {
@@ -135,8 +137,20 @@ public class SynchronizationService extends IntentService {
         }
     }
 
+    private void deleteCollectionOnServerAndInDatabase(CRUDEngine<Collection> collectionCrud, Cursor cursor) {
+        String idCollectionOnServer = cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER));
+        String id = cursor.getString(cursor.getColumnIndex(Collections._ID));
+        String where = Collections._ID+"=?";
+        String[] args = new String[]{id};
+        if (idCollectionOnServer == null) {
+            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+        } else {
+            collectionCrud.remove(idCollectionOnServer, userManager.getToken());
+            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+        }
+    }
+
     private Collection getCollectionFromDatabase(Cursor cursor) {
-        //TODO: wyslac na serwer czy public czy private
         Collection collection = new Collection();
         collection.setName(cursor.getString(cursor.getColumnIndex(Collections.NAME)));
         collection.setDescription(cursor.getString(cursor.getColumnIndex(Collections.DESCRIPTION)));
