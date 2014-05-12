@@ -41,14 +41,17 @@
 
     <item
         android:id="@+id/action_download"
-        android:title="download"/>
+        android:title="download"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_upload"
-        android:title="upload"/>
+        android:title="upload"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_synchronize"
-        android:title="synchronize"/>
+        android:title="synchronize"
+        android:visible="false"/>
 
 </menu>
