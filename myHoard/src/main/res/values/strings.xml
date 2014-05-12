@@ -122,5 +122,6 @@
     <string name="password_strenght_text">Password Strenght</string>
     <string name="google_maps_key">AIzaSyB6R1fTZEI3c1lDKV06SrSDPx2Fg70YQb4</string>
     <string name="no_photo">No photo</string>
+    <string name="tag_exist">Tag %s already added</string>
 
 </resources>
