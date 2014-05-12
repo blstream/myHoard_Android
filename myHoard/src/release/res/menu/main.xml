@@ -39,4 +39,16 @@
         android:title="@string/action_generate"
         android:visible="false"/>
 
+    <item
+        android:id="@+id/action_download"
+        android:title="download"/>
+
+    <item
+        android:id="@+id/action_upload"
+        android:title="upload"/>
+
+    <item
+        android:id="@+id/action_synchronize"
+        android:title="synchronize"/>
+
 </menu>
