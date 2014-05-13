@@ -64,6 +64,7 @@ public class RegisterActivity extends BaseActivity {
 
     public void registerUser() {
 
+
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
         if(!cd.isConnectingToInternet())
         {
@@ -75,7 +76,10 @@ public class RegisterActivity extends BaseActivity {
             boolean passwordFound = validatePassword();
             boolean emailFound = validateEmail();
 
-            if (!emailFound) {
+
+
+
+            if (!emailFound ) {
 
                 emailRegistry.setError(getString(R.string.wrong_email_format));
             }
@@ -87,9 +91,10 @@ public class RegisterActivity extends BaseActivity {
 
             if (passwordFound && emailFound) {
                 User user = new User();
-                user.setEmail(String.valueOf(emailRegistry.getText()));
+                user.setEmail(String.valueOf(emailRegistry.getText()).toLowerCase());
+                Log.d("blah",String.valueOf(emailRegistry.getText()));
                 if (String.valueOf(usernameRegistry.getText()).length() > 0) {
-                    user.setUsername(String.valueOf(usernameRegistry.getText()));
+                    user.setUsername(String.valueOf(usernameRegistry.getText()).toLowerCase());
                 }
                 user.setPassword(String.valueOf(passwordRegistry.getText()));
 
@@ -122,13 +127,19 @@ public class RegisterActivity extends BaseActivity {
     }
 
     public boolean validateEmail() {
-        String email = String.valueOf(emailRegistry.getText());
+        String email = String.valueOf(emailRegistry.getText()).toLowerCase();
         Pattern p = Pattern.compile((getString(R.string.email_pattern)));
         Matcher m = p.matcher(email);
 
         if (!m.matches()) Log.d(TAG,getString(R.string.invalid_password));
         return m.matches();
     }
+
+
+
+
+
+
 
 
     private class RegisterUser extends AsyncTask<Void, Void, Boolean> {
@@ -157,6 +168,7 @@ public class RegisterActivity extends BaseActivity {
             Log.d(TAG,"error");
         }
     }
+
 
 
 
@@ -195,7 +207,7 @@ public class RegisterActivity extends BaseActivity {
                     case 3:
                     {
                         password_strenght.setTextColor(getResources().getColor(R.color.green));
-                        password_strenght.setText("nicely done");
+                        password_strenght.setText("ok");
                         break;
                     }
                     case 4:
