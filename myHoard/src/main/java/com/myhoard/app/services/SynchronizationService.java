@@ -304,9 +304,7 @@ public class SynchronizationService extends IntentService {
             for (Item item : items) {
                 if (idServerToModifiedDate.get(item.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
                     insert(item);
-                } else { //jezeli data modyfikacji jest wieksza
-                    Long dataMod = idServerToModifiedDate.get(item.getId()); //TODO sprawdzenie czy data modyfikacji wieksza.. narazie brakuje tego na serwerach
-                    //c.getString(c.getColumnIndex(Collections.MODIFIED_DATE));
+                } else if (modifiedDateOnServerIsGraterThanInDatabase(item.getModifiedDate(), idServerToModifiedDate.get(item.getId()))) {
                     update(item);
                 }
             }
@@ -480,19 +478,16 @@ public class SynchronizationService extends IntentService {
         selection += ")";
 
         Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.MODIFIED_DATE}, selection, null, null);
-        HashMap<String, Long> mapka = new HashMap<>();
+        HashMap<String, Long> idServerToModifiedDate = new HashMap<>();
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                mapka.put(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)), cursor.getLong(cursor.getColumnIndex(Collections.MODIFIED_DATE)));
+                idServerToModifiedDate.put(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)), cursor.getLong(cursor.getColumnIndex(Collections.MODIFIED_DATE)));
             }
 
         for (Collection collection : collections) {
-            if (mapka.get(collection.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
+            if (idServerToModifiedDate.get(collection.getId()) == null) {
                 insert(collection);
-
-            } else { //jezeli data modyfikacji jest wieksza
-                Long dataMod = mapka.get(collection.getId()); //TODO sprawdzenie czy data modyfikacji wieksza..
-                //c.getString(c.getColumnIndex(Collections.MODIFIED_DATE));
+            } else if (modifiedDateOnServerIsGraterThanInDatabase(collection.getModified_date(), idServerToModifiedDate.get(collection.getId()))){
                 update(collection);
             }
         }
@@ -502,6 +497,17 @@ public class SynchronizationService extends IntentService {
         } catch (RemoteException | OperationApplicationException e) {
             sendError(e.toString());
         }
+    }
+
+    private boolean modifiedDateOnServerIsGraterThanInDatabase(String modifiedDate, Long modifiedDateDatabase) {
+        try {
+            long modifiedDateServer = new SimpleDateFormat(DATE_FORMAT).parse(modifiedDate).getTime();
+            if (modifiedDateDatabase >= modifiedDateServer)
+                return false;
+        } catch (ParseException e) {
+            return true;
+        }
+        return true;
     }
 
 
