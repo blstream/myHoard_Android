@@ -1,5 +1,6 @@
 package com.myhoard.app.element;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.myhoard.app.R;
+import com.myhoard.app.images.ImageLoader;
 import com.myhoard.app.views.ScaleImageView;
 
 /**
@@ -23,7 +25,9 @@ public class ElementPhotoFragment extends Fragment {
         Bundle extra = getArguments();
         Uri imgUri = Uri.parse(extra.getString("uri"));
         ScaleImageView img = (ScaleImageView)v.findViewById(R.id.image);
-        img.setImageURI(imgUri);
+        Bitmap bmp = ImageLoader.decodeSampledBitmapFromResource(imgUri.toString(), 100, 100);
+        //img.setImageURI(imgUri);
+        img.setImageBitmap(bmp);
 
         return v;
     }
