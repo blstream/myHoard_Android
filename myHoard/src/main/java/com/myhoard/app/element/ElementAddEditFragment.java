@@ -502,17 +502,22 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_accept:
-                if (TextUtils.isEmpty(etElementName.getText())) {
+                String sName;
+                sName = etElementName.getText().toString();
+                sName = sName.trim();
+                if(sName.isEmpty()){
                     Toast.makeText(getActivity(),
                             getString(R.string.required_name_element),
                             Toast.LENGTH_SHORT).show();
-                } else {
-                    String sName = "", sDescription = "";
-                    if (etElementName.getText() != null) {
-                        sName = etElementName.getText().toString();
-                    }
+                } else if(sName.length()<2) {
+                    Toast.makeText(getActivity(),
+                            getString(R.string.required_name_element_minimum_length),
+                            Toast.LENGTH_SHORT).show();
+                }else {
+                    String sDescription = "";
                     if (etElementDescription.getText() != null) {
                         sDescription = etElementDescription.getText().toString();
+                        sDescription = sDescription.trim();
                     }
                     ContentValues values = new ContentValues();
                     values.put(DataStorage.Items.NAME, sName);
