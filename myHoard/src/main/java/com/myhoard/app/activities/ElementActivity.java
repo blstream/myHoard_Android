@@ -126,9 +126,6 @@ public class ElementActivity extends ActionBarActivity {
         if (fragment != null) {
             fragmentTransaction.replace(R.id.frame_container, fragment,
                     String.valueOf(position));
-            if(!(fragment instanceof ElementReadFragment)) {
-                fragmentTransaction.addToBackStack(null);
-            }
             fragmentTransaction.commit();
         }
     }
