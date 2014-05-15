@@ -113,7 +113,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private Item element;
     private boolean locationUserSet = false;
     private boolean gpsEnabled = false;
-
+    private String mActualElementName;
     private PhotoManager photoManager;
 
     private LatLng elementLocation;
@@ -173,6 +173,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             elementLocation = new LatLng(element.getLocation().lat,element.getLocation().lng);
 
             etElementName.setText(element.getName());
+            mActualElementName = etElementName.getText().toString().trim();
+
+            etElementDescription.setText(element.getDescription());
         }
         gvPhotosList.setAdapter(getPhotosList());
         gvPhotosList.setOnItemClickListener(this);
@@ -534,23 +537,38 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                             getActivity().getContentResolver()) {
                     };
                     if (elementId != -1) {
-                        values.put(DataStorage.Items.MODIFIED_DATE, Calendar
-                                .getInstance().getTime().getTime());
-                        values.put(DataStorage.Items.SYNCHRONIZED, false);
-                        asyncHandler.startUpdate(0, null,
-                                DataStorage.Items.CONTENT_URI, values,
-                                DataStorage.Items._ID + " = ?",
-                                new String[] { String.valueOf(elementId) });
-                        getFragmentManager().popBackStackImmediate();
-                        getFragmentManager().popBackStackImmediate();
+                        if(sName.equals(mActualElementName)){
+                            values.put(DataStorage.Items.MODIFIED_DATE, Calendar
+                                    .getInstance().getTime().getTime());
+                            values.put(DataStorage.Items.SYNCHRONIZED, false);
+                            asyncHandler.startUpdate(0, null,
+                                    DataStorage.Items.CONTENT_URI, values,
+                                    DataStorage.Items._ID + " = ?",
+                                    new String[] { String.valueOf(elementId) });
+                            getActivity().finish();
+                        } else{
+                            if(checkUniquenessElementName(sName)){
+                                values.put(DataStorage.Items.MODIFIED_DATE, Calendar
+                                        .getInstance().getTime().getTime());
+                                values.put(DataStorage.Items.SYNCHRONIZED, false);
+                                asyncHandler.startUpdate(0, null,
+                                        DataStorage.Items.CONTENT_URI, values,
+                                        DataStorage.Items._ID + " = ?",
+                                        new String[] { String.valueOf(elementId) });
+                                getActivity().finish();
+                            }
+                            else{
+                                Toast.makeText(getActivity(),R.string.element_exist,Toast.LENGTH_SHORT).show();
+                            }
+                        }
                     } else {
-                        if(checkUniquenessElementName(sName)){
+                        if(checkUniquenessElementName(sName)) {
                             values.put(DataStorage.Items.CREATED_DATE, Calendar
                                     .getInstance().getTime().getTime());
                             asyncHandler.startInsert(0, null,
                                     DataStorage.Items.CONTENT_URI, values);
                             getActivity().finish();
-                        }else{
+                        } else{
                             Toast.makeText(getActivity(),R.string.element_exist,Toast.LENGTH_SHORT).show();
                         }
                     }
