@@ -570,11 +570,18 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             // According to documentation moveToPosition range of values is -1 <= position <= count. This is why there is -1
             // FIXME Dziwny bład z rzutowaniem long na int. Do sprawdzenia na innych wersjach Androida
 //            data.moveToPosition(iCollectionId-1);
-            data.moveToPosition(0);
-            String category = data.getString(data.getColumnIndex(DataStorage.Collections.NAME));
-            tvElementCategory.setText(category);
             fillCategoriesData();
             adapterCategories.swapCursor(data);
+            adapterCategories.getCursor().moveToFirst();
+            for(int i=0;i<adapterCategories.getCount();i++){
+                int column_index_id = adapterCategories.getCursor().getColumnIndex(DataStorage.Collections._ID);
+                if(adapterCategories.getCursor().getInt(column_index_id)!=iCollectionId){
+                    adapterCategories.getCursor().moveToNext();
+                }else{
+                    int column_index_name = adapterCategories.getCursor().getColumnIndex(DataStorage.Collections.NAME);
+                    tvElementCategory.setText(adapterCategories.getCursor().getString(column_index_name));
+                }
+            }
         }
 
         @Override
