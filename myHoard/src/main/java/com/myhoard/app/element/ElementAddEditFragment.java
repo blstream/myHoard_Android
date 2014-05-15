@@ -544,16 +544,34 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                         getFragmentManager().popBackStackImmediate();
                         getFragmentManager().popBackStackImmediate();
                     } else {
-                        values.put(DataStorage.Items.CREATED_DATE, Calendar
-                                .getInstance().getTime().getTime());
-                        asyncHandler.startInsert(0, null,
-                                DataStorage.Items.CONTENT_URI, values);
-                        getActivity().finish();
+                        if(checkUniquenessElementName(sName)){
+                            values.put(DataStorage.Items.CREATED_DATE, Calendar
+                                    .getInstance().getTime().getTime());
+                            asyncHandler.startInsert(0, null,
+                                    DataStorage.Items.CONTENT_URI, values);
+                            getActivity().finish();
+                        }else{
+                            Toast.makeText(getActivity(),R.string.element_exist,Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
                 break;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
+    private boolean checkUniquenessElementName(String sName){
+        Cursor cursor = getActivity().getContentResolver().query(DataStorage.Items.CONTENT_URI,
+                new String[] {DataStorage.Items.NAME},DataStorage.Items.NAME + " = '" + sName + "' AND " +
+                        DataStorage.Items.ID_COLLECTION + " = '" + iCollectionId +"'",null,null);
+        if(cursor!=null){
+            if(cursor.isAfterLast()){
+                return true;
+            }else{
+                return false;
+            }
         }
         return true;
     }

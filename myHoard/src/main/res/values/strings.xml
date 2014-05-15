@@ -41,6 +41,7 @@
     <string name="element_edited">ELEMENT EDITED</string>
     <string name="required_name_element">Required element name</string>
     <string name="required_name_element_minimum_length">Element name must contain at least two characters</string>
+    <string name="element_exist">Element with this name exists</string>
     <string name="name_already_exist">NAME ALREADY EXIST</string>
     <string name="delete_colection_dialog_title">DELETE COLLECTION</string>
     <string name="delete_colection_dialog_message">Are you sure you want to delete collection?</string>
