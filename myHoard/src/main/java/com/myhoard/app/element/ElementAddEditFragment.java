@@ -9,8 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.MatrixCursor;
-import android.database.MergeCursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -20,7 +18,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,11 +45,9 @@ import com.myhoard.app.provider.DataStorage;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -104,10 +99,10 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private int elementId;
     private Context context;
     // private ScaleImageView ivElementPhoto;
-    private SimpleCursorAdapter adapterCategories, adapterItems;
-    private ImageElementAdapterCursor adapterImages;
+    private SimpleCursorAdapter adapterCategories;
     private GridView gvPhotosList;
     private ArrayList<Uri> imagesUriList;
+    private ArrayList<Uri> imagesUriInsertList;
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
     private Item element;
@@ -176,6 +171,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             mActualElementName = etElementName.getText().toString().trim();
 
             etElementDescription.setText(element.getDescription());
+            imagesUriInsertList = new ArrayList<>();
         }
         gvPhotosList.setAdapter(getPhotosList());
         gvPhotosList.setOnItemClickListener(this);
@@ -191,12 +187,10 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private ListAdapter getPhotosList() {
         if (elementId != -1) {
             fillPhotosData();
-            return adapterImages;
-        } else {
-            imageListAdapter = new ImageElementAdapterList(getActivity(),
-                    NO_FLAGS, imagesUriList);
-            return imageListAdapter;
+        } else{
+            imageListAdapter = new ImageElementAdapterList(getActivity(),NO_FLAGS, imagesUriList);
         }
+        return imageListAdapter;
     }
 
     @Override
@@ -304,9 +298,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private void fillPhotosData() {
         getLoaderManager().initLoader(LOADER_IMAGES, null,
                 new LoaderImagesCallbacks());
-
-        adapterImages = new ImageElementAdapterCursor(getActivity(), null,
-                NO_FLAGS);
     }
 
     /**
@@ -383,14 +374,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
     private void deleteImage(int id) {
         if (elementId != -1) {
-            ContentValues values = new ContentValues();
-//            values.put(DataStorage.Media.ID_ITEM, id);
-            values.put(DataStorage.Media.DELETED,true);
-            AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(
-                    getActivity().getContentResolver()) {
-            };
-            asyncHandler.startUpdate(0, null, DataStorage.Media.CONTENT_URI, values, DataStorage.Media._ID + " =? ",
-                    new String[] { String.valueOf(id) });
+
         } else {
             imagesUriList.remove(id);
             if(imagesUriList.size()==1) {
@@ -433,49 +417,24 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     }
 
     private void setImage(Uri uri) {
-        Log.i("TAG","elementId: " + elementId + " " + imageId);
-        switch (elementId) {
-            case -1:
-                if(imageListAdapter.getCount()==0) {
-                    imagesUriList.add(null);
-                }
-                if (imageId != -1) {
-                    imagesUriList.set(imageId, uri);
-                    imageListAdapter.notifyDataSetChanged();
-                    imageId = -1;
-                } else {
-                    imagesUriList.add(uri);
-                    imageListAdapter.notifyDataSetChanged();
-                }
-                if(imageListAdapter.getCount()==2){
-                    gvPhotosList.setNumColumns(2);
-                } else {
-                    gvPhotosList.setNumColumns(3);
-                }
-                break;
-            default:
-                ContentValues values = new ContentValues();
-                values.put(DataStorage.Media.ID_ITEM, elementId);
-                values.put(DataStorage.Media.FILE_NAME, uri.toString());
-                AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(
-                        getActivity().getContentResolver()) {
-                };
-                if (imageId != -1) {
-                    values.put(DataStorage.Media.SYNCHRONIZED, false);
-                    values.put(DataStorage.Media.AVATAR, false);
-                    asyncHandler.startUpdate(0, null,
-                            DataStorage.Media.CONTENT_URI, values,
-                            DataStorage.Media._ID + " = ?",
-                            new String[] { String.valueOf(imageId) });
-                    imageId = -1;
-                } else {
-                    values.put(DataStorage.Media.AVATAR, first);
-                    values.put(DataStorage.Media.CREATED_DATE, Calendar
-                            .getInstance().getTime().getTime());
-                    asyncHandler.startInsert(0, null,
-                            DataStorage.Media.CONTENT_URI, values);
-                }
-                break;
+        if(imageListAdapter.getCount()==0) {
+            imagesUriList.add(null);
+        }
+        if (imageId != -1) {
+            imagesUriList.set(imageId, uri);
+            imageListAdapter.notifyDataSetChanged();
+            imageId = -1;
+        } else {
+            if(elementId!=-1){
+                imagesUriInsertList.add(uri);
+            }
+            imagesUriList.add(uri);
+            imageListAdapter.notifyDataSetChanged();
+        }
+        if(imageListAdapter.getCount()==2){
+            gvPhotosList.setNumColumns(2);
+        } else {
+            gvPhotosList.setNumColumns(3);
         }
     }
 
@@ -648,19 +607,21 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             if(data.getCount()!=0) {
                 first = false;
             }
-            String[] projection = { DataStorage.Media.FILE_NAME,
-                    DataStorage.Media.CREATED_DATE, DataStorage.Media._ID,
-                    DataStorage.Media.ID_ITEM };
-            MatrixCursor extras = new MatrixCursor(projection);
-            extras.addRow(new String[] { "", "", "-2", String.valueOf(elementId) });
-            Cursor[] cursors = { extras, data };
-            Cursor extendedCursor = new MergeCursor(cursors);
-            adapterImages.swapCursor(extendedCursor);
+            if(data!=null){
+                imagesUriList.add(null);
+                data.moveToFirst();
+                while(!data.isAfterLast()){
+                    imagesUriList.add(Uri.parse(data.getString(data.getColumnIndexOrThrow(DataStorage.Media.FILE_NAME))));
+                    data.moveToNext();
+                }
+                imageListAdapter = new ImageElementAdapterList(getActivity(),NO_FLAGS, imagesUriList);
+                gvPhotosList.setAdapter(imageListAdapter);
+            }
         }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            adapterImages.swapCursor(null);
+            imagesUriList.clear();
         }
     }
 
@@ -704,6 +665,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         @Override
         protected void onUpdateComplete(int token, Object cookie, int result) {
             super.onUpdateComplete(token, cookie, result);
+            for (Uri imageUri : imagesUriInsertList) {
+                insertImage(elementId, imageUri);
+            }
         }
 
         @Override
