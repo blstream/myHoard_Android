@@ -721,6 +721,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         private void updateImage(int id, Uri uri) {
             ContentValues values = new ContentValues();
             values.put(DataStorage.Media.FILE_NAME,uri.toString());
+            values.put(DataStorage.Media.SYNCHRONIZED,false);
             AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(cr) {};
             asyncHandler.startUpdate(0,null,DataStorage.Media.CONTENT_URI,values,
                     DataStorage.Media._ID + " =? ",new String[] {String.valueOf(id)});
@@ -730,7 +731,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             ContentValues values = new ContentValues();
             values.put(DataStorage.Media.ID_ITEM, id);
             values.put(DataStorage.Media.FILE_NAME, uri.toString());
-            //values.put(DataStorage.Media.SYNCHRONIZED, false);
+            values.put(DataStorage.Media.SYNCHRONIZED, false);
             if (first) {
                 values.put(DataStorage.Media.AVATAR, true);
                 first = false;
