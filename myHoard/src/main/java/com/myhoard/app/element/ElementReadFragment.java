@@ -71,7 +71,7 @@ public class ElementReadFragment extends Fragment {
                     DataStorage.Media.ID_ITEM};
             CursorLoader cursorLoader = new CursorLoader(getActivity(),
                     DataStorage.Media.CONTENT_URI, projection,
-                    DataStorage.Media.ID_ITEM + " =? ",
+                    DataStorage.Media.ID_ITEM + " =? " + " AND NOT " + DataStorage.Media.DELETED,
                     new String[]{String.valueOf(elementId)},
                     DataStorage.Media.CREATED_DATE + " ASC");
             return cursorLoader;

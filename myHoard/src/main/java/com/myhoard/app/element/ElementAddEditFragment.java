@@ -391,9 +391,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             };
             asyncHandler.startUpdate(0, null, DataStorage.Media.CONTENT_URI, values, DataStorage.Media._ID + " =? ",
                     new String[] { String.valueOf(id) });
-//            asyncHandler.startDelete(0, null, DataStorage.Media.CONTENT_URI,
-//                    DataStorage.Media._ID + " =? ",
-//                    new String[] { String.valueOf(id) });
         } else {
             imagesUriList.remove(id);
             if(imagesUriList.size()==1) {
@@ -640,10 +637,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     DataStorage.Media.ID_ITEM };
             CursorLoader cursorLoader = new CursorLoader(getActivity(),
                     DataStorage.Media.CONTENT_URI, projection,
-                    DataStorage.Media.ID_ITEM + " =? ",
-                    // TODO working on image deleteting
-//                    AND " + DataStorage.Media.DELETED +
-//                    " != ? ",
+                    DataStorage.Media.ID_ITEM + " =? AND NOT "+ DataStorage.Media.DELETED,
                     new String[] { String.valueOf(elementId)/*, String.valueOf(true)*/ },
                     DataStorage.Media.CREATED_DATE + " ASC");
             return cursorLoader;
