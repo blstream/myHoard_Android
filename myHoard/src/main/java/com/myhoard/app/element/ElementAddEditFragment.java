@@ -56,6 +56,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /*
  * Created by Sebastian Peryt on 27.02.14.
@@ -85,6 +89,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private static final int NO_FLAGS = 0;
 
     private boolean first = true;
+    private static int sLastImageIndex;
 
     /*
      * AWA:FIXME: Niepotrzebne prefiksy określające typ Patrz:Ksiazka:Czysty
@@ -103,6 +108,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private GridView gvPhotosList;
     private ArrayList<Uri> imagesUriList;
     private ArrayList<Uri> imagesUriInsertList;
+    private HashMap<Integer,Uri> imagesUriUpdateList;
+    private HashMap<Integer,Integer> imagesPositionList;
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
     private Item element;
@@ -172,6 +179,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
             etElementDescription.setText(element.getDescription());
             imagesUriInsertList = new ArrayList<>();
+            imagesUriUpdateList = new HashMap<>();
+            imagesPositionList = new HashMap<>();
         }
         gvPhotosList.setAdapter(getPhotosList());
         gvPhotosList.setOnItemClickListener(this);
@@ -421,6 +430,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             imagesUriList.add(null);
         }
         if (imageId != -1) {
+            if(imageId < sLastImageIndex){
+                if(elementId!=-1){
+                    if(imagesUriUpdateList.containsKey(imageId)){
+                        imagesUriUpdateList.remove(imageId);
+                    }
+                    imagesUriUpdateList.put(imageId,uri);
+                }
+            }
             imagesUriList.set(imageId, uri);
             imageListAdapter.notifyDataSetChanged();
             imageId = -1;
@@ -610,10 +627,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             if(data!=null){
                 imagesUriList.add(null);
                 data.moveToFirst();
+                int position = 1;
                 while(!data.isAfterLast()){
+                    imagesPositionList.put(position,data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)));
                     imagesUriList.add(Uri.parse(data.getString(data.getColumnIndexOrThrow(DataStorage.Media.FILE_NAME))));
                     data.moveToNext();
+                    position++;
                 }
+                sLastImageIndex = position;
                 imageListAdapter = new ImageElementAdapterList(getActivity(),NO_FLAGS, imagesUriList);
                 gvPhotosList.setAdapter(imageListAdapter);
             }
@@ -639,13 +660,13 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         @Override
         protected void onUpdateComplete(int token, Object cookie, int result) {
             super.onUpdateComplete(token, cookie, result);
-            fillPhotosData();
         }
 
         @Override
         protected void onInsertComplete(int token, Object cookie, Uri uri) {
             super.onInsertComplete(token, cookie, uri);
         }
+
     }
 
     private class AsyncElementQueryHandler extends AsyncQueryHandler {
@@ -668,6 +689,13 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             for (Uri imageUri : imagesUriInsertList) {
                 insertImage(elementId, imageUri);
             }
+            if(imagesUriUpdateList.size()!=0){
+                Iterator<Integer> keySetIterator = imagesUriUpdateList.keySet().iterator();
+                while(keySetIterator.hasNext()){
+                    Integer key = keySetIterator.next();
+                    updateImage(imagesPositionList.get(key),imagesUriUpdateList.get(key));
+                }
+            }
         }
 
         @Override
@@ -681,11 +709,19 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             }
         }
 
+        private void updateImage(int id, Uri uri) {
+            ContentValues values = new ContentValues();
+            values.put(DataStorage.Media.FILE_NAME,uri.toString());
+            AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(cr) {};
+            asyncHandler.startUpdate(0,null,DataStorage.Media.CONTENT_URI,values,
+                    DataStorage.Media._ID + " =? ",new String[] {String.valueOf(id)});
+        }
+
         private void insertImage(int id, Uri uri) {
             ContentValues values = new ContentValues();
             values.put(DataStorage.Media.ID_ITEM, id);
             values.put(DataStorage.Media.FILE_NAME, uri.toString());
-            values.put(DataStorage.Media.SYNCHRONIZED, false);
+            //values.put(DataStorage.Media.SYNCHRONIZED, false);
             if (first) {
                 values.put(DataStorage.Media.AVATAR, true);
                 first = false;
