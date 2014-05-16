@@ -104,9 +104,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private SimpleCursorAdapter adapterCategories;
     private GridView gvPhotosList;
     private ArrayList<Uri> imagesUriList;
+    private ArrayList<Integer> imagesUriDeleteList;
     private HashMap<Integer,Uri> imagesUriInsertList;
     private HashMap<Integer,Uri> imagesUriUpdateList;
-    private HashMap<Integer,Uri> imagesUriDeleteList;
     private HashMap<Integer,Integer> imagesPositionList;
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
@@ -179,6 +179,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             imagesUriInsertList = new HashMap<>();
             imagesUriUpdateList = new HashMap<>();
             imagesPositionList = new HashMap<>();
+            imagesUriDeleteList = new ArrayList<>();
         }
         gvPhotosList.setAdapter(getPhotosList());
         gvPhotosList.setOnItemClickListener(this);
@@ -381,20 +382,29 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
     private void deleteImage(int id) {
         if (elementId != -1) {
-
-        } else {
-            imagesUriList.remove(id);
-            if(imagesUriList.size()==1) {
-                imagesUriList.clear();
+            if(imagesUriInsertList.containsKey(id)){
+                imagesUriInsertList.remove(id);
+            }else{
+                if(imagesUriDeleteList.contains(id)){
+                    imagesUriDeleteList.remove(id);
+                }
+                imagesUriDeleteList.add(id);
+                if(imagesUriUpdateList.containsKey(id)){
+                    imagesUriUpdateList.remove(id);
+                }
             }
-            if(imagesUriList.size() == 2) {
-                gvPhotosList.setNumColumns(2);
-            } else {
-                gvPhotosList.setNumColumns(3);
-            }
-            imageId = -1;
-            imageListAdapter.notifyDataSetChanged();
         }
+        imagesUriList.remove(id);
+        if(imagesUriList.size()==1) {
+            imagesUriList.clear();
+        }
+        if(imagesUriList.size() == 2) {
+            gvPhotosList.setNumColumns(2);
+        } else {
+            gvPhotosList.setNumColumns(3);
+        }
+        imageId = -1;
+        imageListAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -448,7 +458,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             imageId = -1;
         } else {
             if(elementId!=-1){
-                imagesUriInsertList.put(imagesUriList.size(),uri);
+                imagesUriInsertList.put(imagesUriList.size(), uri);
             }
             imagesUriList.add(uri);
             imageListAdapter.notifyDataSetChanged();
@@ -695,7 +705,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 Iterator<Integer> keySetIterator = imagesUriInsertList.keySet().iterator();
                 while(keySetIterator.hasNext()){
                     Integer key = keySetIterator.next();
-                    insertImage(elementId,imagesUriInsertList.get(key));
+                    insertImage(elementId, imagesUriInsertList.get(key));
                 }
             }
             if(imagesUriUpdateList.size()!=0){
@@ -703,6 +713,11 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 while(keySetIterator.hasNext()){
                     Integer key = keySetIterator.next();
                     updateImage(imagesPositionList.get(key),imagesUriUpdateList.get(key));
+                }
+            }
+            if(imagesUriDeleteList.size()!=0){
+                for(int i=0;i<imagesUriDeleteList.size();i++){
+                    deleteImage(imagesPositionList.get(imagesUriDeleteList.get(i)));
                 }
             }
         }
@@ -716,6 +731,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             for (Uri imageUri : imagesUriList) {
                 insertImage(id, imageUri);
             }
+        }
+
+        private void deleteImage(int id){
+            ContentValues values = new ContentValues();
+            values.put(DataStorage.Media.DELETED,true);
+            AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(cr) {};
+            asyncHandler.startUpdate(0,null,DataStorage.Media.CONTENT_URI,values,
+                    DataStorage.Media._ID + " =? ",new String[] {String.valueOf(id)});
         }
 
         private void updateImage(int id, Uri uri) {
