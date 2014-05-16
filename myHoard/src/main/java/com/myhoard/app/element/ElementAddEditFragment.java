@@ -37,7 +37,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
-import com.myhoard.app.adapters.ImageElementAdapterCursor;
 import com.myhoard.app.adapters.ImageElementAdapterList;
 import com.myhoard.app.images.PhotoManager;
 import com.myhoard.app.model.Item;
@@ -58,8 +57,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /*
  * Created by Sebastian Peryt on 27.02.14.
@@ -107,8 +104,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private SimpleCursorAdapter adapterCategories;
     private GridView gvPhotosList;
     private ArrayList<Uri> imagesUriList;
-    private ArrayList<Uri> imagesUriInsertList;
+    private HashMap<Integer,Uri> imagesUriInsertList;
     private HashMap<Integer,Uri> imagesUriUpdateList;
+    private HashMap<Integer,Uri> imagesUriDeleteList;
     private HashMap<Integer,Integer> imagesPositionList;
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
@@ -178,7 +176,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             mActualElementName = etElementName.getText().toString().trim();
 
             etElementDescription.setText(element.getDescription());
-            imagesUriInsertList = new ArrayList<>();
+            imagesUriInsertList = new HashMap<>();
             imagesUriUpdateList = new HashMap<>();
             imagesPositionList = new HashMap<>();
         }
@@ -437,13 +435,20 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     }
                     imagesUriUpdateList.put(imageId,uri);
                 }
+            }else{
+                if(elementId!=-1){
+                    if(imagesUriInsertList.containsKey(imageId)){
+                        imagesUriInsertList.remove(imageId);
+                    }
+                    imagesUriInsertList.put(imageId,uri);
+                }
             }
             imagesUriList.set(imageId, uri);
             imageListAdapter.notifyDataSetChanged();
             imageId = -1;
         } else {
             if(elementId!=-1){
-                imagesUriInsertList.add(uri);
+                imagesUriInsertList.put(imagesUriList.size(),uri);
             }
             imagesUriList.add(uri);
             imageListAdapter.notifyDataSetChanged();
@@ -686,8 +691,12 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         @Override
         protected void onUpdateComplete(int token, Object cookie, int result) {
             super.onUpdateComplete(token, cookie, result);
-            for (Uri imageUri : imagesUriInsertList) {
-                insertImage(elementId, imageUri);
+            if(imagesUriInsertList.size()!=0){
+                Iterator<Integer> keySetIterator = imagesUriInsertList.keySet().iterator();
+                while(keySetIterator.hasNext()){
+                    Integer key = keySetIterator.next();
+                    insertImage(elementId,imagesUriInsertList.get(key));
+                }
             }
             if(imagesUriUpdateList.size()!=0){
                 Iterator<Integer> keySetIterator = imagesUriUpdateList.keySet().iterator();
