@@ -125,11 +125,8 @@
     <string name="password_strenght_text">Password Strenght</string>
     <string name="google_maps_key">AIzaSyB6R1fTZEI3c1lDKV06SrSDPx2Fg70YQb4</string>
     <string name="no_photo">No photo</string>
-<<<<<<< HEAD
     <string name="polish_lettters">ąężźćńółś</string>
     <string name="wrong_letters_format">Your email contains not recognised letters</string>
-=======
     <string name="tag_exist">Tag %s already added</string>
->>>>>>> 7945d1910e20f819c808c91398d6ff37de0356a2
 
 </resources>
