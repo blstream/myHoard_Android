@@ -1,5 +1,7 @@
 package com.myhoard.app.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +21,8 @@ public class Collection implements IModel {
     private String description;
     private List<String> tags;
     private String owner;
+    @SerializedName("public")
+    private Boolean ifPublic;
     private String items_number;
     private String created_date;
     private String modified_date;
@@ -81,6 +85,13 @@ public class Collection implements IModel {
         this.modified_date = modified_date;
     }
 
+    public Boolean getIfPublic() {
+        return ifPublic;
+    }
+
+    public void setIfPublic(Boolean ifPublic) {
+        this.ifPublic = ifPublic;
+    }
 
     public String getName() {
         return name;
@@ -119,33 +130,30 @@ public class Collection implements IModel {
 
     @Override
     public JSONObject toJson() throws JSONException {
+        final String jsonOwner = "owner";
+        final String jsonName = "name";
+        final String jsonDescription = "description";
+        final String jsonTags = "tags";
+        final String jsonPublic = "public";
+        final String jsonItemsNumber = "items_number";
+        final String jsonCreatedDate = "created_date";
+        final String jsonModifiedDate = "modified_date";
+
         JSONObject json = new JSONObject();
-
-        json.put("owner", getOwner());
-        json.put("name", getName());
-        json.put("description", getDescription());
-
+        json.put(jsonOwner, getOwner());
+        json.put(jsonName, getName());
+        json.put(jsonDescription, getDescription());
         if (getTags() != null) {
             JSONArray arrayTags = new JSONArray();
             for (String s : getTags()) {
                 arrayTags.put(s);
             }
-            json.put("tags", arrayTags);
+            json.put(jsonTags, arrayTags);
         }
-
-        /* AWA:FIXME: Hardcoded value
-                    Umiesc w private final static String, int, etc....
-                    lub w strings.xml
-                    lub innym *.xml
-                    */
-
-/* AWA:FIXME: Hardcoded value
-            String "" powinien być jako stała np.
-            private final static String NAZWA_STALEJ="Main"
-                    */
-        json.put("items_number", getItems_number());
-        json.put("created_date", getCreated_date());
-        json.put("modified_date", getModified_date());
+        json.put(jsonPublic, getIfPublic());
+        json.put(jsonItemsNumber, getItems_number());
+        json.put(jsonCreatedDate, getCreated_date());
+        json.put(jsonModifiedDate, getModified_date());
 
         return json;
     }

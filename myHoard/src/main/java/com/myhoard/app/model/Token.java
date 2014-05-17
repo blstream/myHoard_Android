@@ -16,6 +16,8 @@ import com.google.gson.annotations.SerializedName;
     private int expiresIn;
     @SerializedName("refresh_token")
     private String refreshToken;
+    @SerializedName("user_id")
+    private String userId;
 
     public String getAccess_token() {
         return accessToken;
@@ -39,5 +41,13 @@ import com.google.gson.annotations.SerializedName;
 
     public void setRefreshToken(String refresh_token) {
         this.refreshToken = refresh_token;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

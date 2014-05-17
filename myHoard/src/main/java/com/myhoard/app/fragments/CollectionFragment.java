@@ -43,6 +43,7 @@ import com.myhoard.app.provider.DataStorage;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Rafał Soudani on 20.02.2014
@@ -144,16 +145,37 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                             mDescription = etCollectionDescription.getText().toString();
                         }
                         if (etCollectionTags.getText() != null) {
-                            mTags = etCollectionTags.getText().toString();
+                            if (validateTags()) {
+                                mTags = etCollectionTags.getText().toString();
+                            }else{
+                                return false;
+                            }
                         }
                         saveDataInDataBase();
-                        showAToast(getString(R.string.collection_added), Toast.LENGTH_SHORT);
                         getActivity().getSupportFragmentManager().popBackStack();
                     }
                 }
                 break;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
+    private boolean validateTags() {
+        String sentence = String.valueOf(etCollectionTags.getText());
+        String[] tags = sentence.split(" ");
+        List<String> result = new ArrayList<>();
+
+        for (String tag : tags)
+        {
+            if(!result.contains(tag)){
+                result.add(tag);
+            }else{
+                String toastText = String.format(getString(R.string.tag_exist), tag);
+                showAToast(toastText, Toast.LENGTH_SHORT);
+                return false;
+            }
         }
         return true;
     }
@@ -211,6 +233,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
             handler.startUpdate(-1, null, DataStorage.Collections.CONTENT_URI, values,
                     DataStorage.Collections._ID + " = " + mEditId, null);
         } else {
+            showAToast(getString(R.string.collection_added), Toast.LENGTH_SHORT);
             values.put(DataStorage.Collections.CREATED_DATE, Calendar.getInstance()
                     .getTime().getTime());
 

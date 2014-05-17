@@ -35,9 +35,7 @@ public class ElementReadFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         elementId = getArguments().getLong("elementId");
-        getLoaderManager().initLoader(1, null, new LoaderImagesCallbacks());
     }
 
     @Override
@@ -52,11 +50,8 @@ public class ElementReadFragment extends Fragment {
         elementDescription = (TextView) v.findViewById(R.id.tvElementDescription);
         elementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
         elementPosition.setOnClickListener(listener);
-
-        new AsyncElementRead().execute();
-
         pager = (ViewPager) v.findViewById(R.id.pager);
-
+        getLoaderManager().initLoader(1, null, new LoaderImagesCallbacks());
         return v;
     }
 
@@ -76,7 +71,7 @@ public class ElementReadFragment extends Fragment {
                     DataStorage.Media.ID_ITEM};
             CursorLoader cursorLoader = new CursorLoader(getActivity(),
                     DataStorage.Media.CONTENT_URI, projection,
-                    DataStorage.Media.ID_ITEM + " =? ",
+                    DataStorage.Media.ID_ITEM + " =? " + " AND NOT " + DataStorage.Media.DELETED,
                     new String[]{String.valueOf(elementId)},
                     DataStorage.Media.CREATED_DATE + " ASC");
             return cursorLoader;
@@ -88,6 +83,7 @@ public class ElementReadFragment extends Fragment {
                 pagerAdapter = new ElementFragmentPager(getChildFragmentManager(), data, null);
             }
             pagerAdapter.swapCursor(data);
+            new AsyncElementRead().execute();
         }
 
         @Override

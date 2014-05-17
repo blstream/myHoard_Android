@@ -28,7 +28,6 @@ import com.myhoard.app.model.Media;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,7 +48,8 @@ import java.util.List;
  */
 public class SynchronizationService extends IntentService {
 
-    private static final String COLLECTION_ENDPOINT = "collections/";
+    private static final String COLLECTIONS_ENDPOINT = "collections/";
+    private static final String USERS_ENDPOINT = "users/";
     private static final String ITEM_ENDPOINT = "items/";
     private static final String MEDIA_ENDPOINT = "media/";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
@@ -108,7 +108,7 @@ public class SynchronizationService extends IntentService {
     }
 
     private void uploadCollections() {
-        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTION_ENDPOINT, Collection.class);
+        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTIONS_ENDPOINT, Collection.class);
         Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, null, null, null, null);
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -117,7 +117,10 @@ public class SynchronizationService extends IntentService {
     }
 
     private void uploadCollection(CRUDEngine<Collection> collectionCrud, Cursor cursor) {
-        if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
+        if (cursor.getInt(cursor.getColumnIndex(Collections.DELETED)) == 1) {
+            deleteCollectionOnServerAndInDatabase(collectionCrud, cursor);
+        }
+        else if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
             Collection collection = getCollectionFromDatabase(cursor);
             if (cursor.getInt(cursor.getColumnIndex(Collections.SYNCHRONIZED)) == 0
                     && cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)) != null) {
@@ -134,11 +137,25 @@ public class SynchronizationService extends IntentService {
         }
     }
 
+    private void deleteCollectionOnServerAndInDatabase(CRUDEngine<Collection> collectionCrud, Cursor cursor) {
+        String idCollectionOnServer = cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER));
+        String id = cursor.getString(cursor.getColumnIndex(Collections._ID));
+        String where = Collections._ID+"=?";
+        String[] args = new String[]{id};
+        if (idCollectionOnServer == null) {
+            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+        } else {
+            collectionCrud.remove(idCollectionOnServer, userManager.getToken());
+            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+        }
+    }
+
     private Collection getCollectionFromDatabase(Cursor cursor) {
-        //TODO: wyslac na serwer czy public czy private
         Collection collection = new Collection();
         collection.setName(cursor.getString(cursor.getColumnIndex(Collections.NAME)));
         collection.setDescription(cursor.getString(cursor.getColumnIndex(Collections.DESCRIPTION)));
+        if(cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) == TypeOfCollection.PUBLIC.getType())
+            collection.setIfPublic(true);
         String [] tags = cursor.getString(cursor.getColumnIndex(Collections.TAGS)).split("#");
         List<String> list = new LinkedList<String>(Arrays.asList(tags));
         list.remove(0); //zero element is always empty, remove it
@@ -287,9 +304,7 @@ public class SynchronizationService extends IntentService {
             for (Item item : items) {
                 if (idServerToModifiedDate.get(item.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
                     insert(item);
-                } else { //jezeli data modyfikacji jest wieksza
-                    Long dataMod = idServerToModifiedDate.get(item.getId()); //TODO sprawdzenie czy data modyfikacji wieksza.. narazie brakuje tego na serwerach
-                    //c.getString(c.getColumnIndex(Collections.MODIFIED_DATE));
+                } else if (modifiedDateOnServerIsGraterThanInDatabase(item.getModifiedDate(), idServerToModifiedDate.get(item.getId()))) {
                     update(item);
                 }
             }
@@ -444,8 +459,9 @@ public class SynchronizationService extends IntentService {
     }
 
     private void downloadCollections() {
-        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTION_ENDPOINT, Collection.class);
-        List<Collection> collections = null;
+        String url = userManager.getIp() + USERS_ENDPOINT + UserManager.getInstance().getToken().getUserId() + "/" + COLLECTIONS_ENDPOINT;
+        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(url, Collection.class);
+        List<Collection> collections = new ArrayList<>();
         try {
             collections = collectionCrud.getList(userManager.getToken());
         } catch (RuntimeException re) {
@@ -462,19 +478,16 @@ public class SynchronizationService extends IntentService {
         selection += ")";
 
         Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.MODIFIED_DATE}, selection, null, null);
-        HashMap<String, Long> mapka = new HashMap<>();
+        HashMap<String, Long> idServerToModifiedDate = new HashMap<>();
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                mapka.put(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)), cursor.getLong(cursor.getColumnIndex(Collections.MODIFIED_DATE)));
+                idServerToModifiedDate.put(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)), cursor.getLong(cursor.getColumnIndex(Collections.MODIFIED_DATE)));
             }
 
         for (Collection collection : collections) {
-            if (mapka.get(collection.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
+            if (idServerToModifiedDate.get(collection.getId()) == null) {
                 insert(collection);
-
-            } else { //jezeli data modyfikacji jest wieksza
-                Long dataMod = mapka.get(collection.getId()); //TODO sprawdzenie czy data modyfikacji wieksza..
-                //c.getString(c.getColumnIndex(Collections.MODIFIED_DATE));
+            } else if (modifiedDateOnServerIsGraterThanInDatabase(collection.getModified_date(), idServerToModifiedDate.get(collection.getId()))){
                 update(collection);
             }
         }
@@ -484,6 +497,17 @@ public class SynchronizationService extends IntentService {
         } catch (RemoteException | OperationApplicationException e) {
             sendError(e.toString());
         }
+    }
+
+    private boolean modifiedDateOnServerIsGraterThanInDatabase(String modifiedDate, Long modifiedDateDatabase) {
+        try {
+            long modifiedDateServer = new SimpleDateFormat(DATE_FORMAT).parse(modifiedDate).getTime();
+            if (modifiedDateDatabase >= modifiedDateServer)
+                return false;
+        } catch (ParseException e) {
+            return true;
+        }
+        return true;
     }
 
 
@@ -520,7 +544,10 @@ public class SynchronizationService extends IntentService {
             tags=tags+"#"+s+" ";
         }
         values.put(Collections.TAGS, tags.trim());
-        values.put(Collections.TYPE, TypeOfCollection.PUBLIC.getType());
+        if (collection.getIfPublic())
+            values.put(Collections.TYPE, TypeOfCollection.PUBLIC.getType());
+        else
+            values.put(Collections.TYPE, TypeOfCollection.PRIVATE.getType());
         values.put(Collections.ITEMS_NUMBER, collection.getItems_number());
         values.put(Collections.SYNCHRONIZED, true);
 

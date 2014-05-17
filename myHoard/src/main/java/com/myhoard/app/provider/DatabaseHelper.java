@@ -30,16 +30,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			for (DatabaseTable tb : tables) {
 				tb.createTable(db);
 			}
-            //create trigger, where is his place?
-            StringBuilder sql = new StringBuilder();
-            sql.append("CREATE TRIGGER update_items_number AFTER INSERT ON " + Items.TABLE_NAME)
-                    .append(" BEGIN ")
-                    .append("UPDATE " + Collections.TABLE_NAME + " set " + Collections.ITEMS_NUMBER + " = ")
-                    .append("(SELECT COUNT(*) from " + Items.TABLE_NAME)
-                    .append(" WHERE " + Items.TABLE_NAME + "." + Items.ID_COLLECTION)
-                    .append(" = " + Collections.TABLE_NAME + "." + Collections._ID + "); ")
-                    .append("END");
-            db.execSQL(sql.toString());
+
+            db.execSQL(getTriggerForInsertingItem());
+            db.execSQL(getTriggerForUpdatingItem());
+
 			db.setTransactionSuccessful();
 		} finally {
 			db.endTransaction();
@@ -67,4 +61,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			db.execSQL("PRAGMA foreign_keys=ON;");
 		}
 	}
+
+    private String getTriggerForInsertingItem() {
+        StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TRIGGER update_items_number AFTER INSERT ON " + Items.TABLE_NAME)
+                .append(" BEGIN ")
+                .append("UPDATE " + Collections.TABLE_NAME + " set " + Collections.ITEMS_NUMBER + " = ")
+                .append("(SELECT COUNT(*) from " + Items.TABLE_NAME)
+                .append(" WHERE " + Items.TABLE_NAME + "." + Items.ID_COLLECTION)
+                .append(" = " + Collections.TABLE_NAME + "." + Collections._ID + "); ")
+                .append("END");
+        return sql.toString();
+    }
+
+    private String getTriggerForUpdatingItem() {
+        StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TRIGGER update_items_number2 AFTER UPDATE ON " + Items.TABLE_NAME)
+                .append(" BEGIN ")
+                .append("UPDATE " + Collections.TABLE_NAME + " set " + Collections.ITEMS_NUMBER + " = ")
+                .append("(SELECT COUNT(*) from " + Items.TABLE_NAME)
+                .append(" WHERE " + Items.TABLE_NAME + "." + Items.ID_COLLECTION)
+                .append(" = " + Collections.TABLE_NAME + "." + Collections._ID + "); ")
+                .append("END");
+        return sql.toString();
+    }
 }

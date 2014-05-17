@@ -40,6 +40,8 @@
     <string name="edit">Edit</string>
     <string name="element_edited">ELEMENT EDITED</string>
     <string name="required_name_element">Required element name</string>
+    <string name="required_name_element_minimum_length">Element name must contain at least two characters</string>
+    <string name="element_exist">Element with this name exists</string>
     <string name="name_already_exist">NAME ALREADY EXIST</string>
     <string name="delete_colection_dialog_title">DELETE COLLECTION</string>
     <string name="delete_colection_dialog_message">Are you sure you want to delete collection?</string>
@@ -111,7 +113,8 @@
     <string name="please_sing_up">Don\'t have an account?\nPlease, sing up to public\n your collections.</string>
     <string name="have_account">Already have an account?</string>
     <string name="synchronization_not_implement">Synchronization is not implemented yet</string>
-    <string name="serverJava2">http://78.133.154.39:1080/</string>
+    <string name="serverJava2">http://78.133.154.39:2080/</string>
+    <string name="serverJava1">http://78.133.154.39:1080/</string>
     <string name="search_hint">Enter search text</string>
     <string name="collection_added">Collection added successfully</string>
     <string name="delete_picker">Delete</string>
@@ -122,7 +125,11 @@
     <string name="password_strenght_text">Password Strenght</string>
     <string name="google_maps_key">AIzaSyB6R1fTZEI3c1lDKV06SrSDPx2Fg70YQb4</string>
     <string name="no_photo">No photo</string>
+<<<<<<< HEAD
     <string name="polish_lettters">ąężźćńółś</string>
     <string name="wrong_letters_format">Your email contains not recognised letters</string>
+=======
+    <string name="tag_exist">Tag %s already added</string>
+>>>>>>> 7945d1910e20f819c808c91398d6ff37de0356a2
 
 </resources>

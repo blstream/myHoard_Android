@@ -157,7 +157,7 @@ import java.util.List;
                     return imodel;
                 }
                 else {
-                    Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
+                    Log.d("TAG", "Jsontext = " + HTTP_response);
                     throw new RuntimeException(HTTP_response);
                 }
             }

@@ -1,10 +1,8 @@
 package com.myhoard.app.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.myhoard.app.R;
-
-import java.io.IOException;
+import com.myhoard.app.images.ImageLoader;
 import java.util.ArrayList;
 
 /**
@@ -69,13 +66,9 @@ public class ImageElementAdapterList extends ArrayAdapter<Uri> {
         {
             holder.img.setImageResource(R.drawable.nophoto);
         } else {
-            try {
-                holder.bmp = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-                holder.img.setImageBitmap(holder.bmp);
-            } catch (IOException io) {
-                holder.img.setImageResource(R.drawable.nophoto);
-                io.printStackTrace();
-            }
+            //holder.bmp = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+            holder.bmp = ImageLoader.decodeSampledBitmapFromResource(uri.toString(),100,100);
+            holder.img.setImageBitmap(holder.bmp);
         }
         return row;
     }

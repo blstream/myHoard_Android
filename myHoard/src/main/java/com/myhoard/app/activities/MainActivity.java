@@ -45,6 +45,7 @@ import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.NavDrawerListAdapter;
 import com.myhoard.app.dialogs.GeneratorDialog;
+import com.myhoard.app.dialogs.SynchronizationDialog;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.model.RowItem;
@@ -65,7 +66,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private Menu actionBarMenu;
     private AlertDialog.Builder builder;
     private Intent synchronizationIntent;
-    private SynchronizationThread synchronizationThread;
 
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
@@ -78,7 +78,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private static final String ITEMSLIST = "ItemsList";
     private static final String FRAGMENT = "fragment";
     private static DrawerLayout drawerLayout = null;
-    private ProgressDialog progress;
+    private SynchronizationDialog synchronizationDialog;
 
     private NavDrawerListAdapter navDrawerListAdapter;
 
@@ -99,7 +99,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         openFragment(savedInstanceState, fm);
         setDrawer();
 
-        progress = new ProgressDialog(this);
         builder = new AlertDialog.Builder(MainActivity.this);
     }
 
@@ -107,7 +106,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter("notification"));
-        needItForDebugging();
+        //needItForDebugging();
     }
 
     @Override
@@ -244,8 +243,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         super.onStop();
         if (synchronizationIntent!=null)
             stopService(synchronizationIntent);
-        if (synchronizationThread != null)
-            synchronizationThread.interrupt();
     }
 
 
@@ -334,19 +331,11 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 startService(synchronizationIntent);
                 break;
             case R.id.action_synchronize:
-                progress.setMessage("synchronization in progress...");
-                progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progress.setIndeterminate(true);
-                progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        progress.dismiss();
-                        stopService(synchronizationIntent);
-                    }
-                });
-                progress.show();
-                synchronizationThread = new SynchronizationThread();
-                synchronizationThread.start();
+                synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
+                synchronizationIntent.putExtra("option","synchronization");
+                startService(synchronizationIntent);
+                synchronizationDialog = new SynchronizationDialog(synchronizationIntent, getApplicationContext());
+                synchronizationDialog.show(getSupportFragmentManager(), "");
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -354,14 +343,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         return true;
     }
 
-    private class SynchronizationThread extends Thread {
-        @Override
-        public void run() {
-            synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
-            synchronizationIntent.putExtra("option","synchronization");
-            startService(synchronizationIntent);
-        }
-    }
 
     @Override
     public void onBackStackChanged() {
@@ -428,7 +409,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
             int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
 
-        List<RowItem> list = new ArrayList<>();
+        List<RowItem> list = new ArrayList<RowItem>();
         for (int i = 0; i < drawerListItems.length; i++) {
             RowItem item = new RowItem(drawerListItems[i], images[i]);
             list.add(item);
@@ -438,14 +419,15 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
 
-        List <String> errorSynchronizationList = new ArrayList<>();
+        List <String> errorSynchronizationList = new ArrayList<String>();
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String stringExtra = intent.getStringExtra("result");
             if (stringExtra != null) {
                 if (stringExtra.equals("synchronized")){
-                    progress.dismiss();
+                    //progress.dismiss();
+                    synchronizationDialog.dismiss();
                     showErrors();
                 }
             }
@@ -480,6 +462,9 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         cursor = getContentResolver().query(DataStorage.Collections.CONTENT_URI, null, null, null, null);
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections._ID)));
+            Log.d(TAG, "name "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME)));
+            Log.d(TAG, "iloscItemow "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections.ITEMS_NUMBER)));
+
             Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.SYNCHRONIZED))>0)).toString());
             Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.DELETED))>0)).toString());
             Log.d(TAG, (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.MODIFIED_DATE))).toString());

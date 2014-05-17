@@ -39,11 +39,12 @@ import com.myhoard.app.provider.DataStorage;
 public class ImageAdapter extends CursorAdapter {
 	private int width = 200;
     private static final String EMPTY_COLLECTION = "0";
+    private static final int COLLECTION_NO_PHOTO = 1;
     public final ImageLoader mImageLoader;
 
 	public ImageAdapter(Context context) {
 		super(context, null, 0);
-        mImageLoader = new ImageLoader(context);
+        mImageLoader = new ImageLoader(context,COLLECTION_NO_PHOTO);
 
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
