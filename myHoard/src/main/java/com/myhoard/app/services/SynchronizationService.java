@@ -173,8 +173,8 @@ public class SynchronizationService extends IntentService {
             ContentValues values = new ContentValues();
             values.put(Collections.SYNCHRONIZED, true);
             getContentResolver().update(Collections.CONTENT_URI, values, where, null);
-        } catch (RuntimeException re) {
-            sendError(re.getMessage());
+        } catch (RuntimeException re) { // mozliwe, ze ktos skasowal kolekjce z innego urzadzenia i nie mozna jej zudpatowac, trzeba sprobowac create
+            createCollectionOnServerAndUpdateInDatabase(collectionCrud, cursor, collection);
         }
     }
 
@@ -200,6 +200,7 @@ public class SynchronizationService extends IntentService {
                 Items.TABLE_NAME + "." + Items.SYNCHRONIZED,
                 Items.TABLE_NAME + "." + Items.DESCRIPTION,
                 Items.TABLE_NAME + "." + Items.NAME,
+                Items.TABLE_NAME + "." + Items.DELETED
         };
         Cursor cursor = getContentResolver().query(Items.CONTENT_URI, projection, null, null, null);
 
@@ -210,7 +211,10 @@ public class SynchronizationService extends IntentService {
     }
 
     private void uploadItem(CRUDEngine<Item> itemCrud, Cursor cursor) {
-        if (cursor.getInt(cursor.getColumnIndex(Items.SYNCHRONIZED)) == 0) {
+        if (cursor.getInt(cursor.getColumnIndex(Items.DELETED)) == 1) {
+            deleteItemOnServerAndInDatabase(itemCrud, cursor);
+        }
+        else if (cursor.getInt(cursor.getColumnIndex(Items.SYNCHRONIZED)) == 0) {
             String where = String.format("%s = %s", Collections._ID, cursor.getString(cursor.getColumnIndex(Items.ID_COLLECTION)));
             Cursor c = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.TYPE}, where, null, null);
             if (c != null) {
@@ -219,6 +223,19 @@ public class SynchronizationService extends IntentService {
                     createOrUpdateItemOnServerAndUpdateInDatabase(itemCrud, cursor, c);
                 }
             }
+        }
+    }
+
+    private void deleteItemOnServerAndInDatabase(CRUDEngine<Item> itemCrud, Cursor cursor) {
+        String idItemOnServer = cursor.getString(cursor.getColumnIndex(Items.ID_SERVER));
+        String id = cursor.getString(cursor.getColumnIndex(Items._ID));
+        String where = Items._ID+"=?";
+        String[] args = new String[]{id};
+        if (idItemOnServer == null) {
+            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+        } else {
+            itemCrud.remove(idItemOnServer, userManager.getToken());
+            getContentResolver().delete(Collections.CONTENT_URI, where, args);
         }
     }
 
@@ -236,9 +253,15 @@ public class SynchronizationService extends IntentService {
             ContentValues values = new ContentValues();
             String where;
             if (cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)) != null) {
-                itemCrud.update(item, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)), userManager.getToken());
-                where = String.format("%s = %s", Items.ID_SERVER, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)));
-
+                try {
+                    itemCrud.update(item, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)), userManager.getToken());
+                    where = String.format("%s = %s", Items.ID_SERVER, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)));
+                } catch (RuntimeException re) {
+                    //TODO: trzeba wysłac wszystkie obrazki od nowa, mimo że mogą być synchronized, ktoś skasował nasza kolekcje z serwera
+                    IModel imodel = itemCrud.create(item, userManager.getToken());
+                    where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
+                    values.put(Items.ID_SERVER, imodel.getId());
+                }
             } else {
                 IModel imodel = itemCrud.create(item, userManager.getToken());
                 where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));

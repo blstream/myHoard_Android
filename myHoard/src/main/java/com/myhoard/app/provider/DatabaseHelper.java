@@ -33,6 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             db.execSQL(getTriggerForInsertingItem());
             db.execSQL(getTriggerForUpdatingItem());
+            db.execSQL(getTriggerForDeletingItem());
 
 			db.setTransactionSuccessful();
 		} finally {
@@ -69,7 +70,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 .append("UPDATE " + Collections.TABLE_NAME + " set " + Collections.ITEMS_NUMBER + " = ")
                 .append("(SELECT COUNT(*) from " + Items.TABLE_NAME)
                 .append(" WHERE " + Items.TABLE_NAME + "." + Items.ID_COLLECTION)
-                .append(" = " + Collections.TABLE_NAME + "." + Collections._ID + "); ")
+                .append(" = " + Collections.TABLE_NAME + "." + Collections._ID)
+                .append(" AND NOT " + Items.TABLE_NAME + "." + Items.DELETED + "); ")
                 .append("END");
         return sql.toString();
     }
@@ -81,7 +83,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 .append("UPDATE " + Collections.TABLE_NAME + " set " + Collections.ITEMS_NUMBER + " = ")
                 .append("(SELECT COUNT(*) from " + Items.TABLE_NAME)
                 .append(" WHERE " + Items.TABLE_NAME + "." + Items.ID_COLLECTION)
-                .append(" = " + Collections.TABLE_NAME + "." + Collections._ID + "); ")
+                .append(" = " + Collections.TABLE_NAME + "." + Collections._ID)
+                .append(" AND NOT " + Items.TABLE_NAME + "." + Items.DELETED + "); ")
+                .append("END");
+        return sql.toString();
+    }
+
+    private String getTriggerForDeletingItem() {
+        StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TRIGGER update_items_number3 AFTER DELETE ON " + Items.TABLE_NAME)
+                .append(" BEGIN ")
+                .append("UPDATE " + Collections.TABLE_NAME + " set " + Collections.ITEMS_NUMBER + " = ")
+                .append("(SELECT COUNT(*) from " + Items.TABLE_NAME)
+                .append(" WHERE " + Items.TABLE_NAME + "." + Items.ID_COLLECTION)
+                .append(" = " + Collections.TABLE_NAME + "." + Collections._ID)
+                .append(" AND NOT " + Items.TABLE_NAME + "." + Items.DELETED + "); ")
                 .append("END");
         return sql.toString();
     }

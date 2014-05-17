@@ -463,14 +463,14 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections._ID)));
             Log.d(TAG, "name "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME)));
-            Log.d(TAG, "iloscItemow "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections.ITEMS_NUMBER)));
+            //Log.d(TAG, "iloscItemow "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections.ITEMS_NUMBER)));
 
             Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.SYNCHRONIZED))>0)).toString());
             Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.DELETED))>0)).toString());
-            Log.d(TAG, (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.MODIFIED_DATE))).toString());
-            Log.d(TAG, ((Integer)cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))).toString());
-            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TYPE)));
-            Log.d(TAG, DataStorage.TypeOfCollection.values()[cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))].toString());
+            //Log.d(TAG, (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.MODIFIED_DATE))).toString());
+            //Log.d(TAG, ((Integer)cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))).toString());
+            //Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TYPE)));
+           // Log.d(TAG, DataStorage.TypeOfCollection.values()[cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))].toString());
         }
 
         Log.d(TAG,"<--------ITEMY-------->");
