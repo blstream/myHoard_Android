@@ -108,6 +108,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private HashMap<Integer,Uri> imagesUriInsertList;
     private HashMap<Integer,Uri> imagesUriUpdateList;
     private HashMap<Integer,Integer> imagesPositionList;
+    private HashMap<Integer,String> imagesIDServerList;
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
     private Item element;
@@ -180,6 +181,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             imagesUriUpdateList = new HashMap<>();
             imagesPositionList = new HashMap<>();
             imagesUriDeleteList = new ArrayList<>();
+            imagesIDServerList = new HashMap<>();
         }
         gvPhotosList.setAdapter(getPhotosList());
         gvPhotosList.setOnItemClickListener(this);
@@ -625,7 +627,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             String[] projection = { DataStorage.Media.FILE_NAME,
                     DataStorage.Media.CREATED_DATE, DataStorage.Media._ID,
-                    DataStorage.Media.ID_ITEM };
+                    DataStorage.Media.ID_ITEM,DataStorage.Media.ID_SERVER };
             CursorLoader cursorLoader = new CursorLoader(getActivity(),
                     DataStorage.Media.CONTENT_URI, projection,
                     DataStorage.Media.ID_ITEM + " =? AND NOT "+ DataStorage.Media.DELETED,
@@ -644,6 +646,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 data.moveToFirst();
                 int position = 1;
                 while(!data.isAfterLast()){
+                    imagesIDServerList.put(data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)),
+                            data.getString(data.getColumnIndexOrThrow(DataStorage.Media.ID_SERVER)));
                     imagesPositionList.put(position,data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)));
                     imagesUriList.add(Uri.parse(data.getString(data.getColumnIndexOrThrow(DataStorage.Media.FILE_NAME))));
                     data.moveToNext();
@@ -735,10 +739,11 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         private void deleteImage(int id){
             ContentValues values = new ContentValues();
-            values.put(DataStorage.Media.DELETED,true);
+            values.put(DataStorage.Media.ID_SERVER,imagesIDServerList.get(id));
             AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(cr) {};
-            asyncHandler.startUpdate(0,null,DataStorage.Media.CONTENT_URI,values,
+            asyncHandler.startDelete(0,null,DataStorage.Media.CONTENT_URI,
                     DataStorage.Media._ID + " =? ",new String[] {String.valueOf(id)});
+            asyncHandler.startInsert(0,null,DataStorage.DeletedMedia.CONTENT_URI,values);
         }
 
         private void updateImage(int id, Uri uri) {
