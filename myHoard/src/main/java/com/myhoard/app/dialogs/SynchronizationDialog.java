@@ -23,6 +23,8 @@ public class SynchronizationDialog extends DialogFragment {
     Intent synchronizationIntent;
     Context context;
 
+    public SynchronizationDialog() {}
+
     public SynchronizationDialog (Intent synchronizationIntent, Context context) {
         this.synchronizationIntent = synchronizationIntent;
         this.context = context;
