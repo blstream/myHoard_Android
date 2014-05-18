@@ -119,7 +119,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private boolean gpsEnabled = false;
     private String mActualElementName;
     private PhotoManager photoManager;
-
+    private int mActualCollectionId;
     private LatLng elementLocation;
 
     @Override
@@ -171,7 +171,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             element = b.getParcelable("element");
             elementId = Integer.parseInt(element.getId());
             iCollectionId = Integer.parseInt(element.getCollection());
-
+            mActualCollectionId = iCollectionId;
             tvElementPosition.setText(element.getLocationTxt());
             tvElementPosition.setTextColor(Color.GREEN);
             elementLocation = new LatLng(element.getLocation().lat,element.getLocation().lng);
@@ -552,7 +552,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                             getActivity().getContentResolver()) {
                     };
                     if (elementId != -1) {
-                        if(sName.equals(mActualElementName)){
+                        if(sName.equals(mActualElementName)&&(iCollectionId==mActualCollectionId)){
                             values.put(DataStorage.Items.MODIFIED_DATE, Calendar
                                     .getInstance().getTime().getTime());
                             values.put(DataStorage.Items.SYNCHRONIZED, false);
@@ -561,7 +561,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                                     DataStorage.Items._ID + " = ?",
                                     new String[] { String.valueOf(elementId) });
                             getActivity().finish();
-                        } else{
+                        }
+                        else{
                             if(checkUniquenessElementName(sName)){
                                 values.put(DataStorage.Items.MODIFIED_DATE, Calendar
                                         .getInstance().getTime().getTime());
@@ -598,7 +599,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private boolean checkUniquenessElementName(String sName){
         Cursor cursor = getActivity().getContentResolver().query(DataStorage.Items.CONTENT_URI,
                 new String[] {DataStorage.Items.NAME},DataStorage.Items.NAME + " = '" + sName + "' AND " +
-                        DataStorage.Items.ID_COLLECTION + " = '" + iCollectionId +"'",null,null);
+                        DataStorage.Items.ID_COLLECTION + " = '" + iCollectionId +"' AND (" + DataStorage.Items.TABLE_NAME + "."
+                        + DataStorage.Items.DELETED + " != '" + 1 + "')",null,null);
         if(cursor!=null){
             if(cursor.isAfterLast()){
                 return true;
@@ -668,7 +670,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 first = false;
             }
             if(data!=null){
-                imagesUriList.add(null);
+                if(data.getCount()!=0){
+                    imagesUriList.add(null);
+                }
                 data.moveToFirst();
                 int position = 1;
                 while(!data.isAfterLast()){

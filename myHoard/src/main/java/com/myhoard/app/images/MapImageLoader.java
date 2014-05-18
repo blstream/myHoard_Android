@@ -37,7 +37,7 @@ public class MapImageLoader {
     private Context context;
     Handler handler = new Handler();
 
-    private final int emptyResource = R.drawable.ic_launcher;
+    private final int emptyResource = R.drawable.element_empty;
 
     public MapImageLoader(Context context) {
         this.context = context;

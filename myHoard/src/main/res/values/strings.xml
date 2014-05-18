@@ -78,7 +78,7 @@
     <string name="element_localisation">Localisation:</string>
     <string name="add_image">Add image</string>
     <string name="app_id">1388908654663237</string>
-    <string name="menu_share">Share on FB</string>
+    <string name="menu_share">Share on Facebook</string>
     <string name="incorrect_data">Incorrect data</string>
     <string name="action_synchronize">Synchronize</string>
     <string name="collection">Collection</string>
@@ -128,8 +128,7 @@
     <string name="password_strenght_text">Password Strenght</string>
     <string name="google_maps_key">AIzaSyB6R1fTZEI3c1lDKV06SrSDPx2Fg70YQb4</string>
     <string name="no_photo">No photo</string>
-    <string name="polish_lettters">ąężźćńółś</string>
-    <string name="wrong_letters_format">Your email contains not recognised letters</string>
     <string name="tag_exist">Tag %s already added</string>
+    <string name="selected_items">Selected items: </string>
 
 </resources>

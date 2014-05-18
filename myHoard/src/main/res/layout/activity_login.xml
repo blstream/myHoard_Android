@@ -28,6 +28,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
+                android:paddingLeft="5dp"
                 android:inputType="textEmailAddress"
                 android:background="@drawable/login_and_registration_border"
                 android:textColor="@color/yellow_text"
@@ -50,6 +51,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
+                android:paddingLeft="5dp"
                 android:textColor="@color/yellow_text"
                 android:background="@drawable/login_and_registration_border"
                 android:inputType="textPassword"

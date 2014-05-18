@@ -1,6 +1,7 @@
 
 package com.myhoard.app.fragments;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.content.Context;
@@ -18,10 +19,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 import com.myhoard.app.R;
+import com.myhoard.app.activities.ElementActivity;
 import com.myhoard.app.images.ImageAdapterList;
 import com.myhoard.app.provider.DataStorage;
 
@@ -48,6 +51,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView mSearchByName;
     private TextView mSearchAll;
     private TextView mSearchByDescription;
+    private GridView mGridView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,12 +60,11 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         Bundle b = this.getArguments();
         mCollectionId = b.getLong(SEARCH_COLLECTION_ID);
         mContext = getActivity();
+        mGridView = (GridView) v.findViewById(R.id.gridViewSearch);
         //Create adapter to adapt data to individual list row
         mImageAdapterList = new ImageAdapterList(mContext, null, 0);
-        assert v != null;
-        GridView mSearchList = (GridView) v.findViewById(R.id.gridViewSearch);
         //Set adapter for ListView
-        mSearchList.setAdapter(mImageAdapterList);
+        mGridView.setAdapter(mImageAdapterList);
         ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setCustomView(R.layout.action_bar_search);
@@ -73,6 +76,21 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         //Use text changed listener by mSearchTest EditText object to find elements in real time of search
         textListener();
         return v;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                Intent in = new Intent(getActivity(), ElementActivity.class);
+                in.putExtra("elementId",id);
+                startActivity(in);
+            }
+        });
+        registerForContextMenu(mGridView);
     }
 
     public void createSearchByNameTab(ActionBar actionBar){
@@ -215,18 +233,21 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         String selection = null;
         switch(id){
             case SEARCH_ALL:
-                selection = String.format("%s = %s and (%s=%d or %s is null) AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                        DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.DESCRIPTION,collectionElementText,DataStorage.Items.NAME,collectionElementText);
                 break;
             case SEARCH_BY_NAME:
-                selection = String.format("%s = %s and (%s=%d or %s is null) AND %s LIKE '%%%s%%'",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND %s LIKE '%%%s%%'",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                        DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.NAME,collectionElementText);
                 break;
             case SEARCH_BY_DESCRIPTION:
-                selection = String.format("%s = %s and (%s=%d or %s is null) AND %s LIKE '%%%s%%'",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND %s LIKE '%%%s%%'",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                        DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.DESCRIPTION,collectionElementText);
                 break;
         }
@@ -278,9 +299,15 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroyView() {
+        super.onDestroyView();
         resetActionBarNavigationMode();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkText(mTextToSearch);
     }
 
     private void resetActionBarNavigationMode() {
@@ -288,6 +315,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
         actionBar.removeAllTabs();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME|ActionBar.DISPLAY_HOME_AS_UP);
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
+        actionBar.setDisplayShowTitleEnabled(true);
     }
 }
