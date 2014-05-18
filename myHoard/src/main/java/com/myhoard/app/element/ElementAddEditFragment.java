@@ -669,7 +669,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 first = false;
             }
             if(data!=null){
-                imagesUriList.add(null);
+                if(data.getCount()!=0){
+                    imagesUriList.add(null);
+                }
                 data.moveToFirst();
                 int position = 1;
                 while(!data.isAfterLast()){
