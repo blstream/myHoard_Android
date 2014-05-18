@@ -1,7 +1,8 @@
 package com.myhoard.app.fragments;
 
-
-import android.app.ActionBar;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
@@ -35,6 +37,7 @@ import com.facebook.Session;
 import com.facebook.SessionLoginBehavior;
 import com.facebook.SessionState;
 import com.myhoard.app.R;
+import com.myhoard.app.activities.MainActivity;
 import com.myhoard.app.dialogs.FacebookShareDialog;
 import com.myhoard.app.images.FacebookImageAdapterList;
 import com.myhoard.app.images.ImageLoader;
@@ -65,6 +68,10 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private TextView tvSelectedItems;
     private Button mButtonShare;
     private String mMessageOnFb;
+
+    private Notification facebookNotification;
+    private NotificationManager notificationManager;
+    private static final int SHARE_ID = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -243,8 +250,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     public void shareOnFacebook(Session session) {
         if (session != null && session.isOpened()) {
             mProgressDialog = ProgressDialog.show(getActivity(), "", getString(R.string.progress), true);
-            //Bundle postParams = prepareDataToShare(mMessageOnFb);
-           // if (postParams != null) {
+            buildNotification();
                 Request.Callback callback = new Request.Callback() {
                     public void onCompleted(Response response) {
 
@@ -254,9 +260,9 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                                 makeAndShowToast(error.getErrorMessage());
                             }
                         } else {
-                            makeAndShowToast(getString(R.string.sharing_succeeded));
+                            notificationManager.notify(SHARE_ID, facebookNotification);
                         }
-                        mProgressDialog.dismiss();
+
                     }
                 };
 
@@ -273,6 +279,8 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                 }
                 RequestAsyncTask mFacebookTask = new RequestAsyncTask(batch);
                 mFacebookTask.execute();
+                mProgressDialog.dismiss();
+                makeAndShowToast(getString(R.string.sharing_succeeded));
         }
     }
 
@@ -329,5 +337,18 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
             return new Request(session, PUBLISH_PHOTOS, bundle, HttpMethod.POST,callback);
         } else return null;
 
+    }
+
+    private void buildNotification() {
+        Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+        facebookNotification = new NotificationCompat.Builder(getActivity().getApplicationContext())
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.sharing_succeeded))
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(pIntent)
+                .build();
+        notificationManager =
+                (NotificationManager) getActivity().getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
     }
 }
