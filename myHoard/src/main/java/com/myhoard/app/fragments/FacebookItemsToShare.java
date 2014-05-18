@@ -2,9 +2,11 @@ package com.myhoard.app.fragments;
 
 
 import android.app.ActionBar;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -21,10 +23,21 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.RequestAsyncTask;
+import com.facebook.RequestBatch;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionLoginBehavior;
+import com.facebook.SessionState;
 import com.myhoard.app.R;
 import com.myhoard.app.dialogs.FacebookShareDialog;
 import com.myhoard.app.images.FacebookImageAdapterList;
+import com.myhoard.app.images.ImageLoader;
 import com.myhoard.app.provider.DataStorage;
 
 import java.util.ArrayList;
@@ -36,11 +49,17 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
 
     private static final int LOAD_ITEMS = 0;
     public static final String ITEM_ID = "itemId";
+    private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
+    private static final String PUBLISH_PHOTOS = "me/photos";
+
+    private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
+    private ProgressDialog mProgressDialog; //Facebook
+
     private GridView mGridView;
     private FacebookImageAdapterList mFacebookImageAdapterList;
     private Context mContext;
     private long mElementId;
-    private ArrayList<Long> mSelectedItems = new ArrayList<>();
+    private ArrayList<Integer> mSelectedItems = new ArrayList<>();
     int mCount;
 
     private TextView tvSelectedItems;
@@ -66,8 +85,34 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         mElementId = bundle.getLong(ITEM_ID);
         setOnClickActionOnGridView();
         setOnClickButton();
+
+        // Lifecycle Facebook session
+        Session session = Session.getActiveSession();
+        if (session == null) {
+            if (savedInstanceState != null) {
+                session = Session.restoreSession(getActivity(), null, statusCallback, savedInstanceState);
+            }
+            if (session == null) {
+                session = new Session(getActivity());
+
+            }
+            Session.setActiveSession(session);
+        }
+
         getLoaderManager().initLoader(LOAD_ITEMS,null,this);
         bindData();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Session.getActiveSession().addCallback(statusCallback);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Session.getActiveSession().removeCallback(statusCallback);
     }
 
     private void bindData() {
@@ -81,7 +126,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                 CheckBox box =(CheckBox) view.findViewById(R.id.chbItemToShare);
                 if(box.isChecked()) box.setChecked(false);
                 else box.setChecked(true);
-                setSelectedItems(id);
+                setSelectedItems(position);
             }
         });
     }
@@ -95,20 +140,20 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         });
     }
 
-    private void setSelectedItems(long id) {
-        if(isSelected(id)) {
+    private void setSelectedItems(int pos) {
+        if(isSelected(pos)) {
             mCount--;
             setCountOnView();
         }
         else {
-            mSelectedItems.add(id);
+            mSelectedItems.add(pos);
             mCount++;
             setCountOnView();
         }
     }
 
     private boolean isSelected(long id) {
-        for(long i : mSelectedItems) {
+        for(int i : mSelectedItems) {
             if(id == i){
                 mSelectedItems.remove(id);
                 return true;
@@ -131,10 +176,18 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
         if (requestCode == FacebookShareDialog.DIALOG_ID) {
             mMessageOnFb = data.getStringExtra(FacebookShareDialog.GET_RESULT);
-           // openFbSessionForShare();
+            openFbSessionForShare();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Session session = Session.getActiveSession();
+        Session.saveSession(session, outState);
     }
 
     @Override
@@ -180,4 +233,101 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         mFacebookImageAdapterList.swapCursor(null);
     }
 
+    private class SessionStatusCallback implements Session.StatusCallback {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+            shareOnFacebook(session);
+        }
+    }
+
+    public void shareOnFacebook(Session session) {
+        if (session != null && session.isOpened()) {
+            mProgressDialog = ProgressDialog.show(getActivity(), "", getString(R.string.progress), true);
+            //Bundle postParams = prepareDataToShare(mMessageOnFb);
+           // if (postParams != null) {
+                Request.Callback callback = new Request.Callback() {
+                    public void onCompleted(Response response) {
+
+                        FacebookRequestError error = response.getError();
+                        if (error != null) {
+                            if (getActivity().getApplicationContext() != null) {
+                                makeAndShowToast(error.getErrorMessage());
+                            }
+                        } else {
+                            makeAndShowToast(getString(R.string.sharing_succeeded));
+                        }
+                        mProgressDialog.dismiss();
+                    }
+                };
+
+
+                /* AWA:FIXME: Niebezpieczne używanie wątku
+        Brak anulowania tej operacji.
+        Wyjście z Activity nie kończy wątku,
+        należy o to zadbać.
+        */
+                RequestBatch batch = new RequestBatch();
+                batch.add(prepareDataToShare(mMessageOnFb,0,session,callback));
+                for(int pos=1;pos < mSelectedItems.size();pos++) {
+                    batch.add(prepareDataToShare(null,pos,session,null));
+                }
+                RequestAsyncTask mFacebookTask = new RequestAsyncTask(batch);
+                mFacebookTask.execute();
+        }
+    }
+
+    public void makeAndShowToast(String message) {
+        if(getActivity().getApplicationContext()!=null) {
+            Toast.makeText(
+                    getActivity().getApplicationContext(),
+                    message,
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+    }
+
+    /*
+    Opening Facebook session for publish
+     */
+    private void openFbSessionForShare() {
+        Session session = Session.getActiveSession();
+        Session.OpenRequest request = new Session.OpenRequest(this).setCallback(statusCallback);
+        request.setPermissions(PERMISSIONS);
+        request.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
+        if (!session.isOpened() && !session.isClosed()) {
+            session.openForPublish(request);
+        } else if (session.getState().equals(SessionState.CLOSED_LOGIN_FAILED) || session.isClosed()) {
+            session.close();
+
+            session = new Session.Builder(getActivity()).build();
+            session.addCallback(statusCallback);
+            Session.setActiveSession(session);
+            session.openForPublish(request);
+        }
+        else {
+            Session.openActiveSession(getActivity(), this, true, statusCallback);
+        }
+    }
+    /*
+     Retrieving data that will be sharing on FB
+     */
+    private Request prepareDataToShare(String message,int position,Session session, Request.Callback callback) {
+
+        int photoSizeX = 800;
+        int photoSizeY = 600;
+        Bundle bundle = new Bundle();
+
+        Cursor cursor = mFacebookImageAdapterList.getCursor();
+        cursor.moveToPosition(position);
+        // getting data form cursor
+        String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
+        if(data != null) {
+            // Decoding image
+            Bitmap image = ImageLoader.decodeSampledBitmapFromResource(data, photoSizeX, photoSizeY);
+            bundle.putParcelable("source", image);
+            bundle.putString("message", message);
+            return new Request(session, PUBLISH_PHOTOS, bundle, HttpMethod.POST,callback);
+        } else return null;
+
+    }
 }
