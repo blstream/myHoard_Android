@@ -31,7 +31,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,9 +50,6 @@ import com.myhoard.app.activities.MainActivity;
 import com.myhoard.app.images.ImageAdapter;
 import com.myhoard.app.provider.DataStorage;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by Rafał Soudani on 20/02/2014
  * Modified by Maciej Plewko, Tomasz Nosal
@@ -69,7 +65,7 @@ public class CollectionsListFragment extends Fragment implements
     public static final java.lang.String QUERY = "Query";
     private static final int SEARCH = 1;
     private GridView gridView;
-    RelativeLayout tvEmpty, spinner;
+    RelativeLayout empty, loading;
     private Context context;
     private ImageAdapter adapter;
 
@@ -81,11 +77,9 @@ public class CollectionsListFragment extends Fragment implements
     private static final String LABEL_BY_DATE_DESC = "> DATE";
     private static final String DEFAULT_SORT = DataStorage.Collections.NAME;
     private static final String sortByNameAscending = DataStorage.Collections.NAME + " ASC";
-    private static final String sortByDateAscending = DataStorage.Collections.TABLE_NAME + "." +
-            DataStorage.Collections.CREATED_DATE + " ASC";
+    private static final String sortByDateAscending = DataStorage.Collections.CREATED_DATE + " ASC";
     private static final String sortByNameDescending = DataStorage.Collections.NAME + " DESC";
-    private static final String sortByDateDescending = DataStorage.Collections.TABLE_NAME + "." +
-            DataStorage.Collections.CREATED_DATE + " DESC";
+    private static final String sortByDateDescending = DataStorage.Collections.CREATED_DATE + " DESC";
     private static String sortOrder = DEFAULT_SORT;
 
     boolean gridViewWasFilled=false;
@@ -106,8 +100,8 @@ public class CollectionsListFragment extends Fragment implements
         gridView = (GridView) view.findViewById(R.id.gridview);
         gridView.setEmptyView(view.findViewById(R.id.tvEmpty));
 
-        tvEmpty = (RelativeLayout) view.findViewById(R.id.tvEmpty);
-        spinner = (RelativeLayout) view.findViewById(R.id.spinner);
+        empty = (RelativeLayout) view.findViewById(R.id.tvEmpty);
+        loading = (RelativeLayout) view.findViewById(R.id.spinner);
 
         ImageView ivFirstCollectionButton = (ImageView) view.findViewById(R.id.ivFirstCollectionButton);
         ivFirstCollectionButton.setOnClickListener(new View.OnClickListener() {
@@ -330,8 +324,8 @@ public class CollectionsListFragment extends Fragment implements
     }
 
     public void fillGridView(Bundle args) {
-        tvEmpty.setVisibility(View.GONE);
-        spinner.setVisibility(View.VISIBLE);
+        empty.setVisibility(View.GONE);
+        loading.setVisibility(View.VISIBLE);
         if (args != null) {
             getLoaderManager().restartLoader(SEARCH, args, this);
         }else{
@@ -398,24 +392,44 @@ public class CollectionsListFragment extends Fragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        final String[] projection = DataStorage.Collections.TABLE_COLUMNS;
-        String selection = String.format("NOT %s", DataStorage.Collections.DELETED);
+        String collectionsAlias = DataStorage.Collections.TABLE_NAME+".";
+        String mediaAlias = DataStorage.Media.TABLE_NAME+".";
+        final String[] projection = {
+                collectionsAlias+DataStorage.Collections._ID,
+                collectionsAlias+DataStorage.Collections.NAME,
+                collectionsAlias+DataStorage.Collections.TAGS,
+                collectionsAlias+DataStorage.Collections.AVATAR_FILE_NAME,
+                collectionsAlias+DataStorage.Collections.ITEMS_NUMBER,
+                collectionsAlias+DataStorage.Collections.DELETED,
+                mediaAlias+DataStorage.Media.AVATAR,
+                mediaAlias+DataStorage.Media.FILE_NAME
+
+        };
+        String selection = String.format("NOT %s AND (%s OR %s IS NULL) ",
+                collectionsAlias+DataStorage.Collections.DELETED,
+                mediaAlias+DataStorage.Media.AVATAR,
+                mediaAlias+DataStorage.Media.AVATAR);
         if (args != null) {
-            selection = String.format("%s LIKE '%%%s%%' AND NOT %s", DataStorage.Collections.NAME, args.getString(QUERY), DataStorage.Collections.DELETED);
+            selection = String.format("%s LIKE '%%%s%%' AND NOT %s AND (%s OR %s IS NULL)",
+                    collectionsAlias+DataStorage.Collections.NAME,
+                    args.getString(QUERY),
+                    collectionsAlias+DataStorage.Collections.DELETED,
+                    mediaAlias+DataStorage.Media.AVATAR,
+                    mediaAlias+DataStorage.Media.AVATAR);
         }
 
-        return new CursorLoader(context, DataStorage.Collections.CONTENT_URI,
-                projection, selection, null, sortOrder);
+        return new CursorLoader(context, DataStorage.Collections.JOIN_URI,
+                projection, selection, null, collectionsAlias+sortOrder);
     }
 
     @Override
     public void onLoadFinished(Loader loader, Cursor cursor) {
         adapter.swapCursor(cursor);
-        spinner.setVisibility(View.GONE);
+        loading.setVisibility(View.GONE);
         if (loader.getId() != SEARCH) {
-            gridView.setEmptyView(tvEmpty);
+            gridView.setEmptyView(empty);
         } else {
-            tvEmpty.setVisibility(View.GONE);
+            empty.setVisibility(View.GONE);
         }
 
     }
