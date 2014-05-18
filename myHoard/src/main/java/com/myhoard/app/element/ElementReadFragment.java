@@ -10,6 +10,8 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -44,7 +46,7 @@ public class ElementReadFragment extends Fragment {
 
         final View v = inflater.inflate(R.layout.fragment_element_read, container,
                 false);
-
+        setHasOptionsMenu(true);
         elementName = (TextView) v.findViewById(R.id.tvElementName);
         elementCollection = (TextView) v.findViewById(R.id.tvElementCategory);
         elementDescription = (TextView) v.findViewById(R.id.tvElementDescription);
@@ -61,6 +63,13 @@ public class ElementReadFragment extends Fragment {
             pager.setCurrentItem(pagerAdapter.getCount(), true);
         }
     };
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.edit_element,menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 
     private class LoaderImagesCallbacks implements
             LoaderManager.LoaderCallbacks<Cursor> {
