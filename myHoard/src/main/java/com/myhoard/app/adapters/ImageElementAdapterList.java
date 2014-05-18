@@ -64,7 +64,7 @@ public class ImageElementAdapterList extends ArrayAdapter<Uri> {
 
         if(uri==null)
         {
-            holder.img.setImageResource(R.drawable.nophoto);
+            holder.img.setImageResource(R.drawable.aparat);
         } else {
             //holder.bmp = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
             holder.bmp = ImageLoader.decodeSampledBitmapFromResource(uri.toString(),100,100);
