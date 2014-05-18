@@ -598,7 +598,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private boolean checkUniquenessElementName(String sName){
         Cursor cursor = getActivity().getContentResolver().query(DataStorage.Items.CONTENT_URI,
                 new String[] {DataStorage.Items.NAME},DataStorage.Items.NAME + " = '" + sName + "' AND " +
-                        DataStorage.Items.ID_COLLECTION + " = '" + iCollectionId +"'",null,null);
+                        DataStorage.Items.ID_COLLECTION + " = '" + iCollectionId +"' AND " + DataStorage.Items.TABLE_NAME + "."
+                        + DataStorage.Items.DELETED + " != '" + 1 + "'",null,null);
         if(cursor!=null){
             if(cursor.isAfterLast()){
                 return true;
