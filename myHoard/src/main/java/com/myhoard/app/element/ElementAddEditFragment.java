@@ -57,6 +57,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 /*
  * Created by Sebastian Peryt on 27.02.14.
@@ -106,6 +108,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private ArrayList<Uri> imagesUriList;
     private ArrayList<Integer> imagesUriDeleteList;
     private HashMap<Integer,Uri> imagesUriInsertList;
+    private HashMap<Integer,Uri> imagesUriInsertListTmp;
     private HashMap<Integer,Integer> imagesPositionListTmp;
     private HashMap<Integer,Integer> imagesPositionList;
     private HashMap<Integer,String> imagesIDServerList;
@@ -182,6 +185,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             imagesPositionList = new HashMap<>();
             imagesUriDeleteList = new ArrayList<>();
             imagesIDServerList = new HashMap<>();
+            imagesUriInsertListTmp = new HashMap<>();
         }
         gvPhotosList.setAdapter(getPhotosList());
         gvPhotosList.setOnItemClickListener(this);
@@ -407,6 +411,21 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 }
                 imagesPositionListTmp.remove(id);
                 imagesUriDeleteList.add(id);
+                if(!imagesUriInsertList.isEmpty()){
+                    Integer key=null;
+                    Iterator<Integer> keySetIterator = imagesUriInsertList.keySet().iterator();
+                    while(keySetIterator.hasNext()){
+                        key = keySetIterator.next();
+                        imagesUriInsertListTmp.put(key-1,imagesUriInsertList.get(key));
+                    }
+                    imagesUriInsertList.clear();
+                    keySetIterator = imagesUriInsertListTmp.keySet().iterator();
+                    while(keySetIterator.hasNext()){
+                        key = keySetIterator.next();
+                        imagesUriInsertList.put(key,imagesUriInsertListTmp.get(key));
+                    }
+                    imagesUriInsertListTmp.clear();
+                }
             }
         }
         imagesUriList.remove(id);
@@ -712,21 +731,15 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         @Override
         protected void onUpdateComplete(int token, Object cookie, int result) {
             super.onUpdateComplete(token, cookie, result);
-            /*if(!imagesPositionListTmp.isEmpty()){
-                if(imagesPositionListTmp.get(1)==-1){
-                    first = true;
-                }else{
-                    updateElementAvatar(imagesPositionListTmp.get(1));
-                }
-            }*/
-            if(!imagesPositionListTmp.isEmpty()){
-                Iterator<Integer> keySetIterator = imagesPositionListTmp.keySet().iterator();
+            Map<Integer,Integer> map = new TreeMap<Integer,Integer>(imagesPositionListTmp);
+            if(!map.isEmpty()){
+                Iterator<Integer> keySetIterator = map.keySet().iterator();
                 if(keySetIterator.hasNext()){
                     Integer key = keySetIterator.next();
-                    if(imagesPositionListTmp.get(key)==-1){
+                    if(map.get(key)==-1){
                         first = true;
                     }else{
-                        updateElementAvatar(imagesPositionListTmp.get(key));
+                        updateElementAvatar(map.get(key));
                     }
                 }
             }
