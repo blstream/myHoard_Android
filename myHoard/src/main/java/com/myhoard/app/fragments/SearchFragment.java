@@ -215,18 +215,21 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         String selection = null;
         switch(id){
             case SEARCH_ALL:
-                selection = String.format("%s = %s and (%s=%d or %s is null) AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                        DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.DESCRIPTION,collectionElementText,DataStorage.Items.NAME,collectionElementText);
                 break;
             case SEARCH_BY_NAME:
-                selection = String.format("%s = %s and (%s=%d or %s is null) AND %s LIKE '%%%s%%'",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND %s LIKE '%%%s%%'",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                        DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.NAME,collectionElementText);
                 break;
             case SEARCH_BY_DESCRIPTION:
-                selection = String.format("%s = %s and (%s=%d or %s is null) AND %s LIKE '%%%s%%'",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
+                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND %s LIKE '%%%s%%'",
+                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                        DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.DESCRIPTION,collectionElementText);
                 break;
         }
