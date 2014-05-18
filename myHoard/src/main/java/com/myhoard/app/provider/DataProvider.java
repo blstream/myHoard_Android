@@ -8,7 +8,11 @@ import android.content.OperationApplicationException;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+
+import com.myhoard.app.model.Collection;
+import com.myhoard.app.model.Item;
 import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.provider.DataStorage.Items;
 import com.myhoard.app.provider.DataStorage.Media;
@@ -25,6 +29,7 @@ public class DataProvider extends ContentProvider {
 	public static final int ITEMS = 2;
 	public static final int MEDIA = 3;
 	public static final int DELETED_MEDIA = 4;
+	public static final int COLLECTIONS_ITEMS_MEDIA = 5;
 
 
 	/**
@@ -42,6 +47,7 @@ public class DataProvider extends ContentProvider {
 		uriMatcher.addURI(DataStorage.AUTHORITY, Items.TABLE_NAME, ITEMS);
 		uriMatcher.addURI(DataStorage.AUTHORITY, Media.TABLE_NAME, MEDIA);
 		uriMatcher.addURI(DataStorage.AUTHORITY, DeletedMedia.TABLE_NAME, DELETED_MEDIA);
+		uriMatcher.addURI(DataStorage.AUTHORITY, Collections.JOIN_NAME, COLLECTIONS_ITEMS_MEDIA);
 	}
 
 	@Override
@@ -77,8 +83,25 @@ public class DataProvider extends ContentProvider {
 
     @Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+
+
+        /* JOIN dodany przez Rafała Soudani, aby wyswietlac miniatury w liscie kolekcji */
+        SQLiteDatabase db = helper.getWritableDatabase();
+        if (uriMatcher.match(uri) == COLLECTIONS_ITEMS_MEDIA){
+            String tables = Collections.TABLE_NAME + " LEFT JOIN " + Items.TABLE_NAME + " ON " +
+                    Collections.TABLE_NAME+"."+Collections._ID + " = " +Items.ID_COLLECTION+" LEFT JOIN " +
+                    Media.TABLE_NAME + " ON " + Items.TABLE_NAME+"."+Items._ID + " = " + Media.ID_ITEM
+                    ;
+
+            SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+            queryBuilder.setTables(tables);
+            Cursor cursor = queryBuilder.query(db, projection, selection,
+                    selectionArgs, DataStorage.Collections.TABLE_NAME+"."+DataStorage.Collections._ID, null, sortOrder);
+            return cursor;
+        }
+
 		DatabaseTable table = findTable(uri);
-		return table.query(helper.getWritableDatabase(), projection, selection, selectionArgs, sortOrder);
+		return table.query(db, projection, selection, selectionArgs, sortOrder);
 	}
 
 	private DatabaseTable findTable(Uri uri) {

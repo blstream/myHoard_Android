@@ -218,6 +218,7 @@ public final class DataStorage {
 
 	public static final class Collections implements BaseColumns, CollectionsColumns {
 		public static final String TABLE_NAME = "collections";
+		public static final String JOIN_NAME = "collections_items_media";
 		public static final String[] TABLE_COLUMNS = new String[]{
 				_ID,
                 ID_SERVER,
@@ -233,6 +234,7 @@ public final class DataStorage {
                 SYNCHRONIZED,
                 DELETED
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
+				public static final Uri JOIN_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + JOIN_NAME);
 		/**
 		 * This utility class cannot be instantiated
 		 */
