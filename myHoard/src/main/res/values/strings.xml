@@ -45,6 +45,8 @@
     <string name="name_already_exist">NAME ALREADY EXIST</string>
     <string name="delete_colection_dialog_title">DELETE COLLECTION</string>
     <string name="delete_colection_dialog_message">Are you sure you want to delete collection?</string>
+    <string name="edit_colection_dialog_title">DELETE ELEMENT</string>
+    <string name="edit_colection_dialog_message">Are you sure you want to delete element?</string>
     <string name="collection_tags">Tags:</string>
     <string name="select_tag_to_add">Select tag to add</string>
     <string name="select_tag_to_delete">Select tag to DELETE</string>

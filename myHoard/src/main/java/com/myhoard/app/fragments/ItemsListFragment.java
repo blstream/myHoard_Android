@@ -1,9 +1,11 @@
 package com.myhoard.app.fragments;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -334,18 +336,35 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                 }
                 return true;
             case DELETE_ID:
-                ContentValues values = new ContentValues();
-                values.put(DataStorage.Items.DELETED,true);
-                AsyncQueryHandler asyncHandler =
-                            new AsyncQueryHandler(getActivity().getContentResolver()) { };
-                asyncHandler.startUpdate(0,null,DataStorage.Items.CONTENT_URI,values,DataStorage.Items._ID + " = ?",
-                        new String[]{String.valueOf(info.id)});
-                getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
-                bindData();
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(mContext.getString(R.string.edit_colection_dialog_title))
+                        .setMessage(mContext.getString(R.string.edit_colection_dialog_message))
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (info != null) {
+                                    deleteElement(info.id);
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Do nothing.
+                    }
+                }).show();
                 return true;
         }
 
         return super.onContextItemSelected(item);
+    }
+
+    private void deleteElement(long id){
+        ContentValues values = new ContentValues();
+        values.put(DataStorage.Items.DELETED,true);
+        AsyncQueryHandler asyncHandler =
+                new AsyncQueryHandler(getActivity().getContentResolver()) { };
+        asyncHandler.startUpdate(0,null,DataStorage.Items.CONTENT_URI,values,DataStorage.Items._ID + " = ?",
+                new String[]{String.valueOf(id)});
+        getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
+        bindData();
     }
 
     private void bindData() {
