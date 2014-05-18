@@ -52,6 +52,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -826,7 +827,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 geometry = object.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
                 geometryLocation = geometry.getJSONObject("location");
                 // Get the value of the attribute whose name is "formatted_string"
-                location_string = location.getString("formatted_address");
+                location_string = new String(location.getString("formatted_address").getBytes("ISO-8859-1"),"UTF-8");
                 double lat = Double.parseDouble(geometryLocation.getString("lat"));
                 double lon = Double.parseDouble(geometryLocation.getString("lng"));
                 LatLng latLng = new LatLng(lat,lon);
@@ -835,6 +836,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 tvElementPosition.setTextColor(Color.GREEN);
             } catch (JSONException e1) {
                 e1.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
         }
 
