@@ -38,6 +38,7 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="edit">Edit</string>
+    <string name="remove">Remove</string>
     <string name="element_edited">ELEMENT EDITED</string>
     <string name="required_name_element">Required element name</string>
     <string name="required_name_element_minimum_length">Element name must contain at least two characters</string>

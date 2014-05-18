@@ -10,4 +10,11 @@
         android:icon="@drawable/edycja"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/action_remove"
+        android:title="@string/remove"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_menu_delete"
+        app:showAsAction="always" />
+
 </menu>
