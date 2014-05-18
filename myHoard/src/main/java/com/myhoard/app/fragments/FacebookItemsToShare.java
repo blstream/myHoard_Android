@@ -17,11 +17,13 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.TextView;
 
 import com.myhoard.app.R;
+import com.myhoard.app.dialogs.FacebookShareDialog;
 import com.myhoard.app.images.FacebookImageAdapterList;
 import com.myhoard.app.provider.DataStorage;
 
@@ -42,6 +44,8 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     int mCount;
 
     private TextView tvSelectedItems;
+    private Button mButtonShare;
+    private String mMessageOnFb;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,7 +54,6 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         mContext = getActivity();
         mFacebookImageAdapterList = new FacebookImageAdapterList(mContext,null,0);
         return v;
-
     }
 
     @Override
@@ -58,9 +61,11 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         super.onViewCreated(view, savedInstanceState);
         mGridView = (GridView)view.findViewById(R.id.gvItemsList);
         tvSelectedItems = (TextView)view.findViewById(R.id.tvItemsSelected);
+        mButtonShare = (Button)view.findViewById(R.id.btShareOnFb);
         Bundle bundle = this.getArguments();
         mElementId = bundle.getLong(ITEM_ID);
         setOnClickActionOnGridView();
+        setOnClickButton();
         getLoaderManager().initLoader(LOAD_ITEMS,null,this);
         bindData();
     }
@@ -76,13 +81,21 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                 CheckBox box =(CheckBox) view.findViewById(R.id.chbItemToShare);
                 if(box.isChecked()) box.setChecked(false);
                 else box.setChecked(true);
-                setSelectedItems(position, id);
+                setSelectedItems(id);
             }
         });
-
     }
 
-    private void setSelectedItems(int index,long id) {
+    private void setOnClickButton() {
+        mButtonShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                facebookShareDialog();
+            }
+        });
+    }
+
+    private void setSelectedItems(long id) {
         if(isSelected(id)) {
             mCount--;
             setCountOnView();
@@ -109,10 +122,19 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         tvSelectedItems.setText(s);
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    private void facebookShareDialog() {
+         FacebookShareDialog facebookShareDialog = new FacebookShareDialog();
+         facebookShareDialog.setTargetFragment(this,FacebookShareDialog.DIALOG_ID);
+         facebookShareDialog.show(getFragmentManager(),null);
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FacebookShareDialog.DIALOG_ID) {
+            mMessageOnFb = data.getStringExtra(FacebookShareDialog.GET_RESULT);
+           // openFbSessionForShare();
+        }
     }
 
     @Override

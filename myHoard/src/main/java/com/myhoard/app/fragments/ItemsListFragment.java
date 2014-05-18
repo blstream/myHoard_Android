@@ -335,6 +335,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                     facebookShareDialog.setTargetFragment(this,FacebookShareDialog.DIALOG_ID);
                     facebookShareDialog.show(getFragmentManager(),null);*/
                     newFacebookShareFragment(info.id);
+
                 }
                 return true;
             case DELETE_ID:
@@ -610,4 +611,5 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         transaction.addToBackStack(NEW_FACEBOOK_FRAGMENT_NAME);
         transaction.commit();
     }
+
 }
