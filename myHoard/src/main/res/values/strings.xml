@@ -38,6 +38,7 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="edit">Edit</string>
+    <string name="remove">Remove</string>
     <string name="element_edited">ELEMENT EDITED</string>
     <string name="required_name_element">Required element name</string>
     <string name="required_name_element_minimum_length">Element name must contain at least two characters</string>
@@ -45,6 +46,8 @@
     <string name="name_already_exist">NAME ALREADY EXIST</string>
     <string name="delete_colection_dialog_title">DELETE COLLECTION</string>
     <string name="delete_colection_dialog_message">Are you sure you want to delete collection?</string>
+    <string name="edit_colection_dialog_title">DELETE ELEMENT</string>
+    <string name="edit_colection_dialog_message">Are you sure you want to delete element?</string>
     <string name="collection_tags">Tags:</string>
     <string name="select_tag_to_add">Select tag to add</string>
     <string name="select_tag_to_delete">Select tag to DELETE</string>
@@ -125,7 +128,9 @@
     <string name="password_strenght_text">Password Strenght</string>
     <string name="google_maps_key">AIzaSyB6R1fTZEI3c1lDKV06SrSDPx2Fg70YQb4</string>
     <string name="no_photo">No photo</string>
+<<<<<<< HEAD
     <string name="tag_exist">Tag %s already added</string>
 
+>>>>>>> 22e7da43b920096aa08b51759b434dd69128fd13
 
 </resources>

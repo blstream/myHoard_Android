@@ -208,6 +208,14 @@ public final class DataStorage {
         public static final String DELETED = "deleted";
 	}
 
+    protected interface DeletedMediaColumns {
+        /**
+         * Id on server. Column name.
+         * <p>Type: TEXT</p>
+         */
+        public static final String ID_SERVER = "idServer";
+    }
+
 	public static final class Collections implements BaseColumns, CollectionsColumns {
 		public static final String TABLE_NAME = "collections";
 		public static final String[] TABLE_COLUMNS = new String[]{
@@ -266,6 +274,14 @@ public final class DataStorage {
 		};		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
 
 	}
+
+    public static final class DeletedMedia implements BaseColumns, DeletedMediaColumns {
+        public static final String TABLE_NAME = "deletedMedia";
+        public static final String[] TABLE_COLUMNS = new String[]{
+                _ID,
+                ID_SERVER,
+        };		public static final Uri CONTENT_URI = Uri.parse(DataStorage.CONTENT_URI + "/" + TABLE_NAME);
+    }
 
     public enum TypeOfCollection {
         ERROR(0), OFFLINE(1), PUBLIC(2), PRIVATE(3);

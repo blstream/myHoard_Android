@@ -193,16 +193,20 @@ import java.util.List;
                 if (response.getStatusLine().getStatusCode()==STATUS_OK) {
                     HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                     T model = (T) new Gson().fromJson(HTTP_response, item.getClass());
-                    Log.d("TAG", "Jsontext = " + HTTP_response);
+                    Log.d("TAG", "update Jsontext = " + HTTP_response);
                     return model;
                 }
-            }
-            Log.d("TAG", "Jsontext = " + EntityUtils.toString(response.getEntity(), HTTP.UTF_8));
+                else {
+                    HTTP_response = EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
+                    Log.d("TAG", "update Jsontext = " + HTTP_response);
+                    throw new RuntimeException(handleError(HTTP_response));
+                }
+            } else
+                throw new RuntimeException("No response");
         } catch (Exception e) {
             Log.d("TAG", e.toString());
             throw new RuntimeException(handleError(HTTP_response));
         }
-        return null;
     }
 
     @Override

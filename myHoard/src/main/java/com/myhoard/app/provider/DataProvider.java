@@ -12,6 +12,7 @@ import android.net.Uri;
 import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.provider.DataStorage.Items;
 import com.myhoard.app.provider.DataStorage.Media;
+import com.myhoard.app.provider.DataStorage.DeletedMedia;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -23,6 +24,9 @@ public class DataProvider extends ContentProvider {
 	public static final int COLLECTIONS = 1;
 	public static final int ITEMS = 2;
 	public static final int MEDIA = 3;
+	public static final int DELETED_MEDIA = 4;
+
+
 	/**
 	 * A UriMatcher instance
 	 */
@@ -37,6 +41,7 @@ public class DataProvider extends ContentProvider {
 		uriMatcher.addURI(DataStorage.AUTHORITY, Collections.TABLE_NAME, COLLECTIONS);
 		uriMatcher.addURI(DataStorage.AUTHORITY, Items.TABLE_NAME, ITEMS);
 		uriMatcher.addURI(DataStorage.AUTHORITY, Media.TABLE_NAME, MEDIA);
+		uriMatcher.addURI(DataStorage.AUTHORITY, DeletedMedia.TABLE_NAME, DELETED_MEDIA);
 	}
 
 	@Override
@@ -45,6 +50,7 @@ public class DataProvider extends ContentProvider {
 		tables.add(new CollectionsTable(getContext(), COLLECTIONS));
 		tables.add(new ItemsTable(getContext(), ITEMS));
 		tables.add(new MediaTable(getContext(), MEDIA));
+		tables.add(new DeletedMediaTable(getContext(), DELETED_MEDIA));
 
 		// Creates a new helper object. Note that the database itself isn't opened until
 		// something tries to access it, and it's only created if it doesn't already exist.

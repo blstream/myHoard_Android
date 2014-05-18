@@ -1,7 +1,11 @@
 package com.myhoard.app.fragments;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.AsyncQueryHandler;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -38,7 +42,6 @@ import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.activities.ElementActivity;
 import com.myhoard.app.dialogs.FacebookShareDialog;
-import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.images.ImageAdapterList;
 import com.myhoard.app.images.ImageLoader;
 import com.myhoard.app.provider.DataStorage;
@@ -52,13 +55,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
 	public static final String Selected_Collection_ID = "id";
     private static final int DELETE_ID = Menu.FIRST + 1;
-    private static final int EDIT_ID = Menu.FIRST + 2;
     private static final int SHARE_ID = Menu.FIRST + 3; // Facebook
     private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
     private static final String PUBLISH_PHOTOS = "me/photos";
     private static final int LOAD_COLLECTION_NAME_AND_DESCRIPTION = 2;
     private static final int LOAD_COLLECTION_ELEMENTS = 0;
-    private static final String NEW_ELEMENT_FRAGMENT_NAME = "NewElement";
     private static final String NEW_SEARCH_FRAGMENT_NAME = "SearchFragment";
     private static final String SEARCH_COLLECTION_ID = "SearchCollection";
 
@@ -66,8 +67,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private ProgressDialog mProgressDialog; //Facebook
     private int mItemPositionOnList;
     private String mMessageOnFb;
-
-    private Cursor globalCursor;
 
     private Context mContext;
     private GridView mGridView;
@@ -317,7 +316,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         super.onCreateContextMenu(menu, v, menuInfo);
 
         int groupId = 0;
-        menu.add(groupId, EDIT_ID, EDIT_ID, R.string.menu_edit);
         menu.add(groupId, DELETE_ID, DELETE_ID, R.string.menu_delete);
         menu.add(groupId, SHARE_ID, SHARE_ID, R.string.menu_share); // Sharing on FB
     }
@@ -337,42 +335,36 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                     facebookShareDialog.show(getFragmentManager(),null);
                 }
                 return true;
-            case EDIT_ID:
-                Fragment newFragment = new ElementAddEditFragment();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-
-                // Add arguments to opened fragment element
-                Bundle b = new Bundle();
-                b.putBoolean(ElementAddEditFragment.EDITION,true);
-                if (info != null) {
-                    globalCursor.moveToPosition(info.position);
-                    b.putLong(ElementAddEditFragment.ID,info.id);
-                }
-                b.putLong(ElementAddEditFragment.COLLECTION_ID,mCollectionID);
-                String name = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.NAME));
-                String description = globalCursor.getString(globalCursor.getColumnIndex(DataStorage.Items.DESCRIPTION));
-                b.putString(ElementAddEditFragment.NAME,name);
-                b.putString(ElementAddEditFragment.DESCRIPTION,description);
-
-                newFragment.setArguments(b);
-
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack
-                transaction.replace(R.id.container, newFragment, NEW_ELEMENT_FRAGMENT_NAME);
-                transaction.addToBackStack(NEW_ELEMENT_FRAGMENT_NAME);
-
-                // Commit the transaction
-                transaction.commit();
-                return true;
             case DELETE_ID:
-//                AsyncQueryHandler asyncHandler =
-//                        new AsyncQueryHandler(getActivity().getContentResolver()) { };
-//                asyncHandler.startDelete(0, null, DataStorage.Items.CONTENT_URI,
-//                        DataStorage.Items._ID + " = ?", new String[]{String.valueOf(info.id)});
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(mContext.getString(R.string.edit_colection_dialog_title))
+                        .setMessage(mContext.getString(R.string.edit_colection_dialog_message))
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (info != null) {
+                                    deleteElement(info.id);
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Do nothing.
+                    }
+                }).show();
                 return true;
         }
 
         return super.onContextItemSelected(item);
+    }
+
+    private void deleteElement(long id){
+        ContentValues values = new ContentValues();
+        values.put(DataStorage.Items.DELETED,true);
+        AsyncQueryHandler asyncHandler =
+                new AsyncQueryHandler(getActivity().getContentResolver()) { };
+        asyncHandler.startUpdate(0,null,DataStorage.Items.CONTENT_URI,values,DataStorage.Items._ID + " = ?",
+                new String[]{String.valueOf(id)});
+        getLoaderManager().restartLoader(LOAD_COLLECTION_ELEMENTS, null, this);
+        bindData();
     }
 
     private void bindData() {
@@ -387,7 +379,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         switch(i){
             //Get all elements from collection
             case LOAD_COLLECTION_ELEMENTS:
-                selection = String.format("%s = %s and (%s=%d or %s is null)",mCollectionID,DataStorage.Items.ID_COLLECTION,DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR);
+                selection = String.format("%s = %s and %s!=%d and (%s=%d or %s is null)",mCollectionID,DataStorage.Items.ID_COLLECTION,
+                        DataStorage.Items.TABLE_NAME+"."+DataStorage.Items.DELETED,1,
+                        DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR);
                 cursorLoader =  new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
                         new String[]{DataStorage.Items.NAME, DataStorage.Media.FILE_NAME,
                                 DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,DataStorage.Items.DESCRIPTION},
@@ -425,7 +419,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             }
             mImageAdapterList.swapCursor(data);
         }
-        globalCursor = data;
     }
 
 	@Override
