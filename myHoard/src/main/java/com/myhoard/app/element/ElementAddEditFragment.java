@@ -615,8 +615,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             String[] projection = { DataStorage.Collections.NAME,
                     DataStorage.Collections._ID };
+            String selection = String.format("%s!=%d",DataStorage.Collections.DELETED,1);
             CursorLoader cursorLoader = new CursorLoader(getActivity(),
-                    DataStorage.Collections.CONTENT_URI, projection, null,
+                    DataStorage.Collections.CONTENT_URI, projection, selection,
                     null, DataStorage.Collections.NAME + " ASC");
             return cursorLoader;
         }
