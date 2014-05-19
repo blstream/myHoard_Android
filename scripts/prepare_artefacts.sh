@@ -30,8 +30,7 @@ function prepareAndroidArtefacts() {
     done
 
     #copy obfuscation map
-    #!!!! temporary turned off app need fix when proguard is on!!!
-    #cp $OBFUCATOR_MAP_DIR/$OBFUSCATOR_MAP_NAME $OUTPUTDIR/$OBFUSCATOR_MAP_NAME
+    cp $OBFUCATOR_MAP_DIR/$OBFUSCATOR_MAP_NAME $OUTPUTDIR/$OBFUSCATOR_MAP_NAME
 
     #pack artefacts
     ZIP_OUTPUT_PATH=$OUTPUTDIR/${ARTEFACT_FILE_NAME}-${RELEASE_DATE}-${COMMIT_ID}.zip
