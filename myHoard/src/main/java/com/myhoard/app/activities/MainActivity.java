@@ -44,6 +44,7 @@ import android.widget.Toast;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.NavDrawerListAdapter;
+import com.myhoard.app.crudengine.ConnectionDetector;
 import com.myhoard.app.dialogs.GeneratorDialog;
 import com.myhoard.app.dialogs.SynchronizationDialog;
 import com.myhoard.app.fragments.CollectionFragment;
@@ -331,11 +332,16 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 startService(synchronizationIntent);
                 break;
             case R.id.action_synchronize:
-                synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
-                synchronizationIntent.putExtra("option","synchronization");
-                startService(synchronizationIntent);
-                synchronizationDialog = new SynchronizationDialog(synchronizationIntent, getApplicationContext());
-                synchronizationDialog.show(getSupportFragmentManager(), "");
+                ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+                if (cd.isConnectingToInternet()) {
+                    synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
+                    synchronizationIntent.putExtra("option", "synchronization");
+                    startService(synchronizationIntent);
+                    synchronizationDialog = new SynchronizationDialog(synchronizationIntent, getApplicationContext());
+                    synchronizationDialog.show(getSupportFragmentManager(), "");
+                } else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show();
+                }
                 break;
             default:
                 return super.onOptionsItemSelected(item);

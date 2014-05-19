@@ -12,9 +12,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.widget.Toast;
 
 import com.myhoard.app.Managers.UserManager;
+import com.myhoard.app.R;
 import com.myhoard.app.crudengine.CRUDEngine;
+import com.myhoard.app.crudengine.ConnectionDetector;
 import com.myhoard.app.crudengine.MediaCrudEngine;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.IModel;
@@ -52,6 +55,7 @@ public class SynchronizationService extends IntentService {
     private static final String USERS_ENDPOINT = "users/";
     private static final String ITEM_ENDPOINT = "items/";
     private static final String MEDIA_ENDPOINT = "media/";
+    private static final String SEPARATOR = "#";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     private UserManager userManager = UserManager.getInstance();
     ArrayList<ContentProviderOperation> operations;
@@ -78,9 +82,9 @@ public class SynchronizationService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        String tmp = intent.getStringExtra("option");
+        String option = intent.getStringExtra("option");
 
-        switch (tmp) {
+        switch (option) {
             case "download":
                 downloadCollections();
                 downloadItems();
@@ -119,8 +123,7 @@ public class SynchronizationService extends IntentService {
     private void uploadCollection(CRUDEngine<Collection> collectionCrud, Cursor cursor) {
         if (cursor.getInt(cursor.getColumnIndex(Collections.DELETED)) == 1) {
             deleteCollectionOnServerAndInDatabase(collectionCrud, cursor);
-        }
-        else if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
+        } else if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
             Collection collection = getCollectionFromDatabase(cursor);
             if (cursor.getInt(cursor.getColumnIndex(Collections.SYNCHRONIZED)) == 0
                     && cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)) != null) {
@@ -140,7 +143,7 @@ public class SynchronizationService extends IntentService {
     private void deleteCollectionOnServerAndInDatabase(CRUDEngine<Collection> collectionCrud, Cursor cursor) {
         String idCollectionOnServer = cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER));
         String id = cursor.getString(cursor.getColumnIndex(Collections._ID));
-        String where = Collections._ID+"=?";
+        String where = Collections._ID + "=?";
         String[] args = new String[]{id};
         if (idCollectionOnServer == null) {
             getContentResolver().delete(Collections.CONTENT_URI, where, args);
@@ -154,15 +157,18 @@ public class SynchronizationService extends IntentService {
         Collection collection = new Collection();
         collection.setName(cursor.getString(cursor.getColumnIndex(Collections.NAME)));
         collection.setDescription(cursor.getString(cursor.getColumnIndex(Collections.DESCRIPTION)));
-        if(cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) == TypeOfCollection.PUBLIC.getType())
+        if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) == TypeOfCollection.PUBLIC.getType())
             collection.setIfPublic(true);
-        String [] tags = cursor.getString(cursor.getColumnIndex(Collections.TAGS)).split("#");
-        List<String> list = new LinkedList<String>(Arrays.asList(tags));
-        list.remove(0); //zero element is always empty, remove it
-        for(int i=0; i<list.size();i++){
-            list.set(i, list.get(i).trim());
+        String tags = cursor.getString(cursor.getColumnIndex(Collections.TAGS));
+        if (tags != null) {
+            String[] splitedTags = tags.split(SEPARATOR);
+            List<String> list = new LinkedList<>(Arrays.asList(splitedTags));
+            list.remove(0); //zero element is always empty, remove it
+            for (int i = 0; i < list.size(); i++) {
+                list.set(i, list.get(i).trim());
+            }
+            collection.setTags(list);
         }
-        collection.setTags(list);
         return collection;
     }
 
@@ -213,8 +219,7 @@ public class SynchronizationService extends IntentService {
     private void uploadItem(CRUDEngine<Item> itemCrud, Cursor cursor) {
         if (cursor.getInt(cursor.getColumnIndex(Items.DELETED)) == 1) {
             deleteItemOnServerAndInDatabase(itemCrud, cursor);
-        }
-        else if (cursor.getInt(cursor.getColumnIndex(Items.SYNCHRONIZED)) == 0) {
+        } else if (cursor.getInt(cursor.getColumnIndex(Items.SYNCHRONIZED)) == 0) {
             String where = String.format("%s = %s", Collections._ID, cursor.getString(cursor.getColumnIndex(Items.ID_COLLECTION)));
             Cursor c = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.TYPE}, where, null, null);
             if (c != null) {
@@ -229,7 +234,7 @@ public class SynchronizationService extends IntentService {
     private void deleteItemOnServerAndInDatabase(CRUDEngine<Item> itemCrud, Cursor cursor) {
         String idItemOnServer = cursor.getString(cursor.getColumnIndex(Items.ID_SERVER));
         String id = cursor.getString(cursor.getColumnIndex(Items._ID));
-        String where = Items._ID+"=?";
+        String where = Items._ID + "=?";
         String[] args = new String[]{id};
         if (idItemOnServer == null) {
             getContentResolver().delete(Collections.CONTENT_URI, where, args);
@@ -396,12 +401,11 @@ public class SynchronizationService extends IntentService {
         }
         for (ItemMedia med : media) {
             if (!mapka.containsKey(med.id)) { //jezeli serwer id nie znajduje sie w bazie
-                //create
                 insert(med, itemId);
             } else { //jezeli się znajduję sprawdź czy media jest w danym itemie
                 //if(mapka.get(med.id) != itemId) {
                 //przenies do innego itemu
-                //}
+                //} SYTUACJA NIEMOZLIWA DO WYKONANIA Z APLIKACJI KLIENCKIEJ
             }
         }
     }
@@ -510,7 +514,7 @@ public class SynchronizationService extends IntentService {
         for (Collection collection : collections) {
             if (idServerToModifiedDate.get(collection.getId()) == null) {
                 insert(collection);
-            } else if (modifiedDateOnServerIsGraterThanInDatabase(collection.getModified_date(), idServerToModifiedDate.get(collection.getId()))){
+            } else if (modifiedDateOnServerIsGraterThanInDatabase(collection.getModified_date(), idServerToModifiedDate.get(collection.getId()))) {
                 update(collection);
             }
         }
@@ -562,9 +566,9 @@ public class SynchronizationService extends IntentService {
         values.put(Collections.NAME, collection.getName());
         if (collection.getDescription() != null)
             values.put(Collections.DESCRIPTION, collection.getDescription());
-        String tags="";
-        for (String s : collection.getTags()){
-            tags=tags+"#"+s+" ";
+        String tags = "";
+        for (String s : collection.getTags()) {
+            tags = tags + "#" + s + " ";
         }
         values.put(Collections.TAGS, tags.trim());
         if (collection.getIfPublic())
@@ -644,8 +648,7 @@ public class SynchronizationService extends IntentService {
             cursor.moveToFirst();
             if (cursor.getInt(1) != TypeOfCollection.OFFLINE.getType()) {
                 values.put(DataStorage.Items.ID_COLLECTION, cursor.getString(0));
-            }
-            else return null;
+            } else return null;
         }
         return values;
     }
