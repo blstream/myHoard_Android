@@ -21,4 +21,4 @@ echo yes | android update sdk --filter android-19 --no-ui --force
 echo yes | android update sdk --filter sysimg-19 --no-ui --force
 echo yes | android update sdk --filter extra-android-support --no-ui --force
 echo yes | android update sdk --filter extra-android-m2repository --no-ui --force
-echo yes | android update sdk --no-ui --all --filter extra-google-m2repository
+echo yes | android update sdk --filter extra-google-m2repository --no-ui --force
