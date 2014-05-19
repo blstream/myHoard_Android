@@ -1,14 +1,12 @@
 package com.myhoard.app.fragments;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -28,22 +26,11 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.facebook.FacebookRequestError;
-import com.facebook.HttpMethod;
-import com.facebook.Request;
-import com.facebook.RequestAsyncTask;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionLoginBehavior;
-import com.facebook.SessionState;
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.activities.ElementActivity;
-import com.myhoard.app.dialogs.FacebookShareDialog;
 import com.myhoard.app.images.ImageAdapterList;
-import com.myhoard.app.images.ImageLoader;
 import com.myhoard.app.provider.DataStorage;
 
 /**
@@ -56,19 +43,11 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	public static final String Selected_Collection_ID = "id";
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int SHARE_ID = Menu.FIRST + 3; // Facebook
-    private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
-    private static final String PUBLISH_PHOTOS = "me/photos";
     private static final int LOAD_COLLECTION_NAME_AND_DESCRIPTION = 2;
     private static final int LOAD_COLLECTION_ELEMENTS = 0;
     private static final String NEW_SEARCH_FRAGMENT_NAME = "SearchFragment";
     private static final String SEARCH_COLLECTION_ID = "SearchCollection";
     private static final String NEW_FACEBOOK_FRAGMENT_NAME = "FacebookFragment";
-
-    private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
-    private ProgressDialog mProgressDialog; //Facebook
-    private int mItemPositionOnList;
-    private String mMessageOnFb;
-
     private Context mContext;
     private GridView mGridView;
     private ImageView mEmptyView;
@@ -107,23 +86,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-
         // currently moved to onResume()
         //setSortTabs();
-
-        // Lifecycle Facebook session
-        Session session = Session.getActiveSession();
-        if (session == null) {
-            if (savedInstanceState != null) {
-                session = Session.restoreSession(getActivity(), null, statusCallback, savedInstanceState);
-            }
-            if (session == null) {
-                session = new Session(getActivity());
-
-            }
-            Session.setActiveSession(session);
-        }
-
 		mGridView = (GridView) view.findViewById(R.id.gvItemsList);
         getLoaderManager().initLoader(LOAD_COLLECTION_ELEMENTS, null, this);
         bindData();
@@ -220,15 +184,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        Session.getActiveSession().addCallback(statusCallback);
-    }
-
-    @Override
     public void onStop() {
         super.onStop();
-        Session.getActiveSession().removeCallback(statusCallback);
         resetActionBarNavigationMode();
     }
 
@@ -236,23 +193,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onDestroyView() {
         super.onDestroyView();
         mImageAdapterList.mImageLoader.clearCache();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
-        if (requestCode == FacebookShareDialog.DIALOG_ID) {
-            mMessageOnFb = data.getStringExtra(FacebookShareDialog.GET_RESULT);
-            openFbSessionForShare();
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Session session = Session.getActiveSession();
-        Session.saveSession(session, outState);
     }
 
     @Override
@@ -329,13 +269,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             // Sharing item from list
             case SHARE_ID:
                 if(info!=null) {
-                    mItemPositionOnList = info.position;
-                    /*FacebookShareDialog facebookShareDialog = new FacebookShareDialog();
-                    facebookShareDialog.setDefaultPostOnFb(setDefaultPostOnFb());
-                    facebookShareDialog.setTargetFragment(this,FacebookShareDialog.DIALOG_ID);
-                    facebookShareDialog.show(getFragmentManager(),null);*/
                     newFacebookShareFragment(info.id);
-
                 }
                 return true;
             case DELETE_ID:
@@ -485,120 +419,6 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private void setUnselectedTabByDateText(String text) {
         sortByDateTabText.setTextColor(getResources().getColor(R.color.black));
         sortByDateTabText.setText(text);
-    }
-
-    /*
-    * Sharing on Facebook name/description/photos/location
-    * TODO Sharing group of items
-    */
-    private class SessionStatusCallback implements Session.StatusCallback {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-            shareOnFacebook(session);
-        }
-    }
-
-    public void shareOnFacebook(Session session) {
-        if (session != null && session.isOpened()) {
-            mProgressDialog = ProgressDialog.show(getActivity(), "", getString(R.string.progress), true);
-            Bundle postParams = prepareDataToShare(mMessageOnFb);
-            if (postParams != null) {
-                Request.Callback callback = new Request.Callback() {
-                    public void onCompleted(Response response) {
-
-                        FacebookRequestError error = response.getError();
-                        if (error != null) {
-                            if (getActivity().getApplicationContext() != null) {
-                                makeAndShowToast(error.getErrorMessage());
-                            }
-                        } else {
-                            makeAndShowToast(getString(R.string.sharing_succeeded));
-                        }
-                        mProgressDialog.dismiss();
-                    }
-                };
-
-                Request postRequest = new Request(session, PUBLISH_PHOTOS, postParams, HttpMethod.POST, callback);
-                /* AWA:FIXME: Niebezpieczne używanie wątku
-        Brak anulowania tej operacji.
-        Wyjście z Activity nie kończy wątku,
-        należy o to zadbać.
-        */
-                RequestAsyncTask mFacebookTask = new RequestAsyncTask(postRequest);
-                mFacebookTask.execute();
-
-            } else {
-                mProgressDialog.dismiss();
-                makeAndShowToast(getString(R.string.no_photo));
-            }
-        }
-    }
-
-    public void makeAndShowToast(String message) {
-        if(getActivity().getApplicationContext()!=null) {
-            Toast.makeText(
-                    getActivity().getApplicationContext(),
-                    message,
-                    Toast.LENGTH_SHORT
-            ).show();
-        }
-    }
-
-    /*
-    Opening Facebook session for publish
-     */
-    private void openFbSessionForShare() {
-        Session session = Session.getActiveSession();
-        Session.OpenRequest request = new Session.OpenRequest(this).setCallback(statusCallback);
-        request.setPermissions(PERMISSIONS);
-        request.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
-        if (!session.isOpened() && !session.isClosed()) {
-            session.openForPublish(request);
-        } else if (session.getState().equals(SessionState.CLOSED_LOGIN_FAILED) || session.isClosed()) {
-            session.close();
-
-            session = new Session.Builder(getActivity()).build();
-            session.addCallback(statusCallback);
-            Session.setActiveSession(session);
-            session.openForPublish(request);
-        }
-        else {
-            Session.openActiveSession(getActivity(), this, true, statusCallback);
-        }
-    }
-    /*
-     Retrieving data that will be sharing on FB
-     */
-    private Bundle prepareDataToShare(String message) {
-
-        int photoSizeX = 800;
-        int photoSizeY = 600;
-        Bundle bundle = new Bundle();
-
-        Cursor cursor = mImageAdapterList.getCursor();
-        cursor.moveToPosition(mItemPositionOnList);
-        // getting data form cursor
-        String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
-        if(data != null) {
-            // Decoding image
-            Bitmap image = ImageLoader.decodeSampledBitmapFromResource(data, photoSizeX, photoSizeY);
-
-            bundle.putParcelable("source", image);
-            bundle.putString("message", message);
-            return bundle;
-        } else return null;
-
-    }
-
-    private String setDefaultPostOnFb() {
-        String messageOnFB;
-        Cursor cursor = mImageAdapterList.getCursor();
-        cursor.moveToPosition(mItemPositionOnList);
-
-        String[] data = {cursor.getString(cursor.getColumnIndex(DataStorage.Items.NAME)),
-                         cursor.getString(cursor.getColumnIndex(DataStorage.Items.DESCRIPTION))};
-        messageOnFB = String.format("%s \n %s",data[0],data[1]);
-        return messageOnFB;
     }
 
     private void newFacebookShareFragment(long id) {
