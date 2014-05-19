@@ -49,9 +49,5 @@
         android:title="upload"
         android:visible="false"/>
 
-    <item
-        android:id="@+id/action_synchronize"
-        android:title="synchronize"
-        android:visible="false"/>
 
 </menu>
