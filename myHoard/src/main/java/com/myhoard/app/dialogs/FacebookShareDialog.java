@@ -63,20 +63,39 @@ public class FacebookShareDialog extends DialogFragment implements View.OnClickL
         if(v.getId() == R.id.share_button) {
             ConnectionDetector detector = new ConnectionDetector(getActivity());
             if(detector.isConnectingToInternet()) {
-                String message = null;
-                if (mPostOnWall.getText() != null) message = mPostOnWall.getText().toString();
-                backToTheItemsListFragment(message);
+                String message;
+                if (mPostOnWall.getText() != null) {
+                    message = mPostOnWall.getText().toString();
+                    if(isText(message))
+                        backToTheItemsListFragment(message);
+                }
             }
             else {
-                Toast.makeText(
-                        getActivity(),
-                        R.string.no_internet_connection,
-                        Toast.LENGTH_SHORT
-                ).show();
+                makeAndShowToast(getString(R.string.no_internet_connection));
                 dialog.dismiss();
             }
         }
 
+    }
+
+    private boolean isText(String text) {
+        if(text != null) {
+            text = text.trim();
+            if(text.length() > 0) return true;
+        } else {
+            makeAndShowToast(getString(R.string.empty_msg));
+        }
+        return false;
+    }
+
+    public void makeAndShowToast(String message) {
+        if(getActivity().getApplicationContext()!=null) {
+            Toast.makeText(
+                    getActivity().getApplicationContext(),
+                    message,
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     public void setDefaultPostOnFb(String message) {

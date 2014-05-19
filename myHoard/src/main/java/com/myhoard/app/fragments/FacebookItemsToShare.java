@@ -43,6 +43,7 @@ import com.myhoard.app.images.FacebookImageAdapterList;
 import com.myhoard.app.images.ImageLoader;
 import com.myhoard.app.provider.DataStorage;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 /**
@@ -53,7 +54,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private static final int LOAD_ITEMS = 0;
     public static final String ITEM_ID = "itemId";
     private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
-    private static final String PUBLISH_PHOTOS = "me/photos";
+    private static final String ALBUM_NAME = "myHoard";
 
     private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
     private ProgressDialog mProgressDialog; //Facebook
@@ -72,6 +73,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private Notification facebookNotification;
     private NotificationManager notificationManager;
     private static final int SHARE_ID = 0;
+    private String mAlbumId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -131,9 +133,20 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 CheckBox box =(CheckBox) view.findViewById(R.id.chbItemToShare);
-                if(box.isChecked()) box.setChecked(false);
-                else box.setChecked(true);
-                setSelectedItems(position);
+                if(box.isChecked()){
+                    box.setChecked(false);
+                    mCount--;
+                    setCountOnView();
+                    isSelected(position);
+
+                }
+                else {
+                    box.setChecked(true);
+                    mSelectedItems.add(position);
+                    mCount++;
+                    setCountOnView();
+                }
+
             }
         });
     }
@@ -147,26 +160,11 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         });
     }
 
-    private void setSelectedItems(int pos) {
-        if(isSelected(pos)) {
-            mCount--;
-            setCountOnView();
+    private void isSelected(int pos) {
+        for(int i=0;i<mSelectedItems.size();i++) {
+            if(mSelectedItems.get(i) == pos)
+                mSelectedItems.remove(i);
         }
-        else {
-            mSelectedItems.add(pos);
-            mCount++;
-            setCountOnView();
-        }
-    }
-
-    private boolean isSelected(long id) {
-        for(int i : mSelectedItems) {
-            if(id == i){
-                mSelectedItems.remove(id);
-                return true;
-            }
-        }
-        return false;
     }
 
     private void setCountOnView() {
@@ -243,7 +241,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private class SessionStatusCallback implements Session.StatusCallback {
         @Override
         public void call(Session session, SessionState state, Exception exception) {
-            shareOnFacebook(session);
+            createAlbumOnFacebook(session, mMessageOnFb, ALBUM_NAME);
         }
     }
 
@@ -253,35 +251,41 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
             buildNotification();
                 Request.Callback callback = new Request.Callback() {
                     public void onCompleted(Response response) {
-
                         FacebookRequestError error = response.getError();
                         if (error != null) {
                             if (getActivity().getApplicationContext() != null) {
-                                makeAndShowToast(error.getErrorMessage());
+                                Log.d("FB ERROR",error.getErrorMessage());
                             }
                         } else {
                             notificationManager.notify(SHARE_ID, facebookNotification);
                         }
-
                     }
                 };
-
 
                 /* AWA:FIXME: Niebezpieczne używanie wątku
         Brak anulowania tej operacji.
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.
         */
-                RequestBatch batch = new RequestBatch();
-                batch.add(prepareDataToShare(mMessageOnFb,0,session,callback));
-                for(int pos=1;pos < mSelectedItems.size();pos++) {
-                    batch.add(prepareDataToShare(null,pos,session,null));
-                }
+                RequestBatch batch = sendAllPhotos(mAlbumId,session,callback);
                 RequestAsyncTask mFacebookTask = new RequestAsyncTask(batch);
                 mFacebookTask.execute();
                 mProgressDialog.dismiss();
                 makeAndShowToast(getString(R.string.sharing_succeeded));
         }
+    }
+
+    private RequestBatch sendAllPhotos(String albumId,Session session, Request.Callback callback) {
+        RequestBatch batch = new RequestBatch();
+        //batch.add(createAlbumOnFacebook(session,mMessageOnFb,ALBUM_NAME));
+        for(int pos : mSelectedItems)
+            batch.add(sendPhotosToAlbum(albumId,pos,session,callback));
+        clearSelectedItems();
+        return batch;
+    }
+
+    private void clearSelectedItems() {
+        mSelectedItems.clear();
     }
 
     public void makeAndShowToast(String message) {
@@ -319,27 +323,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     /*
      Retrieving data that will be sharing on FB
      */
-    private Request prepareDataToShare(String message,int position,Session session, Request.Callback callback) {
-
-        int photoSizeX = 800;
-        int photoSizeY = 600;
-        Bundle bundle = new Bundle();
-
-        Cursor cursor = mFacebookImageAdapterList.getCursor();
-        cursor.moveToPosition(position);
-        // getting data form cursor
-        String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
-        if(data != null) {
-            // Decoding image
-            Bitmap image = ImageLoader.decodeSampledBitmapFromResource(data, photoSizeX, photoSizeY);
-            bundle.putParcelable("source", image);
-            bundle.putString("message", message);
-            return new Request(session, PUBLISH_PHOTOS, bundle, HttpMethod.POST,callback);
-        } else return null;
-
-    }
-
-    private void buildNotification() {
+     private void buildNotification() {
         Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
         facebookNotification = new NotificationCompat.Builder(getActivity().getApplicationContext())
@@ -350,5 +334,52 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                 .build();
         notificationManager =
                 (NotificationManager) getActivity().getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    private Request sendPhotosToAlbum(String album_id,int position,Session session,Request.Callback callback) {
+        int photoSizeX = 800;
+        int photoSizeY = 600;
+        Bundle bundle = new Bundle();
+        Cursor cursor = mFacebookImageAdapterList.getCursor();
+        cursor.moveToPosition(position);
+        // getting data form cursor
+        String data = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
+        if(data != null) {
+            // Decoding image
+            Bitmap image = ImageLoader.decodeSampledBitmapFromResource(data, photoSizeX, photoSizeY);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            byte []img = out.toByteArray();
+            bundle.putByteArray("source", img);
+            String publish = String.format("%s/photos",album_id);
+            return new Request(session, publish, bundle, HttpMethod.POST,callback);
+        } else return null;
+    }
+
+    private void createAlbumOnFacebook(final Session session,String message,String albumName) {
+        if (session != null && session.isOpened()) {
+            Bundle params = new Bundle();
+            params.putString("name", albumName);
+            params.putString("message", message);
+        /* make the API call */
+            new Request(
+                    session,
+                    "/me/albums",
+                    params,
+                    HttpMethod.POST,
+                    new Request.Callback() {
+                        public void onCompleted(Response response) {
+                            FacebookRequestError error = response.getError();
+                            if (error != null) {
+                                if (getActivity().getApplicationContext() != null) {
+                                    makeAndShowToast(error.getErrorMessage());
+                                }
+                            }
+                            mAlbumId = (String)response.getGraphObject().getProperty("id");
+                            shareOnFacebook(session);
+                        }
+                    }
+            ).executeAsync();
+        }
     }
 }
