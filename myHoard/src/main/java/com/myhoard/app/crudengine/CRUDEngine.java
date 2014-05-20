@@ -1,6 +1,5 @@
 package com.myhoard.app.crudengine;
 
-import android.content.Intent;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -17,10 +16,10 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
@@ -28,10 +27,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,6 +52,7 @@ import java.util.List;
 
     private static final String AUTHORIZATION = "Authorization";
     private static final String APPLICATION_JSON = "application/json; charset=utf-8";
+    private static final String NO_INTERNET_CONNECTION ="YOU DON\'T HAVE INTERNET CONNECTION";
     private static final int STATUS_CREATED = 201;
     private static final int STATUS_OK = 200;
     private static final int STATUS_NO_CONTENT = 204;
@@ -161,6 +159,8 @@ import java.util.List;
                     throw new RuntimeException(HTTP_response);
                 }
             }
+        } catch (ConnectTimeoutException e) {
+            throw new RuntimeException(NO_INTERNET_CONNECTION);
         } catch (Exception e) {
             Log.d("TAG", e.toString());
             throw new RuntimeException(handleError(HTTP_response));

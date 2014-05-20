@@ -53,6 +53,7 @@ public class RegisterActivity extends BaseActivity {
         password_strenght = (TextView) findViewById(R.id.passwordStrenghtText);
         imageView = (ImageView)findViewById(R.id.imageViewRegistry);
         textViewEmailAlreadyExists = (TextView) findViewById(R.id.textViewEmailAlreadyExists);
+        txt = (TextView)findViewById(R.id.NoInternetTextView);
 
         registryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +71,6 @@ public class RegisterActivity extends BaseActivity {
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
         if(!cd.isConnectingToInternet())
         {
-            txt = (TextView)findViewById(R.id.NoInternetTextView);
             txt.setText(getString(R.string.no_internet_connection));
 
         }
@@ -167,6 +167,7 @@ public class RegisterActivity extends BaseActivity {
 
         public User user;
         public Activity activity;
+        private String warning;
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -175,6 +176,7 @@ public class RegisterActivity extends BaseActivity {
                 UserManager.getInstance().register(user);
                 return UserManager.getInstance().login(user);
             } catch (RuntimeException e) {
+                warning = e.getMessage();
                 return false;
             }
         }
@@ -188,6 +190,9 @@ public class RegisterActivity extends BaseActivity {
 
                 Log.d(TAG,"finished");
                 return;
+            } else if (warning.equals(getString(R.string.no_internet_connection))) {
+                Log.d(TAG,"error");
+                txt.setText(getString(R.string.no_internet_connection));
             } else {
                 Log.d(TAG,"error");
                 textViewEmailAlreadyExists.setText(getString(R.string.email_already_exists));
