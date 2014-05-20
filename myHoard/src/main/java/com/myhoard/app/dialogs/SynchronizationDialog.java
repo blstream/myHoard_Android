@@ -20,15 +20,8 @@ public class SynchronizationDialog extends DialogFragment {
 
     private Dialog dialog;
     TextView stopSynchronization;
-    Intent synchronizationIntent;
-    Context context;
 
     public SynchronizationDialog() {}
-
-    public SynchronizationDialog (Intent synchronizationIntent, Context context) {
-        this.synchronizationIntent = synchronizationIntent;
-        this.context = context;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -42,7 +35,6 @@ public class SynchronizationDialog extends DialogFragment {
     private View.OnClickListener onClickStop = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            context.stopService(synchronizationIntent);
             dialog.dismiss();
         }
     };

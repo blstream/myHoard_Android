@@ -337,7 +337,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                     synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
                     synchronizationIntent.putExtra("option", "synchronization");
                     startService(synchronizationIntent);
-                    synchronizationDialog = new SynchronizationDialog(synchronizationIntent, getApplicationContext());
+                    synchronizationDialog = new SynchronizationDialog();
                     synchronizationDialog.show(getSupportFragmentManager(), "");
                 } else {
                     Toast.makeText(getApplicationContext(), getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show();
