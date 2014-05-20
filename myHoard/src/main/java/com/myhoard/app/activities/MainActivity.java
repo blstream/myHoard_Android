@@ -74,6 +74,9 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private static final int YOFFSET = 0;
     private static final String NEWCOLLECTION = "NewCollection";
     private static final String MAIN = "Main";
+    //FIXME:CODEREVIEW: Nazwa stalej w innym jezyku niz pozostale stale, zmienne
+    //Jezeli uzywane sa jako fragment tag to proszę o sufikst _TAG
+    //np. NEWELEMENT_TAG
     private static final String WYLOGOWANO = "Wylogowano";
     private static final String NEWELEMENT = "NewElement";
     private static final String ITEMSLIST = "ItemsList";
@@ -164,6 +167,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 svSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextSubmit(String s) {
+                        //FIXME:CODEREVIEW:AWA: Wartosci hardoced
                         if (s.equals("generate")) {
                             GeneratorDialog generatorDialog = new GeneratorDialog();
                             generatorDialog.show(getSupportFragmentManager(), "");
@@ -173,6 +177,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
                     @Override
                     public boolean onQueryTextChange(String s) {
+                        //FIXME:CODEREVIEW:AWA: Wartosci hardoced 20 ?
                         if (s.length() > 20) {
                             svSearch.setQuery(s.substring(0, 20), false);
                         } else if (s.length() >= 2){
@@ -224,6 +229,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         actionBarDrawerToggle.syncState();
     }
 
+    //FIXME:CODEREVIEW:AWA: Martwy kod
     /*@Override
     protected void onStart() {
         IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
@@ -261,6 +267,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        //FIXME:CODEREVIEW:AWA: Martwy kod
         //setting sort option unvisible
         //Mplewko: usunę jak ostatecznie zakończę sortowanie
         //menu.findItem(R.id.action_sort).setVisible(false);
@@ -271,6 +278,8 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         return super.onCreateOptionsMenu(menu);
     }
 
+    //FIXME:CODEREVIEW:AWA: Za dlugie ciało metody.
+    //Patrz Książka R. Martin Czysty kod Rozdział 3
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -306,6 +315,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 GeneratorDialog generatorDialog = new GeneratorDialog();
                 generatorDialog.show(getSupportFragmentManager(), "");
                 break;
+            //FIXME:CODEREVIEW:AWA: Martwy kod
             //MPLewko: usunę jak ostatecznie zakończę sortowanie
             /*case R.id.action_sort:
 
@@ -352,10 +362,12 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
     @Override
     public void onBackStackChanged() {
+        //FIXME:CODEREVIEW:AWA: Martwy kod
         //    shouldDisplayHomeUp();
     }
 
     void shouldDisplayHomeUp() {
+        //FIXME:CODEREVIEW:AWA: Martwy kod
         //Enable Up button only  if there are entries in the back stack
         //  boolean canBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
         //  getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
@@ -457,6 +469,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         }
     };
 
+    //FIXME:CODEREVIEW:AWA: Czystosc kodu ogolnie do poprawki
     private void needItForDebugging() {
         //Kod potrzebny do debugowania, prosze go nie uswuac
         Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);

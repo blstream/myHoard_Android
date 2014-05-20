@@ -23,7 +23,7 @@ import com.myhoard.app.model.User;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+//FIXME:CODEREVIEW:AWA: Usun tabulacje na początku nagłówka
     /*
     Created by Mateusz Czyszkiewicz , modified by Marcin Laszcz, Tomasz Nosal
     */
@@ -156,7 +156,7 @@ public class RegisterActivity extends BaseActivity {
         return m.matches();
     }
 
-
+//FIXME:CODEREVIEW:AWA: Usun niepotrzebne puste linie
 
 
 
@@ -199,7 +199,7 @@ public class RegisterActivity extends BaseActivity {
             }
         }
     }
-
+//FIXME:CODEREVIEW:AWA: Usun niepotrzebne puste linie
 
 
 
@@ -214,6 +214,7 @@ public class RegisterActivity extends BaseActivity {
 
             }
 
+            //FIXME:CODEREVIEW:AWA: Wartości hardcoded low, nice, ....
             @Override
             public void afterTextChanged(Editable s) {
 

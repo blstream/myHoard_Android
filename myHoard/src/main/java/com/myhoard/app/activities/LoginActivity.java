@@ -88,6 +88,9 @@ public class LoginActivity extends BaseActivity {
     public void registry() {
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
         if (cd.isConnectingToInternet()) {
+
+            //FIXME:CODEREVIEW:AWA: Nazwa zmiennej z podkreslnikiem. Nie stosujemy tej praktyki w
+            // przypadku zwykłych zmiennych
             String email_ch = String.valueOf(email.getText());
             String password_ch = String.valueOf(password.getText());
 

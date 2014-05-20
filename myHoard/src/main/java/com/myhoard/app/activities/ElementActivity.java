@@ -34,6 +34,8 @@ import com.myhoard.app.provider.DataStorage;
  */
 
 /**
+ * FIXME: AWA: CLEAN CODE
+ *
  * README
  * Ta klasa jak i wszystkie w tym pakiecie sa jeszcze przebudowywane, dlatego sa tam rózne hard coded wartości.
  * Zostanie to niedlugo naprawione.
