@@ -95,7 +95,7 @@ public class UserManager {
         return true;
     }
 
-    public boolean register(User user) {
+    public boolean register(User user) throws RuntimeException {
         userHttpEngine = new UserHttpEngine(ip + USER_PATH);
         return userHttpEngine.create(user, null) == null ? false : true;
     }

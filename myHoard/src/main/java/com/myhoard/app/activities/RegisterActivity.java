@@ -37,7 +37,7 @@ public class RegisterActivity extends BaseActivity {
     private TextView password_strenght;
     private ImageView imageView;
     private TextView txt;
-
+    private TextView textViewEmailAlreadyExists;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +45,14 @@ public class RegisterActivity extends BaseActivity {
         setContentView(R.layout.activity_register);
 
         emailRegistry = (EditText) findViewById(R.id.email_register);
+        emailRegistry.addTextChangedListener(emailWatcher);
         passwordRegistry = (EditText) findViewById(R.id.password_register);
         usernameRegistry = (EditText) findViewById(R.id.username_register);
         Button registryButton = (Button) findViewById(R.id.reg_button);
         passwordRegistry.addTextChangedListener(PasswordEditorMatcher);
         password_strenght = (TextView) findViewById(R.id.passwordStrenghtText);
         imageView = (ImageView)findViewById(R.id.imageViewRegistry);
+        textViewEmailAlreadyExists = (TextView) findViewById(R.id.textViewEmailAlreadyExists);
 
         registryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +114,25 @@ public class RegisterActivity extends BaseActivity {
         }
     }
 
+    TextWatcher emailWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            String warning = textViewEmailAlreadyExists.getText().toString();
+            if (warning.length()>0) {
+                textViewEmailAlreadyExists.setText("");
+            }
+        }
+    };
 
 
     public boolean validatePassword() {
@@ -150,8 +171,12 @@ public class RegisterActivity extends BaseActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             UserManager.getInstance().setIp(getString(R.string.serverJava2));
-            UserManager.getInstance().register(user);
-            return UserManager.getInstance().login(user);
+            try {
+                UserManager.getInstance().register(user);
+                return UserManager.getInstance().login(user);
+            } catch (RuntimeException e) {
+                return false;
+            }
         }
 
         protected void onPostExecute(Boolean result) {
@@ -163,9 +188,10 @@ public class RegisterActivity extends BaseActivity {
 
                 Log.d(TAG,"finished");
                 return;
+            } else {
+                Log.d(TAG,"error");
+                textViewEmailAlreadyExists.setText(getString(R.string.email_already_exists));
             }
-
-            Log.d(TAG,"error");
         }
     }
 

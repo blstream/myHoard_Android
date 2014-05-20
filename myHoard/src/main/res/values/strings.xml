@@ -131,5 +131,6 @@
     <string name="tag_exist">Tag %s already added</string>
     <string name="selected_items">Selected items: </string>
     <string name="empty_msg">Post cannot be empty</string>
+    <string name="email_already_exists">EMAIL ALREADY EXISTS</string>
 
 </resources>
