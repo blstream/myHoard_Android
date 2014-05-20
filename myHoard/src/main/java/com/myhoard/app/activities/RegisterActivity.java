@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,10 +22,10 @@ import com.myhoard.app.model.User;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//FIXME:CODEREVIEW:AWA: Usun tabulacje na początku nagłówka
-    /*
-    Created by Mateusz Czyszkiewicz , modified by Marcin Laszcz, Tomasz Nosal
-    */
+
+/*
+Created by Mateusz Czyszkiewicz , modified by Marcin Laszcz, Tomasz Nosal
+*/
 public class RegisterActivity extends BaseActivity {
 
 
@@ -35,9 +34,9 @@ public class RegisterActivity extends BaseActivity {
     private EditText passwordRegistry;
     private EditText usernameRegistry;
     private TextView password_strenght;
-    private ImageView imageView;
     private TextView txt;
     private TextView textViewEmailAlreadyExists;
+    private RegisterUser register;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +50,6 @@ public class RegisterActivity extends BaseActivity {
         Button registryButton = (Button) findViewById(R.id.reg_button);
         passwordRegistry.addTextChangedListener(PasswordEditorMatcher);
         password_strenght = (TextView) findViewById(R.id.passwordStrenghtText);
-        imageView = (ImageView)findViewById(R.id.imageViewRegistry);
         textViewEmailAlreadyExists = (TextView) findViewById(R.id.textViewEmailAlreadyExists);
         txt = (TextView)findViewById(R.id.NoInternetTextView);
 
@@ -63,23 +61,22 @@ public class RegisterActivity extends BaseActivity {
         });
     }
 
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        register.cancel(true);
+    }
 
     public void registerUser() {
-
 
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
         if(!cd.isConnectingToInternet())
         {
             txt.setText(getString(R.string.no_internet_connection));
-
         }
         else {
             boolean passwordFound = validatePassword();
             boolean emailFound = validateEmail();
-
-
-
 
             if (!emailFound ) {
 
@@ -90,7 +87,6 @@ public class RegisterActivity extends BaseActivity {
                 passwordRegistry.setError(getString(R.string.password_information));
             }
 
-
             if (passwordFound && emailFound) {
                 User user = new User();
                 user.setEmail(String.valueOf(emailRegistry.getText()).toLowerCase());
@@ -100,13 +96,7 @@ public class RegisterActivity extends BaseActivity {
                 }
                 user.setPassword(String.valueOf(passwordRegistry.getText()));
 
-
-            /* AWA:FIXME: Niebezpieczne używanie wątku
-        Brak anulowania tej operacji.
-        Wyjście z Activity nie kończy wątku,
-        należy o to zadbać.
-        */
-                RegisterUser register = new RegisterUser();
+                register = new RegisterUser();
                 register.user = user;
                 register.activity = this;
                 register.execute();
@@ -127,9 +117,12 @@ public class RegisterActivity extends BaseActivity {
 
         @Override
         public void afterTextChanged(Editable s) {
-            String warning = textViewEmailAlreadyExists.getText().toString();
-            if (warning.length()>0) {
-                textViewEmailAlreadyExists.setText("");
+            CharSequence warningText = textViewEmailAlreadyExists.getText();
+            if (warningText != null) {
+                String warning = textViewEmailAlreadyExists.getText().toString();
+                if (warning.length() > 0) {
+                    textViewEmailAlreadyExists.setText("");
+                }
             }
         }
     };
@@ -156,13 +149,6 @@ public class RegisterActivity extends BaseActivity {
         return m.matches();
     }
 
-//FIXME:CODEREVIEW:AWA: Usun niepotrzebne puste linie
-
-
-
-
-
-
     private class RegisterUser extends AsyncTask<Void, Void, Boolean> {
 
         public User user;
@@ -187,9 +173,6 @@ public class RegisterActivity extends BaseActivity {
                 Intent intent = new Intent(activity, MainActivity.class);
                 startActivity(intent);
                 activity.finish();
-
-                Log.d(TAG,"finished");
-                return;
             } else if (warning.equals(getString(R.string.no_internet_connection))) {
                 Log.d(TAG,"error");
                 txt.setText(getString(R.string.no_internet_connection));
@@ -199,9 +182,6 @@ public class RegisterActivity extends BaseActivity {
             }
         }
     }
-//FIXME:CODEREVIEW:AWA: Usun niepotrzebne puste linie
-
-
 
         private final TextWatcher PasswordEditorMatcher = new TextWatcher() {
             @Override

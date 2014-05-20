@@ -1,7 +1,5 @@
 package com.myhoard.app.Managers;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.myhoard.app.crudengine.CRUDEngine;
@@ -31,17 +29,13 @@ import java.lang.reflect.Type;
  */
 public class UserManager {
     private static UserManager instance = null;
-    private static Object mutex = new Object();
-    private static final String TAG = "UserManager";
+    private static final Object mutex = new Object();
     private User user;
     private Token token;
     private UserHttpEngine userHttpEngine;
-
-    //TODO add support for more servers and removed fixed ip address from code
     private String ip;
     private static final String USER_PATH = "users/";
     private static final String TOKEN_PATH = "oauth/token/";
-    private static final String API_USERNAME = "username";
     private static final String API_EMAIL = "email";
     private static final String API_PASSWORD = "password";
     private static final String API_GRANT_TYPE = "grant_type";
@@ -97,7 +91,7 @@ public class UserManager {
 
     public boolean register(User user) throws RuntimeException {
         userHttpEngine = new UserHttpEngine(ip + USER_PATH);
-        return userHttpEngine.create(user, null) == null ? false : true;
+        return userHttpEngine.create(user, null) != null;
     }
 
     /**
@@ -105,11 +99,7 @@ public class UserManager {
      * @return true if there is user currently logged in otherwise returns false
      */
     public boolean isLoggedIn() {
-        if (user == null) {
-            return false;
-        }
-
-        return true;
+        return user != null;
     }
 
     /**
@@ -157,17 +147,14 @@ public class UserManager {
                 //Checking response
                 if(response!=null){
                     HttpEntity responseEntity = response.getEntity();
-                    String HTTP_response = null;
+                    String HTTP_response;
                     HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
 
                     if (HTTP_response.contains(ERROR_STRING)){
-                        Log.d(TAG, "nieudalo sie pobrac tokena");
                         return null;
                     } else {
-                        Log.d(TAG, HTTP_response);
                         Type tokenType = new TypeToken<Token>(){}.getType();
-                        Token token = new Gson().fromJson( HTTP_response , tokenType);
-                        return token;
+                        return new Gson().fromJson( HTTP_response , tokenType);
                     }
                 }
             } catch(Exception e) {

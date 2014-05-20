@@ -70,18 +70,18 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
-    private static final int XOFFSET = 0;
-    private static final int YOFFSET = 0;
-    private static final String NEWCOLLECTION = "NewCollection";
+    private static final int X_OFFSET = 0;
+    private static final int Y_OFFSET = 0;
+    private static final String NEW_COLLECTION = "NewCollection";
     private static final String MAIN = "Main";
-    //FIXME:CODEREVIEW: Nazwa stalej w innym jezyku niz pozostale stale, zmienne
-    //Jezeli uzywane sa jako fragment tag to proszę o sufikst _TAG
-    //np. NEWELEMENT_TAG
-    private static final String WYLOGOWANO = "Wylogowano";
-    private static final String NEWELEMENT = "NewElement";
-    private static final String ITEMSLIST = "ItemsList";
+    private static final String LOGOUT = "Wylogowano";
+    private static final String NEW_ELEMENT = "NewElement";
+    private static final String ITEMS_LIST = "ItemsList";
     private static final String FRAGMENT = "fragment";
     private static DrawerLayout drawerLayout = null;
+
+    private static final String OPTION = "option";
+    private static final String SYNCHRONIZATION = "synchronization";
     private SynchronizationDialog synchronizationDialog;
 
     private NavDrawerListAdapter navDrawerListAdapter;
@@ -97,7 +97,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
         //Listen for changes in the back stack
         fm.addOnBackStackChangedListener(this);
-        shouldDisplayHomeUp();
 
         setVariables();
         openFragment(savedInstanceState, fm);
@@ -110,7 +109,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter("notification"));
-        //needItForDebugging();
     }
 
     @Override
@@ -186,7 +184,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                             collectionsListFragment.fillGridView(args);
                         } else if (s.length() <2){
                             collectionsListFragment.fillGridView(null); // reset listy wyników
-
                         }
                         return true;
                     }
@@ -228,16 +225,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         super.onPostCreate(savedInstanceState);
         actionBarDrawerToggle.syncState();
     }
-
-    //FIXME:CODEREVIEW:AWA: Martwy kod
-    /*@Override
-    protected void onStart() {
-        IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        receiver = new ResponseReceiver();
-        registerReceiver(receiver, filter);
-        super.onStart();
-    }*/
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -285,7 +272,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-
         if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
@@ -293,23 +279,13 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             case R.id.action_new_collection:
                 item.setTitle(R.string.action_new_collection);
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
-                        .addToBackStack(NEWCOLLECTION)
+                        .replace(R.id.container, new CollectionFragment(), NEW_COLLECTION)
+                        .addToBackStack(NEW_COLLECTION)
                         .commit();
 
                 break;
             case R.id.action_login:
-                UserManager userManager = UserManager.getInstance();
-                if (!userManager.isLoggedIn()) {
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    startActivity(intent);
-                } else {
-                    userManager.logout();
-                    Toast toast = Toast.makeText(getBaseContext(), WYLOGOWANO,
-                            Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, XOFFSET, YOFFSET);
-                    toast.show();
-                }
+                startLoginActivityOrLogout();
                 break;
             case R.id.action_generate:
                 GeneratorDialog generatorDialog = new GeneratorDialog();
@@ -331,27 +307,8 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                     fragment.itemsSortOrderChange(item);
                 }
                 break;*/
-            case R.id.action_download:
-                Intent synchronize = new Intent(this, SynchronizationService.class);
-                synchronize.putExtra("option","download");
-                startService(synchronize);
-                break;
-            case R.id.action_upload:
-                synchronizationIntent = new Intent(this, SynchronizationService.class);
-                synchronizationIntent.putExtra("option","upload");
-                startService(synchronizationIntent);
-                break;
             case R.id.action_synchronize:
-                ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
-                if (cd.isConnectingToInternet()) {
-                    synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
-                    synchronizationIntent.putExtra("option", "synchronization");
-                    startService(synchronizationIntent);
-                    synchronizationDialog = new SynchronizationDialog();
-                    synchronizationDialog.show(getSupportFragmentManager(), "");
-                } else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show();
-                }
+                startSynchronization();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -359,18 +316,37 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         return true;
     }
 
+    private void startLoginActivityOrLogout() {
+        UserManager userManager = UserManager.getInstance();
+        if (!userManager.isLoggedIn()) {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+        } else {
+            userManager.logout();
+            Toast toast = Toast.makeText(getBaseContext(), LOGOUT,
+                    Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, X_OFFSET, Y_OFFSET);
+            toast.show();
+        }
+    }
+
+    private void startSynchronization() {
+        ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+        if (cd.isConnectingToInternet()) {
+            synchronizationIntent = new Intent(MainActivity.this, SynchronizationService.class);
+            synchronizationIntent.putExtra(OPTION, SYNCHRONIZATION);
+            startService(synchronizationIntent);
+            synchronizationDialog = new SynchronizationDialog();
+            synchronizationDialog.show(getSupportFragmentManager(), "");
+        } else {
+            Toast.makeText(getApplicationContext(), getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show();
+        }
+    }
 
     @Override
     public void onBackStackChanged() {
         //FIXME:CODEREVIEW:AWA: Martwy kod
         //    shouldDisplayHomeUp();
-    }
-
-    void shouldDisplayHomeUp() {
-        //FIXME:CODEREVIEW:AWA: Martwy kod
-        //Enable Up button only  if there are entries in the back stack
-        //  boolean canBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
-        //  getSupportActionBar().setDisplayHomeAsUpEnabled(canBack);
     }
 
     @Override
@@ -393,15 +369,15 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
               //new collection
             case 1:
-                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
-                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
-                        !getVisibleFragmentTag().equals(NEWELEMENT)) {
+                if (!getVisibleFragmentTag().equals(NEW_COLLECTION) &&
+                        !getVisibleFragmentTag().equals(ITEMS_LIST) &&
+                        !getVisibleFragmentTag().equals(NEW_ELEMENT)) {
                     //item.setTitle(R.string.action_new_collection);//TODO correct
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.container, new CollectionFragment(), NEWCOLLECTION)
-                            .addToBackStack(NEWCOLLECTION)
+                            .replace(R.id.container, new CollectionFragment(), NEW_COLLECTION)
+                            .addToBackStack(NEW_COLLECTION)
                             .commit();
-                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
+                } else if (getVisibleFragmentTag().equals(ITEMS_LIST)) {
                     //item.setTitle(R.string.action_new_element);//TODO correct
                     Intent in = new Intent(this,ElementActivity.class);
                     in.putExtra("categoryId",collectionSelected);
@@ -438,18 +414,21 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     private BroadcastReceiver receiver = new BroadcastReceiver() {
 
         List <String> errorSynchronizationList = new ArrayList<String>();
+        private static final String RESULT = "result";
+        private static final String SYNCHRONIZED = "synchronized";
+        private static final String ERROR = "error";
+        private static final String ERRORS = "Errors";
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String stringExtra = intent.getStringExtra("result");
+            String stringExtra = intent.getStringExtra(RESULT);
             if (stringExtra != null) {
-                if (stringExtra.equals("synchronized")){
-                    //progress.dismiss();
+                if (stringExtra.equals(SYNCHRONIZED)){
                     synchronizationDialog.dismiss();
                     showErrors();
                 }
             }
-            stringExtra = intent.getStringExtra("error");
+            stringExtra = intent.getStringExtra(ERROR);
             if (stringExtra != null) {
                 errorSynchronizationList.add(stringExtra);
             }
@@ -458,7 +437,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         private void showErrors() {
             if (errorSynchronizationList.size()>0) {
                 builder.setMessage(errorSynchronizationList.toString())
-                        .setTitle("Errors")
+                        .setTitle(ERRORS)
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                             }
@@ -468,54 +447,4 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             }
         }
     };
-
-    //FIXME:CODEREVIEW:AWA: Czystosc kodu ogolnie do poprawki
-    private void needItForDebugging() {
-        //Kod potrzebny do debugowania, prosze go nie uswuac
-        Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
-            Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
-        }
-        Log.d(TAG,"<-----KOLKECJE----->");
-        cursor = getContentResolver().query(DataStorage.Collections.CONTENT_URI, null, null, null, null);
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections._ID)));
-            Log.d(TAG, "name "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections.NAME)));
-            //Log.d(TAG, "iloscItemow "+cursor.getString(cursor.getColumnIndex(DataStorage.Collections.ITEMS_NUMBER)));
-
-            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.SYNCHRONIZED))>0)).toString());
-            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.DELETED))>0)).toString());
-            //Log.d(TAG, (cursor.getString(cursor.getColumnIndex(DataStorage.Collections.MODIFIED_DATE))).toString());
-            //Log.d(TAG, ((Integer)cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))).toString());
-            //Log.d(TAG, cursor.getString(cursor.getColumnIndex(DataStorage.Collections.TYPE)));
-           // Log.d(TAG, DataStorage.TypeOfCollection.values()[cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE))].toString());
-        }
-
-        Log.d(TAG,"<--------ITEMY-------->");
-        //String selection = String.format(DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_SERVER
-        String[] projection = new String[] { DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_SERVER,
-                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,
-                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.ID_COLLECTION,
-                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items.SYNCHRONIZED,
-                //DataStorage.Media.TABLE_NAME + "." + DataStorage.Media.FILE_NAME,
-        };
-        cursor = getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, null, null, null);
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d(TAG,"<-ITEM->");
-            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Items._ID)));
-            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_SERVER)));
-            Log.d(TAG, "id_collection "+cursor.getString(cursor.getColumnIndex(DataStorage.Items.ID_COLLECTION)));
-            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Items.SYNCHRONIZED))>0)).toString());
-            //Log.d(TAG, "file name "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
-        }
-
-        cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI, null, null, null, null);
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Log.d(TAG, "<-Media->");
-            Log.d(TAG, "id "+cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
-            Log.d(TAG, "id_server "+cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER)));
-            Log.d(TAG, ((Boolean)(cursor.getInt(cursor.getColumnIndex(DataStorage.Media.SYNCHRONIZED))>0)).toString());
-        }
-    }
 }

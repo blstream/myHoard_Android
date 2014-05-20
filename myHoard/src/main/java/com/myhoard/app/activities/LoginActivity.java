@@ -22,8 +22,8 @@ import com.myhoard.app.model.User;
 */
 public class LoginActivity extends BaseActivity {
 
-    private EditText email;
-    private EditText password;
+    private EditText editTextEmail;
+    private EditText editTextPassword;
 
     private final static String SAVELOGIN = "saveLogin";
     private final static String LOGINPREFS = "loginPrefs";
@@ -50,8 +50,8 @@ public class LoginActivity extends BaseActivity {
 
         Boolean saveLogin = loginPreferences.getBoolean(SAVELOGIN, false);
         if (saveLogin) {
-            email.setText(loginPreferences.getString(USERNAMES, ""));
-            password.setText(loginPreferences.getString(PASSWORDS, ""));
+            editTextEmail.setText(loginPreferences.getString(USERNAMES, ""));
+            editTextPassword.setText(loginPreferences.getString(PASSWORDS, ""));
             remember_check.setChecked(true);
         }
 
@@ -73,8 +73,8 @@ public class LoginActivity extends BaseActivity {
 
 
     public void setVariables() {
-        email = (EditText) findViewById(R.id.login_email);
-        password = (EditText) findViewById(R.id.login_password);
+        editTextEmail = (EditText) findViewById(R.id.login_email);
+        editTextPassword = (EditText) findViewById(R.id.login_password);
         login_button = (Button) findViewById(R.id.button_login);
         txt = (TextView) findViewById(R.id.registration_text);
         remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
@@ -89,14 +89,12 @@ public class LoginActivity extends BaseActivity {
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
         if (cd.isConnectingToInternet()) {
 
-            //FIXME:CODEREVIEW:AWA: Nazwa zmiennej z podkreslnikiem. Nie stosujemy tej praktyki w
-            // przypadku zwykłych zmiennych
-            String email_ch = String.valueOf(email.getText());
-            String password_ch = String.valueOf(password.getText());
+            String email = String.valueOf(editTextEmail.getText());
+            String password = String.valueOf(editTextPassword.getText());
 
             user = new User();
-            user.setEmail(email_ch);
-            user.setPassword(password_ch);
+            user.setEmail(email);
+            user.setPassword(password);
 
             getUserSingleton = new GetUserSingleton();
             getUserSingleton.execute();
@@ -105,8 +103,8 @@ public class LoginActivity extends BaseActivity {
             if (remember_check.isChecked()) {
 
                 editor.putBoolean(SAVELOGIN, true);
-                editor.putString(USERNAMES, email_ch);
-                editor.putString(PASSWORDS, password_ch);
+                editor.putString(USERNAMES, email);
+                editor.putString(PASSWORDS, password);
                 editor.putBoolean(CHECK, true);
                 editor.commit();
             } else {
