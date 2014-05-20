@@ -130,5 +130,9 @@
     <string name="no_photo">No photo</string>
     <string name="tag_exist">Tag %s already added</string>
     <string name="selected_items">Selected items: </string>
+    <string name="gps_info_dialog_title">GPS is off</string>
+    <string name="gps_info_dialog_message">Do you want to turn on the GPS?</string>
+    <string name="gps_info_dialog_ok">Yes</string>
+    <string name="gps_info_dialog_cancel">No</string>
 
 </resources>
