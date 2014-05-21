@@ -1,5 +1,7 @@
 package com.myhoard.app.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,7 +10,10 @@ import org.json.JSONObject;
  *         Date: 09.04.14
  */
 public class ItemMedia {
+
+    @SerializedName("id")
     public String id;
+    @SerializedName("url")
     public String url;
 
     public ItemMedia(String url, String id) {

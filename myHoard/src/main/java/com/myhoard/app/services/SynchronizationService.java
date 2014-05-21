@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.crudengine.CRUDEngine;
@@ -543,7 +544,8 @@ public class SynchronizationService extends IntentService {
 
                 values.put(DataStorage.Media.FILE_NAME, contentUri.toString());
                 values.put(DataStorage.Media.ID_SERVER, med.getId());
-
+                values.put(DataStorage.Media.CREATED_DATE, Calendar.getInstance()
+                        .getTime().getTime());
                 values.put(DataStorage.Media.ID_ITEM, id);
                 values.put(DataStorage.Media.SYNCHRONIZED, true);
 
@@ -592,6 +594,7 @@ public class SynchronizationService extends IntentService {
 
     private void downloadCollections() {
         String url = userManager.getIp() + USERS_ENDPOINT + UserManager.getInstance().getToken().getUserId() + "/" + COLLECTIONS_ENDPOINT;
+        Log.d("TAG", url);
         CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(url, Collection.class);
         List<Collection> collections = new ArrayList<>();
         try {
@@ -617,6 +620,7 @@ public class SynchronizationService extends IntentService {
             }
 
         for (Collection collection : collections) {
+            Log.d("TAG", "id kolekcji: " + collection.getId());
             if (idServerToModifiedDate.get(collection.getId()) == null) {
                 insert(collection);
             } else if (modifiedDateOnServerIsGraterThanInDatabase(collection.getModified_date(), idServerToModifiedDate.get(collection.getId()))) {
@@ -685,6 +689,7 @@ public class SynchronizationService extends IntentService {
         if (collection.getDescription() != null)
             values.put(Collections.DESCRIPTION, collection.getDescription());
         String tags = "";
+        if (collection.getTags() != null)
         for (String s : collection.getTags()) {
             tags = tags + "#" + s + " ";
         }
@@ -697,12 +702,14 @@ public class SynchronizationService extends IntentService {
         values.put(Collections.SYNCHRONIZED, true);
 
         try {
+            if (collection.getModified_date() != null && collection.getCreated_date() != null) {
             java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getModified_date());
             java.util.Date creDate = new SimpleDateFormat(DATE_FORMAT).parse(collection.getCreated_date());
             long modifiedDate = modDate.getTime();
             long createdDate = creDate.getTime();
             values.put(Collections.MODIFIED_DATE, modifiedDate);
             values.put(Collections.CREATED_DATE, createdDate);
+            }
         } catch (ParseException e) {
             values.put(Collections.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
             values.put(Collections.CREATED_DATE, Calendar.getInstance().getTimeInMillis());

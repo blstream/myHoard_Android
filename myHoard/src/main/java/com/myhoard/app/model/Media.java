@@ -1,5 +1,7 @@
 package com.myhoard.app.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,8 +13,10 @@ import org.json.JSONObject;
  */
 public class Media implements IModel {
 
+    @SerializedName("id")
     private String id;
 
+    @SerializedName("file")
     private byte[] file;
 
     public byte[] getFile() {

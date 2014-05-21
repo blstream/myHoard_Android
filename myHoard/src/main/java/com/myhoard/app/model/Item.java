@@ -51,15 +51,21 @@ import java.util.List;
  */
 public class Item implements IModel, Parcelable
 {
+    @SerializedName("id")
     public String id;
+    @SerializedName("name")
     public String name;
+    @SerializedName("description")
     public String description;
+    @SerializedName("location")
     public ItemLocation location;
+    @SerializedName("media")
     public List<ItemMedia> media = new ArrayList<>();
     @SerializedName("created_date")
     public String createdDate;
     @SerializedName("modified_date")
     public String modifiedDate;
+    @SerializedName("collection")
     public String collection;
     public String locationTxt;
 

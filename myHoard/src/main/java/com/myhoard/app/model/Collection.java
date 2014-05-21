@@ -16,15 +16,23 @@ import java.util.List;
  */
 public class Collection implements IModel {
 
+    @SerializedName("id")
     private String id;
+    @SerializedName("name")
     private String name;
+    @SerializedName("description")
     private String description;
+    @SerializedName("tags")
     private List<String> tags;
+    @SerializedName("owner")
     private String owner;
     @SerializedName("public")
     private Boolean ifPublic;
+    @SerializedName("items_number")
     private String items_number;
+    @SerializedName("created_date")
     private String created_date;
+    @SerializedName("modified_date")
     private String modified_date;
 
     public Collection(String name, String description, List<String> tags, String owner, String items_number, String created_date, String modified_date) {
