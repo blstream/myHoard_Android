@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
+import com.myhoard.app.dialogs.GPSInfoDialog;
 import com.myhoard.app.element.ElementReadFragment;
 import com.myhoard.app.element.ElementAddEditFragment;
 import com.myhoard.app.gps.GPSProvider;
@@ -47,6 +48,7 @@ public class ElementActivity extends ActionBarActivity {
     private long categoryId = -1;
     private AsyncElementRead asyncElementRead;
     private Intent intent;
+    private GPSInfoDialog gpsInfoDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -211,11 +213,28 @@ public class ElementActivity extends ActionBarActivity {
                 elementAdd.gpsEnabled(gpsEnabled);
             }
 
+            if(gpsInfoDialog == null) {
+                gpsInfoDialog = new GPSInfoDialog();
+            }
             if(gpsEnabled) {
+                if(isDialogVisible(gpsInfoDialog)){
+                    gpsInfoDialog.dismiss();
+                }
                 updatePosition(intent);
+            } else {
+                if(!isDialogVisible(gpsInfoDialog)) {
+                    gpsInfoDialog.show(getSupportFragmentManager(), "gps_dialog");
+                }
             }
         }
     };
+
+    private boolean isDialogVisible(GPSInfoDialog dialog){
+        if(dialog != null) {
+            return dialog.getDialog() != null;
+        }
+        return false;
+    }
 
 	/*
 	 * KONIEC - Część kodu odpowiedzialna za binder
