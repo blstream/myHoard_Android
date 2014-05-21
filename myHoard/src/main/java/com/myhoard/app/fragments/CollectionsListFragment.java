@@ -46,6 +46,7 @@ import android.widget.TextView;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
+import com.myhoard.app.activities.ElementActivity;
 import com.myhoard.app.activities.MainActivity;
 import com.myhoard.app.images.ImageAdapter;
 import com.myhoard.app.provider.DataStorage;
@@ -59,6 +60,7 @@ public class CollectionsListFragment extends Fragment implements
 
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int EDIT_ID = Menu.FIRST + 2;
+    private static final int NEW_ELEMENT_ID = Menu.FIRST + 3;
     private static final String ItemsList = "ItemsList";
     private static final String NEWCOLLECTION = "NewCollection";
     private static final String EDITCOLLECTION = "EditCollection";
@@ -262,6 +264,7 @@ public class CollectionsListFragment extends Fragment implements
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add(0, EDIT_ID, 0, R.string.menu_edit);
         menu.add(0, DELETE_ID, 1, R.string.menu_delete);
+        menu.add(0, NEW_ELEMENT_ID,2,R.string.action_new_element);
     }
 
     @Override
@@ -297,6 +300,13 @@ public class CollectionsListFragment extends Fragment implements
                         .replace(R.id.container, collectionFragment, EDITCOLLECTION)
                         .addToBackStack(EDITCOLLECTION)
                         .commit();
+                return true;
+            case NEW_ELEMENT_ID:
+                Intent in = new Intent(getActivity(),ElementActivity.class);
+                if(info!=null){
+                    in.putExtra("categoryId",info.id);
+                    startActivity(in);
+                }
                 return true;
         }
         return super.onContextItemSelected(item);
