@@ -12,12 +12,9 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.provider.MediaStore;
-import android.widget.Toast;
 
 import com.myhoard.app.Managers.UserManager;
-import com.myhoard.app.R;
 import com.myhoard.app.crudengine.CRUDEngine;
-import com.myhoard.app.crudengine.ConnectionDetector;
 import com.myhoard.app.crudengine.MediaCrudEngine;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.IModel;
@@ -85,18 +82,6 @@ public class SynchronizationService extends IntentService {
         String option = intent.getStringExtra("option");
 
         switch (option) {
-            case "download":
-                downloadCollections();
-                downloadItems();
-
-                Intent intentt = new Intent("notification");
-                intentt.putExtra("result2", "downloaded");
-                sendBroadcast(intentt);
-                break;
-            case "upload":
-                uploadCollections();
-                uploadItems();
-                break;
             case "synchronization":
                 uploadCollections();
                 uploadItems();
@@ -155,6 +140,7 @@ public class SynchronizationService extends IntentService {
 
     private Collection getCollectionFromDatabase(Cursor cursor) {
         Collection collection = new Collection();
+        collection.setId(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)));
         collection.setName(cursor.getString(cursor.getColumnIndex(Collections.NAME)));
         collection.setDescription(cursor.getString(cursor.getColumnIndex(Collections.DESCRIPTION)));
         if (cursor.getInt(cursor.getColumnIndex(Collections.TYPE)) == TypeOfCollection.PUBLIC.getType())
@@ -174,13 +160,17 @@ public class SynchronizationService extends IntentService {
 
     private void updateCollectionOnServerAndUpdateInDatabase(CRUDEngine<Collection> collectionCrud, Cursor cursor, Collection collection) {
         try {
-            collectionCrud.update(collection, cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)), userManager.getToken());
-            String where = String.format("%s = %s", Collections.ID_SERVER, cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)));
+            collectionCrud.update(collection, collection.getId(), userManager.getToken());
+            String where = String.format("%s = %s", Collections.ID_SERVER, collection.getId());
             ContentValues values = new ContentValues();
             values.put(Collections.SYNCHRONIZED, true);
             getContentResolver().update(Collections.CONTENT_URI, values, where, null);
         } catch (RuntimeException re) { // mozliwe, ze ktos skasowal kolekjce z innego urzadzenia i nie mozna jej zudpatowac, trzeba sprobowac create
-            createCollectionOnServerAndUpdateInDatabase(collectionCrud, cursor, collection);
+            try {
+                createCollectionOnServerAndUpdateInDatabase(collectionCrud, cursor, collection);
+            } catch (RuntimeException e) {
+                sendError(e.getMessage());
+            }
         }
     }
 
@@ -192,8 +182,21 @@ public class SynchronizationService extends IntentService {
             values.put(Collections.ID_SERVER, imodel.getId());
             values.put(Collections.SYNCHRONIZED, true);
             getContentResolver().update(Collections.CONTENT_URI, values, where, null);
-        } catch (RuntimeException re) {
-            sendError(re.getMessage());
+        } catch (RuntimeException re) { //moze sie zdarzyć, że już jest taka kolekcja na serwerze, wtedy search i updatujemy
+            try {
+                String url = userManager.getIp() + USERS_ENDPOINT + UserManager.getInstance().getToken().getUserId() + "/" + COLLECTIONS_ENDPOINT + "?name=" + collection.getName();
+                IModel imodel = collectionCrud.searchByName(url, userManager.getToken());
+                collection.setId(imodel.getId());
+                collectionCrud.update(collection, collection.getId(), userManager.getToken());
+
+                String where = String.format("%s = %s", Collections._ID, cursor.getString(cursor.getColumnIndex(Collections._ID)));
+                ContentValues values = new ContentValues();
+                values.put(Collections.ID_SERVER, imodel.getId());
+                values.put(Collections.SYNCHRONIZED, true);
+                getContentResolver().update(Collections.CONTENT_URI, values, where, null);
+            } catch (RuntimeException e) {
+                sendError(re.getMessage());
+            }
         }
     }
 
@@ -225,7 +228,11 @@ public class SynchronizationService extends IntentService {
             if (c != null) {
                 c.moveToFirst();
                 if (c.getInt(c.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType()) {
-                    createOrUpdateItemOnServerAndUpdateInDatabase(itemCrud, cursor, c);
+                    //createOrUpdateItemOnServerAndUpdateInDatabase(itemCrud, cursor, c);
+                    if (cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)) != null)
+                        updateItemOnServerAndUpdateInDatabase(itemCrud, cursor, c);
+                    else
+                        createItemOnServerAndUpdateInDatabase(itemCrud, cursor, c);
                 }
             }
         }
@@ -244,52 +251,106 @@ public class SynchronizationService extends IntentService {
         }
     }
 
-    private void createOrUpdateItemOnServerAndUpdateInDatabase(CRUDEngine<Item> itemCrud, Cursor cursor, Cursor c) {
+    private void updateItemOnServerAndUpdateInDatabase(CRUDEngine<Item> itemCrud, Cursor cursor, Cursor cursorCollection) {
+        ContentValues values = new ContentValues();
+        Item item = getItemFromDatabase(cursor, cursorCollection);
+        String where;
         try {
-            Item item = new Item();
-            item.setName(cursor.getString(cursor.getColumnIndex(Items.NAME)));
-            item.setDescription(cursor.getString(cursor.getColumnIndex(Items.DESCRIPTION)));
-            item.setCollection(c.getString(c.getColumnIndex(Collections.ID_SERVER)));
+            values.put(Items.SYNCHRONIZED, true);
+            itemCrud.update(item, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)), userManager.getToken());
+            where = String.format("%s = %s", Items.ID_SERVER, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)));
+            getContentResolver().update(Items.CONTENT_URI, values, where, null);
+        } catch (RuntimeException re) {
+            //TODO: trzeba wysłac wszystkie obrazki od nowa, mimo że mogą być synchronized, ktoś skasował nasza kolekcje z serwera
+            //try {
+            //    IModel imodel = itemCrud.create(item, userManager.getToken());
+            //    where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
+            //    values.put(Items.ID_SERVER, imodel.getId());
+            //    getContentResolver().update(Items.CONTENT_URI, values, where, null);
+            //} catch (RuntimeException e) {
+            sendError(re.getMessage());
+            //}
+        }
+    }
 
-            List<ItemMedia> mediaId = uploadMedia(cursor.getString(cursor.getColumnIndex(Items._ID)));
-            if (mediaId.size() > 0)
-                item.setMedia(mediaId);
-
+    private void createItemOnServerAndUpdateInDatabase(CRUDEngine<Item> itemCrud, Cursor cursor, Cursor c) {
+        Item item = getItemFromDatabase(cursor, c);
+        try {
             ContentValues values = new ContentValues();
             String where;
-            if (cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)) != null) {
-                try {
-                    itemCrud.update(item, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)), userManager.getToken());
-                    where = String.format("%s = %s", Items.ID_SERVER, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)));
-                } catch (RuntimeException re) {
-                    //TODO: trzeba wysłac wszystkie obrazki od nowa, mimo że mogą być synchronized, ktoś skasował nasza kolekcje z serwera
-                    IModel imodel = itemCrud.create(item, userManager.getToken());
-                    where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
-                    values.put(Items.ID_SERVER, imodel.getId());
-                }
-            } else {
-                IModel imodel = itemCrud.create(item, userManager.getToken());
-                where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
-                values.put(Items.ID_SERVER, imodel.getId());
-            }
+            IModel imodel = itemCrud.create(item, userManager.getToken());
+            where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
+            values.put(Items.ID_SERVER, imodel.getId());
 
             values.put(Items.SYNCHRONIZED, true);
             getContentResolver().update(Items.CONTENT_URI, values, where, null);
         } catch (RuntimeException re) {
-            sendError(re.getMessage());
+            //mozliwe ze nie mozna stowrzyc bo jest na serwerze item o takiej nazwie
+            try {
+                String url = userManager.getIp() + ITEM_ENDPOINT + "?name=" + item.getName() + "&collection=" + item.getCollection();
+                IModel imodel = itemCrud.searchByName(url, userManager.getToken());
+
+                //TODO: pobrac zdjecia?
+                HashMap<String, String> mapka = new HashMap<>();
+                if (item.getMedia().size() > 0) {
+                    Cursor cursorMedia = getContentResolver().query(DataStorage.Media.CONTENT_URI,
+                            null,
+                            DataStorage.Media.ID_SERVER + createSelectionForMedia(item.getMedia()),
+                            null,
+                            null);
+                    if (cursorMedia != null)
+                        for (cursorMedia.moveToFirst(); !cursorMedia.isAfterLast(); cursorMedia.moveToNext()) {
+                            mapka.put(cursorMedia.getString(cursorMedia.getColumnIndex(DataStorage.Media.ID_SERVER)), cursorMedia.getString(cursorMedia.getColumnIndex(DataStorage.Media.ID_ITEM)));
+                        }
+                }
+                List<ItemMedia> tmp = item.getMedia();
+                for (ItemMedia med : ((Item) imodel).getMedia()) {
+                    if (!mapka.containsKey(med.id)) { //jezeli serwer id nie znajduje sie w bazie
+                        insert(med, item.getId(), item.getName());
+                        tmp.add(new ItemMedia(med.getId()));
+                    }
+                }
+
+                item.setId(imodel.getId());
+                item.setMedia(tmp);
+
+                itemCrud.update(item, imodel.getId(), userManager.getToken());
+
+                String where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
+                ContentValues values = new ContentValues();
+                values.put(Items.ID_SERVER, imodel.getId());
+                values.put(Items.SYNCHRONIZED, true);
+                getContentResolver().update(Items.CONTENT_URI, values, where, null);
+            } catch (RuntimeException e) {
+                sendError(e.getMessage());
+            }
         }
+    }
+
+    private Item getItemFromDatabase(Cursor cursor, Cursor cursorCollection) {
+        Item item = new Item();
+        item.setId(cursor.getString(cursor.getColumnIndex(Items._ID)));
+        item.setName(cursor.getString(cursor.getColumnIndex(Items.NAME)));
+        item.setDescription(cursor.getString(cursor.getColumnIndex(Items.DESCRIPTION)));
+        item.setCollection(cursorCollection.getString(cursorCollection.getColumnIndex(Collections.ID_SERVER)));
+
+        List<ItemMedia> mediaId = uploadMedia(cursor.getString(cursor.getColumnIndex(Items._ID)));
+        if (mediaId.size() > 0)
+            item.setMedia(mediaId);
+        return item;
     }
 
     private List<ItemMedia> uploadMedia(String id) {
         List<ItemMedia> listId = new ArrayList<>();
         Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI,
-                new String[]{DataStorage.Media._ID, DataStorage.Media.FILE_NAME, DataStorage.Media.SYNCHRONIZED},
+                new String[]{DataStorage.Media._ID, DataStorage.Media.FILE_NAME, DataStorage.Media.SYNCHRONIZED, DataStorage.Media.ID_SERVER},
                 DataStorage.Media.ID_ITEM + "=" + id, null, null);
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 if (cursor.getInt(cursor.getColumnIndex(DataStorage.Media.SYNCHRONIZED)) == 0) {
                     createMediaOnServerAndUpdateInDatabase(cursor, listId);
-                }
+                } else
+                    listId.add(new ItemMedia(cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER))));
             }
         return listId;
     }
@@ -338,6 +399,8 @@ public class SynchronizationService extends IntentService {
             }
             executeOperations();
 
+            deleteNotFoundItems(items);
+
             for (Item item : items) {
                 if (item.getMedia() != null)
                     downloadMedia(item.getMedia(), item.getId());
@@ -354,7 +417,7 @@ public class SynchronizationService extends IntentService {
     }
 
     private String createSelection(List<Item> items) {
-        String selection = String.format(Items.TABLE_NAME + "." + Items.ID_SERVER + " IN (");
+        String selection = String.format(" IN (");
         for (Item item : items) {
             if (selection.charAt(selection.length() - 1) != '(') {
                 selection += ",";
@@ -368,7 +431,7 @@ public class SynchronizationService extends IntentService {
     private void addItemsIdServerAndModifiedDateToHashMap(List<Item> items, HashMap<String, Long> idServerToModifiedDate) {
         Cursor cursor = getContentResolver().query(Items.CONTENT_URI,
                 new String[]{Items.TABLE_NAME + "." + Items.ID_SERVER, Items.TABLE_NAME + "." + Items.MODIFIED_DATE},
-                createSelection(items),
+                Items.TABLE_NAME + "." + Items.ID_SERVER + createSelection(items),
                 null,
                 null
         );
@@ -386,12 +449,28 @@ public class SynchronizationService extends IntentService {
         }
     }
 
+    private void deleteNotFoundItems(List<Item> items) {
+        Cursor cursor = getContentResolver().query(Items.CONTENT_URI,
+                new String[]{Items.TABLE_NAME + "." + Items.ID_SERVER},
+                Items.TABLE_NAME + "." + Items.ID_SERVER + " NOT" + createSelection(items),
+                null,
+                null
+        );
+        if (cursor != null)
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                String idServer = cursor.getString(cursor.getColumnIndex(Items.ID_SERVER));
+                String where = Items.ID_SERVER + "=?";
+                String[] args = new String[]{idServer};
+                getContentResolver().delete(Items.CONTENT_URI, where, args);
+            }
+    }
+
     private void downloadMedia(List<ItemMedia> media, String itemId) {
         HashMap<String, String> mapka = new HashMap<>();
         if (media.size() > 0) {
             Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI,
                     null,
-                    createSelectionForMedia(media),
+                    DataStorage.Media.ID_SERVER + createSelectionForMedia(media),
                     null,
                     null);
             if (cursor != null)
@@ -401,17 +480,14 @@ public class SynchronizationService extends IntentService {
         }
         for (ItemMedia med : media) {
             if (!mapka.containsKey(med.id)) { //jezeli serwer id nie znajduje sie w bazie
-                insert(med, itemId);
-            } else { //jezeli się znajduję sprawdź czy media jest w danym itemie
-                //if(mapka.get(med.id) != itemId) {
-                //przenies do innego itemu
-                //} SYTUACJA NIEMOZLIWA DO WYKONANIA Z APLIKACJI KLIENCKIEJ
+                insert(med, itemId, null);
             }
         }
+        deleteNotFoundMedia(media, itemId);
     }
 
     private String createSelectionForMedia(List<ItemMedia> media) {
-        String selection = String.format(DataStorage.Media.ID_SERVER + " IN (");
+        String selection = String.format(" IN (");
         for (ItemMedia med : media) {
             if (selection.charAt(selection.length() - 1) != '(') {
                 selection += ",";
@@ -422,17 +498,12 @@ public class SynchronizationService extends IntentService {
         return selection;
     }
 
-    private void insert(ItemMedia med, String itemId) {
+    private void insert(ItemMedia med, String itemId, String name) {
         ContentValues values = new ContentValues();
-
         String path = Environment.getExternalStorageDirectory().toString();
         OutputStream fOut;
 
-        File folder = new File(path + "/myHoardFiles");
-        boolean success = true;
-        if (!folder.exists()) {
-            success = folder.mkdir();
-        }
+        boolean success = createFolderMyHoard(path);
         if (success) {
             MediaCrudEngine<Media> mediaCrud = new MediaCrudEngine<>(userManager.getIp() + MEDIA_ENDPOINT);
             Media media = mediaCrud.get(med.id, userManager.getToken());
@@ -440,10 +511,22 @@ public class SynchronizationService extends IntentService {
             Cursor cursor = getContentResolver().query(Items.CONTENT_URI,
                     new String[]{Items.TABLE_NAME + "." + Items._ID, Items.TABLE_NAME + "." + Items.NAME},
                     Items.TABLE_NAME + "." + Items.ID_SERVER + "=" + itemId, null, null);
+            File file;
             if (cursor != null)
                 cursor.moveToFirst();
+            String filename = "";
+            String id = "";
+            if (cursor != null)
+                if (cursor.isAfterLast()) {
+                    filename = name;
+                    id = itemId;
+                } else {
+                    filename = cursor.getString(cursor.getColumnIndex(Items.NAME));
+                    id = cursor.getString(cursor.getColumnIndex(Items._ID));
+                }
 
-            File file = new File(path + "/myHoardFiles", cursor.getString(cursor.getColumnIndex(Items.NAME)) + med.id + ".jpg");
+            file = new File(path + "/myHoardFiles", filename + med.id + ".jpg");
+
             try {
                 fOut = new FileOutputStream(file);
 
@@ -460,12 +543,13 @@ public class SynchronizationService extends IntentService {
 
                 values.put(DataStorage.Media.FILE_NAME, contentUri.toString());
                 values.put(DataStorage.Media.ID_SERVER, med.getId());
-                values.put(DataStorage.Media.ID_ITEM, cursor.getString(cursor.getColumnIndex(Items._ID)));
+
+                values.put(DataStorage.Media.ID_ITEM, id);
                 values.put(DataStorage.Media.SYNCHRONIZED, true);
 
                 cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI,
                         new String[]{"count(*) AS count"},
-                        DataStorage.Media.ID_ITEM + "=" + cursor.getString(cursor.getColumnIndex(Items._ID)), null, null);
+                        DataStorage.Media.ID_ITEM + "=" + id, null, null);
                 int countOfMedia = ERROR;
                 if (cursor != null) {
                     cursor.moveToFirst();
@@ -485,6 +569,27 @@ public class SynchronizationService extends IntentService {
         }
     }
 
+    private boolean createFolderMyHoard(String path) {
+        File folder = new File(path + "/myHoardFiles");
+        return folder.exists() || folder.mkdir();
+    }
+
+    private void deleteNotFoundMedia(List<ItemMedia> media, String itemId) {
+        Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI,
+                new String[]{DataStorage.Media.ID_SERVER},
+                DataStorage.Media.ID_SERVER + " NOT" + createSelectionForMedia(media) + " AND " + DataStorage.Media.ID_ITEM + "="+itemId,
+                null,
+                null
+        );
+        if (cursor != null)
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                String idServer = cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER));
+                String where = DataStorage.Media.ID_SERVER + "=?";
+                String[] args = new String[]{idServer};
+                getContentResolver().delete(DataStorage.Media.CONTENT_URI, where, args);
+            }
+    }
+
     private void downloadCollections() {
         String url = userManager.getIp() + USERS_ENDPOINT + UserManager.getInstance().getToken().getUserId() + "/" + COLLECTIONS_ENDPOINT;
         CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(url, Collection.class);
@@ -495,7 +600,7 @@ public class SynchronizationService extends IntentService {
             sendError(re.getMessage());
         }
 
-        String selection = String.format(Collections.ID_SERVER + " IN (");
+        String selection = String.format(" IN (");
         for (Collection collection : collections) {
             if (selection.charAt(selection.length() - 1) != '(') {
                 selection += ",";
@@ -504,7 +609,7 @@ public class SynchronizationService extends IntentService {
         }
         selection += ")";
 
-        Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.MODIFIED_DATE}, selection, null, null);
+        Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.MODIFIED_DATE}, Collections.ID_SERVER + selection, null, null);
         HashMap<String, Long> idServerToModifiedDate = new HashMap<>();
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -519,11 +624,24 @@ public class SynchronizationService extends IntentService {
             }
         }
 
+        deleteNotFoundCollections(selection);
+
         try {
             getContentResolver().applyBatch(DataStorage.AUTHORITY, operations);
         } catch (RemoteException | OperationApplicationException e) {
             sendError(e.toString());
         }
+    }
+
+    private void deleteNotFoundCollections(String selection) {
+        Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER}, Collections.ID_SERVER + " NOT" + selection, null, null);
+        if (cursor != null)
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                String idServer = cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER));
+                String where = Collections.ID_SERVER + "=?";
+                String[] args = new String[]{idServer};
+                getContentResolver().delete(Collections.CONTENT_URI, where, args);
+            }
     }
 
     private boolean modifiedDateOnServerIsGraterThanInDatabase(String modifiedDate, Long modifiedDateDatabase) {

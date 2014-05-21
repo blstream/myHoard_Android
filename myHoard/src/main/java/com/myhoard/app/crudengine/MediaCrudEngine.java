@@ -76,7 +76,12 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
         return null;
     }
 
-        @Override
+    @Override
+    public T searchByName(String url, Token token) {
+        return null;
+    }
+
+    @Override
         public IModel create (IModel media, Token token)  throws RuntimeException {
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost httpPost = new HttpPost(url);

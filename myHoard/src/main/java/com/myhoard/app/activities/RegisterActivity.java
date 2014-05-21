@@ -33,7 +33,7 @@ public class RegisterActivity extends BaseActivity {
     private EditText emailRegistry;
     private EditText passwordRegistry;
     private EditText usernameRegistry;
-    private TextView password_strenght;
+    private TextView password_strength;
     private TextView txt;
     private TextView textViewEmailAlreadyExists;
     private RegisterUser register;
@@ -49,7 +49,7 @@ public class RegisterActivity extends BaseActivity {
         usernameRegistry = (EditText) findViewById(R.id.username_register);
         Button registryButton = (Button) findViewById(R.id.reg_button);
         passwordRegistry.addTextChangedListener(PasswordEditorMatcher);
-        password_strenght = (TextView) findViewById(R.id.passwordStrenghtText);
+        password_strength = (TextView) findViewById(R.id.passwordStrenghtText);
         textViewEmailAlreadyExists = (TextView) findViewById(R.id.textViewEmailAlreadyExists);
         txt = (TextView)findViewById(R.id.NoInternetTextView);
 
@@ -186,7 +186,7 @@ public class RegisterActivity extends BaseActivity {
         private final TextWatcher PasswordEditorMatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                password_strenght.setText("Empty");
+                password_strength.setText("Empty");
             }
 
             @Override
@@ -205,33 +205,33 @@ public class RegisterActivity extends BaseActivity {
 
                     case 1: {
 
-                        password_strenght.setTextColor(getResources().getColor(R.color.orange));
-                        password_strenght.setText("low");
+                        password_strength.setTextColor(getResources().getColor(R.color.orange));
+                        password_strength.setText("low");
 
                         break;
                     }
                     case 2:
                     {
-                        password_strenght.setTextColor(getResources().getColor(R.color.yellow_text));
-                        password_strenght.setText("nice");
+                        password_strength.setTextColor(getResources().getColor(R.color.yellow_text));
+                        password_strength.setText("nice");
                         break;
                     }
                     case 3:
                     {
-                        password_strenght.setTextColor(getResources().getColor(R.color.green));
-                        password_strenght.setText("ok");
+                        password_strength.setTextColor(getResources().getColor(R.color.green));
+                        password_strength.setText("ok");
                         break;
                     }
                     case 4:
                     {
-                        password_strenght.setTextColor(getResources().getColor(R.color.green));
-                        password_strenght.setText("Epic");
+                        password_strength.setTextColor(getResources().getColor(R.color.green));
+                        password_strength.setText("Epic");
                         break;
                     }
 
                     default:
-                        password_strenght.setTextColor(getResources().getColor(R.color.red));
-                        password_strenght.setText("too short");
+                        password_strength.setTextColor(getResources().getColor(R.color.red));
+                        password_strength.setText("too short");
 
                         break;
                 }

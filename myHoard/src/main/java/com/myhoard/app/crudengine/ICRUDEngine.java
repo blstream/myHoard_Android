@@ -19,6 +19,7 @@ import java.util.List;
 
     public T get(String id, Token token);
 
+    public T searchByName(String url, Token token);
     /**
      * @param t obiekt wysyłany na serwer
      * @param token token uwierzytelniający

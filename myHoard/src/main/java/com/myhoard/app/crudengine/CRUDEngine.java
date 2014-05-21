@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 import com.myhoard.app.model.*;
 
 import org.apache.http.HttpEntity;
@@ -29,7 +28,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -76,7 +74,7 @@ import java.util.List;
                 HttpEntity entity = response.getEntity();
 
 
-                List<T> newItems = new ArrayList<T>();
+                List<T> newItems = new ArrayList<>();
                 stringResponse = getASCIIContentFromEntity(entity);
 
                 JsonElement json = new JsonParser().parse(stringResponse);
@@ -111,11 +109,47 @@ import java.util.List;
                 HttpEntity entity = response.getEntity();
                 stringResponse = getASCIIContentFromEntity(entity);
 
-                Type collectionType = new TypeToken<List<Collection>>() {
-                }.getType();
                 T iModel = new Gson().fromJson(stringResponse, clazz);
 
-                return (T)iModel;
+                return iModel;
+            } catch (Exception e) {
+                throw new RuntimeException(handleError(stringResponse));
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public T searchByName(String url, Token token) {
+        if (token != null) {
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpContext localContext = new BasicHttpContext();
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
+            String stringResponse=null;
+            try {
+                HttpResponse response = httpClient.execute(httpGet, localContext);
+                HttpEntity entity = response.getEntity();
+
+
+                List<T> newItems = new ArrayList<>();
+                stringResponse = getASCIIContentFromEntity(entity);
+
+                JsonElement json = new JsonParser().parse(stringResponse);
+                JsonArray array= json.getAsJsonArray();
+                Iterator iterator = array.iterator();
+
+                while(iterator.hasNext()){
+                    JsonElement json2 = (JsonElement)iterator.next();
+                    Gson gson = new Gson();
+                    T item = gson.fromJson(json2, clazz);
+                    newItems.add(item);
+                }
+
+                //ponieważ ta metoda z serwera zwraca tablice jsonow, trzeba było pobrać tablice
+                //jednak wiemy ze napewno przyjdzie tylko 1 obiekt, ponieważ nazwy są unikatowe
+                if (newItems.size()>0)
+                    return newItems.get(0);
             } catch (Exception e) {
                 throw new RuntimeException(handleError(stringResponse));
             }
