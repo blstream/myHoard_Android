@@ -1,6 +1,10 @@
 
 package com.myhoard.app.fragments;
 
+import android.app.AlertDialog;
+import android.content.AsyncQueryHandler;
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
@@ -14,9 +18,11 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -38,12 +44,15 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     private static final String SEARCH_BY_NAME_TAB = "name";
     private static final String SEARCH_ALL_TAB = "all";
     private static final String SEARCH_BY_DESCRIPTION_TAB = "description";
+    private static final String NEW_FACEBOOK_FRAGMENT_NAME = "FacebookFragment";
+    private static final int DELETE_ID = Menu.FIRST + 1;
+    private static final int SHARE_ID = Menu.FIRST + 3;
     private static final int TEXT_TO_SEARCH_MIN_LENGTH = 2;
     private static final int SEARCH_ALL = 0;
     private static final int SEARCH_BY_NAME = 1;
     private static final int SEARCH_BY_DESCRIPTION = 2;
     private static int sSelectedTypeOfSearch = SEARCH_ALL;
-    private String mTextToSearch ="";
+    private String mTextToSearch = "";
     private EditText mSearchText;
     private Context mContext;
     private ImageAdapterList mImageAdapterList;
@@ -227,6 +236,45 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        int groupId = 0;
+        menu.add(groupId, DELETE_ID, DELETE_ID, R.string.menu_delete);
+        menu.add(groupId, SHARE_ID, SHARE_ID, R.string.menu_share);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        final AdapterView.AdapterContextMenuInfo info =
+                (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            // Sharing item from list
+            case SHARE_ID:
+                if(info!=null) {
+                    newFacebookShareFragment(info.id);
+                }
+                return true;
+            case DELETE_ID:
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(mContext.getString(R.string.edit_colection_dialog_title))
+                        .setMessage(mContext.getString(R.string.edit_colection_dialog_message))
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (info != null) {
+                                    deleteElement(info.id);
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Do nothing.
+                    }
+                }).show();
+                return true;
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         //Get text to search from args object
         String collectionElementText = args.getString(TEXT_TO_SEARCH);
@@ -307,6 +355,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onResume() {
         super.onResume();
+        mSearchText.setText(mTextToSearch);
         checkText(mTextToSearch);
     }
 
@@ -317,5 +366,26 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
         actionBar.setDisplayShowTitleEnabled(true);
+    }
+
+    private void newFacebookShareFragment(long id) {
+        Fragment newFragment = new FacebookItemsToShare();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        Bundle bundle = new Bundle();
+        bundle.putLong(FacebookItemsToShare.ITEM_ID,id);
+        newFragment.setArguments(bundle);
+        transaction.replace(R.id.container,newFragment,NEW_FACEBOOK_FRAGMENT_NAME);
+        transaction.addToBackStack(NEW_FACEBOOK_FRAGMENT_NAME);
+        transaction.commit();
+    }
+
+    private void deleteElement(long id){
+        ContentValues values = new ContentValues();
+        values.put(DataStorage.Items.DELETED,true);
+        AsyncQueryHandler asyncHandler =
+                new AsyncQueryHandler(getActivity().getContentResolver()) { };
+        asyncHandler.startUpdate(0,null,DataStorage.Items.CONTENT_URI,values,DataStorage.Items._ID + " = ?",
+                new String[]{String.valueOf(id)});
+        checkText(mTextToSearch);
     }
 }
