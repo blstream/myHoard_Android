@@ -82,9 +82,8 @@ public class FacebookShareDialog extends DialogFragment implements View.OnClickL
         if(text != null) {
             text = text.trim();
             if(text.length() > 0) return true;
-        } else {
-            makeAndShowToast(getString(R.string.empty_msg));
         }
+        makeAndShowToast(getString(R.string.empty_msg));
         return false;
     }
 
