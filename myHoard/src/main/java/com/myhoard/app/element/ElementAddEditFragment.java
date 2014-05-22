@@ -88,6 +88,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private static final int LOADER_IMAGES = 2;
     private static final int NO_FLAGS = 0;
 
+    private static final int LOCATION_FROM_ACTIVIT = 1;
+    private static final int LOCATION_FROM_FRAGMENT = 0;
+
     private boolean first = true;
     private static int sLastImageIndex;
 
@@ -195,7 +198,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         getLoaderManager().initLoader(LOADER_CATEGORIES, null,
                 new LoaderCategoriesCallbacks());
-        updateLocationData(location,0);
+//        updateLocationData(location,0);
         return v;
     }
 
@@ -454,7 +457,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     LatLng location = data.getParcelableExtra("localisation");
                     if(location != null) {
                         locationUserSet = true;
-                        updateLocationData(location,0);
+                        updateLocationData(location,LOCATION_FROM_FRAGMENT);
                     } else {
                         locationUserSet = false;
                     }
@@ -842,7 +845,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         }
 
         public JSONObject getLocationInfo( double lat, double lng) {
-            Log.d("test", "start: " + lat + ":" + lng);
             HttpGet httpGet = new HttpGet("http://maps.google.com/maps/api/geocode/json?latlng="+lat+","+lng+"&language=pl&sensor=false");
             HttpClient client = new DefaultHttpClient();
             HttpResponse response;
@@ -902,7 +904,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
     public void putLocation(LatLng location) {
         if(tvElementPosition != null) {
-            updateLocationData(location,1);
+            updateLocationData(location,LOCATION_FROM_ACTIVIT);
         }
     }
 
@@ -916,15 +918,17 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         }
 
         switch(source) {
-            case 0:
+            case LOCATION_FROM_FRAGMENT:
                 new AsyncLocationName().execute(location);
 //                elementLocation = location;
                 break;
-            case 1:
+            case LOCATION_FROM_ACTIVIT:
                 if(locationUserSet) {
                     break;
                 }
-                new AsyncLocationName().execute(location);
+                if(imagesUriList != null && imagesUriList.size()>1) {
+                    new AsyncLocationName().execute(location);
+                }
                 elementLocation = location;
                 break;
             default:
