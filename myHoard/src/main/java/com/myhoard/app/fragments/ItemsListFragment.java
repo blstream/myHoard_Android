@@ -88,6 +88,15 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 		super.onViewCreated(view, savedInstanceState);
         // currently moved to onResume()
         //setSortTabs();
+        ImageView imageViewEmptyList = (ImageView)view.findViewById(R.id.imageViewEmptyList);
+        imageViewEmptyList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent in = new Intent(getActivity(),ElementActivity.class);
+                in.putExtra("categoryId",mCollectionID);
+                startActivity(in);
+            }
+        });
 		mGridView = (GridView) view.findViewById(R.id.gvItemsList);
         getLoaderManager().initLoader(LOAD_COLLECTION_ELEMENTS, null, this);
         bindData();
