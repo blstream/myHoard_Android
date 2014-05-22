@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.myhoard.app.R;
+import com.myhoard.app.services.SynchronizationService;
 
 /**
  * Description
@@ -35,6 +36,10 @@ public class SynchronizationDialog extends DialogFragment {
     private View.OnClickListener onClickStop = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Intent cancelSynchronization = new Intent(getActivity().getBaseContext(),SynchronizationService.class);
+            cancelSynchronization.putExtra(SynchronizationService.CANCEL_COMMAND_KEY, "pusto");
+            cancelSynchronization.putExtra("option", "pusto");
+            getActivity().startService(cancelSynchronization);
             dialog.dismiss();
         }
     };

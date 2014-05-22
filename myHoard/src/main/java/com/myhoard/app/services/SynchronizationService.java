@@ -61,6 +61,9 @@ public class SynchronizationService extends IntentService {
     private static final int ERROR = -1;
     private static final String ERROR_CREATING_FOLDER = "Error creating folder myHoardFiles";
 
+    public static final String CANCEL_COMMAND_KEY = "cancelCommand";
+    Boolean cancel=false;
+
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      *
@@ -76,6 +79,20 @@ public class SynchronizationService extends IntentService {
         super("Synchronizacja");
         operations = new
                 ArrayList<>();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) {
+            if (intent.hasExtra(CANCEL_COMMAND_KEY)) {
+                cancel();
+            }
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void cancel(){
+        cancel=true;
     }
 
     @Override
@@ -95,6 +112,7 @@ public class SynchronizationService extends IntentService {
                 sendBroadcast(intenttt);
                 break;
         }
+        Log.d("TAG","canel: " + cancel);
     }
 
     private void uploadCollections() {
@@ -102,6 +120,7 @@ public class SynchronizationService extends IntentService {
         Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, null, null, null, null);
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                if (!cancel)
                 uploadCollection(collectionCrud, cursor);
             }
     }
@@ -216,6 +235,7 @@ public class SynchronizationService extends IntentService {
 
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                if (!cancel)
                 uploadItem(itemCrud, cursor);
             }
     }
@@ -392,17 +412,21 @@ public class SynchronizationService extends IntentService {
                 addItemsIdServerAndModifiedDateToHashMap(items, idServerToModifiedDate);
             }
             for (Item item : items) {
-                if (idServerToModifiedDate.get(item.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
-                    insert(item);
-                } else if (modifiedDateOnServerIsGraterThanInDatabase(item.getModifiedDate(), idServerToModifiedDate.get(item.getId()))) {
-                    update(item);
+                if (!cancel) {
+                    if (idServerToModifiedDate.get(item.getId()) == null) { //jezeli nie bylo takiego w bazie no to insert
+                        insert(item);
+                    } else if (modifiedDateOnServerIsGraterThanInDatabase(item.getModifiedDate(), idServerToModifiedDate.get(item.getId()))) {
+                        update(item);
+                    }
                 }
             }
             executeOperations();
 
+            if (!cancel)
             deleteNotFoundItems(items);
 
             for (Item item : items) {
+                if (!cancel)
                 if (item.getMedia() != null)
                     downloadMedia(item.getMedia(), item.getId());
             }
@@ -480,10 +504,12 @@ public class SynchronizationService extends IntentService {
                 }
         }
         for (ItemMedia med : media) {
+            if (!cancel)
             if (!mapka.containsKey(med.id)) { //jezeli serwer id nie znajduje sie w bazie
                 insert(med, itemId, null);
             }
         }
+        if (!cancel)
         deleteNotFoundMedia(media, itemId);
     }
 
@@ -620,14 +646,16 @@ public class SynchronizationService extends IntentService {
             }
 
         for (Collection collection : collections) {
-            Log.d("TAG", "id kolekcji: " + collection.getId());
-            if (idServerToModifiedDate.get(collection.getId()) == null) {
-                insert(collection);
-            } else if (modifiedDateOnServerIsGraterThanInDatabase(collection.getModified_date(), idServerToModifiedDate.get(collection.getId()))) {
-                update(collection);
+            if (!cancel) {
+                if (idServerToModifiedDate.get(collection.getId()) == null) {
+                    insert(collection);
+                } else if (modifiedDateOnServerIsGraterThanInDatabase(collection.getModified_date(), idServerToModifiedDate.get(collection.getId()))) {
+                    update(collection);
+                }
             }
         }
 
+        if (!cancel)
         deleteNotFoundCollections(selection);
 
         try {

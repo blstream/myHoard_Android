@@ -64,7 +64,8 @@ public class RegisterActivity extends BaseActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        register.cancel(true);
+        if (register!=null)
+            register.cancel(true);
     }
 
     public void registerUser() {
