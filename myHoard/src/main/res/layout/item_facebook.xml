@@ -8,7 +8,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/grid_item_border"
+        android:background="@color/gray_background"
         tools:ignore="UselessParent">
 
         <com.myhoard.app.views.SquareImageView
@@ -28,9 +28,9 @@
             android:layout_alignLeft="@id/ivSquareAvatarItem"
             android:layout_margin="5dp"
             android:focusable="false"
-
             android:clickable="false"
-            android:focusableInTouchMode="false" />
+            android:focusableInTouchMode="false"
+            android:checked="false" />
         </RelativeLayout>
 
 </FrameLayout>

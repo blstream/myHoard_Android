@@ -18,9 +18,8 @@
         android:layout_height="64dp"
         android:id="@+id/facebook_button"
         android:text="@string/log_in_facebook"
-        android:textAlignment="center"
         android:layout_gravity="center_horizontal"
-        android:background="#278bff"
+        android:background="@color/com_facebook_blue"
         android:textSize="20sp"
         android:textColor="#ffffff" />
 
@@ -31,15 +30,17 @@
         android:textColor="@color/yellow_main"
         android:text="@string/post_on_wall"
         android:padding="15sp"
-        android:textAlignment="center"
-        android:textSize="25sp"/>
+        android:textSize="25sp"
+        android:gravity="center_horizontal" />
 
     <EditText
         android:layout_width="387dp"
         android:layout_height="108dp"
         android:inputType="textMultiLine"
         android:ems="10"
-        android:id="@+id/post_on_wall" />
+        android:id="@+id/post_on_wall"
+        android:background="@drawable/edittext_background_color"
+        android:textColor="@color/yellow_main" />
 
     <Button
         android:layout_width="151dp"
