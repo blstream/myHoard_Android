@@ -49,6 +49,7 @@ public class ElementActivity extends ActionBarActivity {
     private AsyncElementRead asyncElementRead;
     private Intent intent;
     private GPSInfoDialog gpsInfoDialog;
+    private boolean gpsEnabled= false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +123,7 @@ public class ElementActivity extends ActionBarActivity {
                     } else {
                         bundle.putLong("categoryId", categoryId);
                     }
+                    bundle.putBoolean("gps",gpsEnabled);
                     fragment.setArguments(bundle);
                 }
                 break;
@@ -206,7 +208,7 @@ public class ElementActivity extends ActionBarActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
-            boolean gpsEnabled = bundle.getBoolean("gps");
+            gpsEnabled = bundle.getBoolean("gps");
 
             ElementAddEditFragment elementAdd = (ElementAddEditFragment) getSupportFragmentManager().findFragmentByTag(String.valueOf(1));
             if(elementAdd != null) {

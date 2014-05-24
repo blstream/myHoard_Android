@@ -155,21 +155,22 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         tvElementPosition.setOnClickListener(this);
 
-        if(!gpsEnabled) {
-            tvElementPosition.setText("brak sygnału gps");
-            tvElementPosition.setTextColor(Color.RED);
-        } else {
-            tvElementPosition.setText("ustalam");
-            tvElementPosition.setTextColor(Color.YELLOW);
-        }
-
         elementId = -1;
         iCollectionId = -1;
         imageId = -1;
-//        editionMode = false;
 
         Bundle b = getArguments();
         LatLng location = b.getParcelable("location");
+        gpsEnabled = b.getBoolean("gps");
+
+        if(!gpsEnabled) {
+            tvElementPosition.setText(R.string.gps_no_signal);
+            tvElementPosition.setTextColor(Color.RED);
+        } else {
+            tvElementPosition.setText(R.string.gps_finding_location);
+            tvElementPosition.setTextColor(Color.YELLOW);
+        }
+
         if(b.getLong("categoryId",-1)!=-1) {
             iCollectionId = (int) b.getLong("categoryId");
         } else if(b.getParcelable("element")!=null) {
@@ -177,9 +178,13 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             elementId = Integer.parseInt(element.getId());
             iCollectionId = Integer.parseInt(element.getCollection());
             mActualCollectionId = iCollectionId;
-            tvElementPosition.setText(element.getLocationTxt());
-            tvElementPosition.setTextColor(Color.GREEN);
-            elementLocation = new LatLng(element.getLocation().lat,element.getLocation().lng);
+            if(element.getLocation().lat!=0 && element.getLocation().lng!=0) {
+                tvElementPosition.setText(element.getLocationTxt());
+                locationUserSet = true;
+                tvElementPosition.setTextColor(Color.GREEN);
+                elementLocation = new LatLng(element.getLocation().lat,element.getLocation().lng);
+            }
+
 
             etElementName.setText(element.getName());
             mActualElementName = etElementName.getText().toString().trim();
@@ -545,7 +550,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                         values.put(DataStorage.Items.LOCATION_LNG, elementLocation.longitude);
                         values.put(DataStorage.Items.LOCATION, tvElementPosition.getText().toString());
                     } else {
-                        values.put(DataStorage.Items.LOCATION, "Brak");
+                        values.put(DataStorage.Items.LOCATION, getResources().getString(R.string.gps_no_location));
                     }
                     AsyncElementQueryHandler asyncHandler = new AsyncElementQueryHandler(
                             getActivity().getContentResolver()) {
@@ -883,16 +888,16 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         this.gpsEnabled = gpsEnabled;
         if(tvElementPosition!=null && elementLocation==null) {
             if(!gpsEnabled) {
-                tvElementPosition.setText("brak sygnału gps");
+                tvElementPosition.setText(R.string.gps_no_signal);
                 tvElementPosition.setTextColor(Color.RED);
             } else {
-                tvElementPosition.setText("ustalam");
+                tvElementPosition.setText(R.string.gps_finding_location);
                 tvElementPosition.setTextColor(Color.YELLOW);
             }
         } else {
             // TODO loading
             // TODO after return when wifi off with no location change don't change text
-            tvElementPosition.setText("ustalam");
+            tvElementPosition.setText(R.string.gps_finding_location);
             tvElementPosition.setTextColor(Color.YELLOW);
         }
     }

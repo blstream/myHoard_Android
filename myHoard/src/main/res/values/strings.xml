@@ -142,5 +142,8 @@
     <string name="take_a_photo">take a photo</string>
     <string name="choose_from_gallery">choose from gallery</string>
     <string name="add_element">Add element photo:</string>
+    <string name="gps_finding_location">Finding location</string>
+    <string name="gps_no_signal">No GPS signal</string>
+    <string name="gps_no_location">No location</string>
 
 </resources>
