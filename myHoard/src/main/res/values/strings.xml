@@ -146,5 +146,7 @@
     <string name="gps_no_signal">No GPS signal</string>
     <string name="gps_no_location">No location</string>
     <string name="sent_photo">Sending a %1$d photo of the %2$d </string>
+    <string name="remove_photo">remove photo</string>
+    <string name="edit_element">Edit element photo:</string>
 
 </resources>

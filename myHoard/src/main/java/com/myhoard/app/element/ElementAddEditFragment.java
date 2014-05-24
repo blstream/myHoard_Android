@@ -38,6 +38,8 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.ImageElementAdapterList;
+import com.myhoard.app.dialogs.ImageDeleteDialog;
+import com.myhoard.app.dialogs.ImageEditDialog;
 import com.myhoard.app.dialogs.ImageInsertDialog;
 import com.myhoard.app.images.PhotoManager;
 import com.myhoard.app.model.Item;
@@ -77,6 +79,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     public static final String TAGS = "elementTags";
     public static final String EDITION = "edition";
     private static final int INSERT_IMAGE_REQUEST_CODE = 100;
+    private static final int EDIT_IMAGE_REQUEST_CODE = 101;
+    private static final int DELETE_IMAGE_REQUEST_CODE = 102;
     private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
     private static final int REQUEST_GET_PHOTO = 1;
 
@@ -246,7 +250,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             showImagePickerDialog();
         } else {
             imageId = (int) l;
-            imagePickerDel();
+            showImageEditPickerDialog();
+            //imagePickerDel();
         }
     }
 
@@ -327,9 +332,21 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     }
 
     private void showImagePickerDialog(){
-        ImageInsertDialog typeDialog = new ImageInsertDialog();
-        typeDialog.setTargetFragment(this, INSERT_IMAGE_REQUEST_CODE);
-        typeDialog.show(getFragmentManager(), "");
+        ImageInsertDialog insertDialog = new ImageInsertDialog();
+        insertDialog.setTargetFragment(this, INSERT_IMAGE_REQUEST_CODE);
+        insertDialog.show(getFragmentManager(), "");
+    }
+
+    private void showImageEditPickerDialog(){
+        if(elementId!=-1){
+            ImageDeleteDialog removeDialog = new ImageDeleteDialog();
+            removeDialog.setTargetFragment(this, DELETE_IMAGE_REQUEST_CODE);
+            removeDialog.show(getFragmentManager(), "");
+        }else{
+            ImageEditDialog editDialog = new ImageEditDialog();
+            editDialog.setTargetFragment(this, EDIT_IMAGE_REQUEST_CODE);
+            editDialog.show(getFragmentManager(), "");
+        }
     }
 
     /**
@@ -353,55 +370,32 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         }
     }
 
-    private void imagePickerDel() {
-        AlertDialog.Builder pickerDialogBuilder = new AlertDialog.Builder(
-                context);
+    private void imagePickerDel(int which) {
         if(elementId!=-1){
-            pickerDialogBuilder.setItems(R.array.action_on_picker_edit,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            deleteImage(imageId);
-                        }
-                    });
-            pickerDialogBuilder
-                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialogInterface) {
-                            imageId = -1;
-                        }
-                    });
-        }else{
-            pickerDialogBuilder.setItems(R.array.actions_on_picker_del,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            try {
-                                if (which == 0) // add from camera
-                                {
-                                    photoManager.takePicture(PhotoManager.MODE_CAMERA);
-                                } else if (which == 1) // add from gallery
-                                {
-                                    photoManager.takePicture(PhotoManager.MODE_GALLERY);
-                                } else if (which == 2) {
-                                    deleteImage(imageId);
-                                }
-                            } catch (IOException io) {
-                                //TODO show error
-                            }
-                        }
-                    });
-            pickerDialogBuilder
-                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialogInterface) {
-                            imageId = -1;
-                        }
-                    });
+            if (which == 1) {
+                deleteImage(imageId);
+            }else{
+                imageId = -1;
+            }
+        }else {
+            if (which == 0) {
+                try {
+                    photoManager.takePicture(PhotoManager.MODE_CAMERA);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (which == 1) {
+                try {
+                    photoManager.takePicture(PhotoManager.MODE_GALLERY);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (which == 2) {
+                deleteImage(imageId);
+            } else {
+                imageId = -1;
+            }
         }
-
-        AlertDialog choseDialog = pickerDialogBuilder.create();
-        choseDialog.show();
-
     }
 
     private void deleteImage(int id) {
@@ -449,6 +443,12 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         switch (requestCode) {
             case INSERT_IMAGE_REQUEST_CODE:
                 imagePicker(data.getIntExtra("insert image", -1));
+                break;
+            case EDIT_IMAGE_REQUEST_CODE:
+                imagePickerDel(data.getIntExtra("insert image", -1));
+                break;
+            case DELETE_IMAGE_REQUEST_CODE:
+                imagePickerDel(data.getIntExtra("insert image", -1));
                 break;
             case REQUEST_GET_PHOTO:
                 if (resultCode == Activity.RESULT_OK) {
