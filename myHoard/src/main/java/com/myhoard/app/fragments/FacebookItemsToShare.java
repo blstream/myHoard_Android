@@ -1,8 +1,10 @@
 package com.myhoard.app.fragments;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -72,6 +74,8 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private Bitmap photoToSend;
     private int mElementToSend;
     private Request.Callback mCallbackPhoto;
+    private String[] mPhotosPath;
+    private ProgressDialog mProgressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -243,23 +247,33 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         }
     }
 
+    private void prepareForShare() {
+        mProgressDialog = new ProgressDialog(getActivity());
+        mProgressDialog.setTitle(getString(R.string.please_wait));
+        mProgressDialog.setMessage(getString(R.string.preparing_data));
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+        buildNotification();
+        setNumberOfPhotosToSend();
+        setPhotosPathToSend();
+    }
+
     public void shareOnFacebook(final Session session) {
         if (session != null && session.isOpened()) {
-            buildNotification();
-            setNumberOfPhotosToSend();
-                mCallbackPhoto = new Request.Callback() {
+            mCallbackPhoto = new Request.Callback() {
                     public void onCompleted(Response response) {
                         FacebookRequestError error = response.getError();
                         if (error != null) {
                             if (getActivity().getApplicationContext() != null) {
                                 Log.d("FB ERROR",error.getErrorMessage());
+                                mProgressDialog.dismiss();
                             }
                         } else {
                             recycleBitmap();
                             if(mElementToSend == -1) notificationManager.notify(SHARE_ID, facebookNotification);
                             else {
-                                int item = mFacebookImageAdapterList.mSelectedItems.get(mElementToSend);
-                                Request request = sendPhotosToAlbum(mAlbumId,item,session,mCallbackPhoto);
+                                Request request = sendPhotosToAlbum(mAlbumId,mPhotosPath[mElementToSend],session,mCallbackPhoto);
                                 RequestAsyncTask task = new RequestAsyncTask(request);
                                 task.execute();
                             }
@@ -270,14 +284,14 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                 /* AWA:FIXME: Niebezpieczne używanie wątku
         Brak anulowania tej operacji.
         Wyjście z Activity nie kończy wątku,
-        należy o to zadbać.        */
+        należy o to zadbać.       */
 
-                int item = mFacebookImageAdapterList.mSelectedItems.get(mElementToSend);
                 RequestAsyncTask mFacebookTask = new RequestAsyncTask(
-                        sendPhotosToAlbum(mAlbumId,item,session,mCallbackPhoto
+                        sendPhotosToAlbum(mAlbumId,mPhotosPath[mElementToSend],session,mCallbackPhoto
                 ));
                 mFacebookTask.execute();
-                makeAndShowToast(getString(R.string.sharing_succeeded));
+                mProgressDialog.dismiss();
+                makeAndShowToast(getString(R.string.sharing_in_progress));
         }
     }
 
@@ -286,6 +300,13 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     }
     private void setNumberOfPhotosToSend() {
         mElementToSend =mFacebookImageAdapterList.mSelectedItems.size() - 1;
+    }
+
+    private void setPhotosPathToSend() {
+        mPhotosPath = new String[mFacebookImageAdapterList.mSelectedItems.size()];
+        for(int i =0; i < mFacebookImageAdapterList.mSelectedItems.size(); i++) {
+            mPhotosPath[i] = getPhotoPath(i);
+        }
     }
 
     public void makeAndShowToast(String message) {
@@ -334,11 +355,10 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                 (NotificationManager) getActivity().getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    private Request sendPhotosToAlbum(String album_id,int position,Session session,Request.Callback callback) {
+    private Request sendPhotosToAlbum(String album_id,String path,Session session,Request.Callback callback) {
         Bundle bundle = new Bundle();
-        String data = getPhotoPath(position);
-        if(data != null) {
-            bundle.putByteArray("source", prepareBitmapToSend(data));
+        if(path != null) {
+            bundle.putByteArray("source", prepareBitmapToSend(path));
             String publish = String.format("%s/photos",album_id);
             mElementToSend--;
             return new Request(session, publish, bundle, HttpMethod.POST,callback);
@@ -364,6 +384,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
 
     private void createAlbumOnFacebook(final Session session,String message,String albumName) {
         if (session != null && session.isOpened()) {
+            prepareForShare();
             Bundle params = new Bundle();
             params.putString("name", albumName);
             params.putString("message", message);
@@ -379,6 +400,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                             if (error != null) {
                                 if (getActivity().getApplicationContext() != null) {
                                     makeAndShowToast(error.getErrorMessage());
+                                    mProgressDialog.dismiss();
                                 }
                             }
                             mAlbumId = (String)response.getGraphObject().getProperty("id");
