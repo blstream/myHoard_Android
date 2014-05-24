@@ -8,9 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.myhoard.app.R;
+
+import java.util.ArrayList;
 
 
 /**
@@ -21,6 +21,8 @@ public class FacebookImageAdapterList extends CursorAdapter {
 
     private static final int ELEMENT_NO_PHOTO = 2;
     private static final int ELEMENT_FILE_NAME_FROM_LOADER = 0;
+    private final LayoutInflater mInflater;
+    public ArrayList<Integer> mSelectedItems = new ArrayList<>();
 
     private static class ViewHolder {
         CheckBox box;
@@ -31,6 +33,7 @@ public class FacebookImageAdapterList extends CursorAdapter {
 	public FacebookImageAdapterList(Context context, Cursor c, int flags) {
 	    super(context, c, flags);
 	    mImageLoader = new ImageLoader(context,ELEMENT_NO_PHOTO);
+        mInflater = LayoutInflater.from(context);
     }
 
 	@Override
@@ -58,8 +61,40 @@ public class FacebookImageAdapterList extends CursorAdapter {
             //Use LazyLoading for elements list
 		    mImageLoader.DisplayImage(viewHolder.path,viewHolder.img);
         }
-
-
 	}
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
+        if(convertView==null){
+            convertView = mInflater.inflate(R.layout.item_facebook, null);
+            holder = new ViewHolder();
+            if(convertView !=null) {
+                holder.box = (CheckBox) convertView.findViewById(R.id.chbItemToShare);
+                holder.img = (ImageView) convertView.findViewById(R.id.ivSquareAvatarItem);
+            }
+        }else{
+            holder = (ViewHolder)convertView.getTag();
+        }
+        setSelectOnCheckbox(holder,position);
+        convertView.setTag(holder);
+        bindView(convertView,mContext,mCursor);
+        return convertView;
+    }
+
+    private void setSelectOnCheckbox(ViewHolder holder,int position) {
+        mCursor.moveToPosition(position);
+        if(isSelected(position))
+            holder.box.setChecked(true);
+        else holder.box.setChecked(false);
+    }
+
+    private boolean isSelected(int pos) {
+        for(int i=0;i < mSelectedItems.size();i++) {
+            if(mSelectedItems.get(i) == pos)
+                return true;
+        }
+        return false;
+    }
 }
 

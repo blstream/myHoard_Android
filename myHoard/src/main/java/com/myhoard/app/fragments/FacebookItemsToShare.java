@@ -59,7 +59,6 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private FacebookImageAdapterList mFacebookImageAdapterList;
     private Context mContext;
     private long mElementId;
-    private ArrayList<Integer> mSelectedItems = new ArrayList<>();
     int mCount;
 
     private TextView tvSelectedItems;
@@ -141,7 +140,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                 }
                 else {
                     box.setChecked(true);
-                    mSelectedItems.add(position);
+                    mFacebookImageAdapterList.mSelectedItems.add(position);
                     mCount++;
                     setCountOnView();
                 }
@@ -160,9 +159,9 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     }
 
     private void isSelected(int pos) {
-        for(int i=0;i<mSelectedItems.size();i++) {
-            if(mSelectedItems.get(i) == pos)
-                mSelectedItems.remove(i);
+        for(int i=0;i<mFacebookImageAdapterList.mSelectedItems.size();i++) {
+            if(mFacebookImageAdapterList.mSelectedItems.get(i) == pos)
+                mFacebookImageAdapterList.mSelectedItems.remove(i);
         }
     }
 
@@ -257,10 +256,9 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                             }
                         } else {
                             recycleBitmap();
-                            int item = mSelectedItems.get(mElementToSend);
                             if(mElementToSend == -1) notificationManager.notify(SHARE_ID, facebookNotification);
                             else {
-                                mElementToSend--;
+                                int item = mFacebookImageAdapterList.mSelectedItems.get(mElementToSend);
                                 Request request = sendPhotosToAlbum(mAlbumId,item,session,mCallbackPhoto);
                                 RequestAsyncTask task = new RequestAsyncTask(request);
                                 task.execute();
@@ -274,12 +272,10 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.        */
 
-                int item = mSelectedItems.get(mElementToSend);
+                int item = mFacebookImageAdapterList.mSelectedItems.get(mElementToSend);
                 RequestAsyncTask mFacebookTask = new RequestAsyncTask(
                         sendPhotosToAlbum(mAlbumId,item,session,mCallbackPhoto
                 ));
-
-                mElementToSend --;
                 mFacebookTask.execute();
                 makeAndShowToast(getString(R.string.sharing_succeeded));
         }
@@ -289,7 +285,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         if(photoToSend != null) photoToSend.recycle();
     }
     private void setNumberOfPhotosToSend() {
-        mElementToSend = mSelectedItems.size() - 1;
+        mElementToSend =mFacebookImageAdapterList.mSelectedItems.size() - 1;
     }
 
     public void makeAndShowToast(String message) {
@@ -344,6 +340,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         if(data != null) {
             bundle.putByteArray("source", prepareBitmapToSend(data));
             String publish = String.format("%s/photos",album_id);
+            mElementToSend--;
             return new Request(session, publish, bundle, HttpMethod.POST,callback);
         } else return null;
     }
