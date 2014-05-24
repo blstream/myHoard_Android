@@ -1,7 +1,5 @@
 package com.myhoard.app.fragments;
 
-import android.app.AlertDialog;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -15,7 +13,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -43,7 +40,6 @@ import com.myhoard.app.images.ImageLoader;
 import com.myhoard.app.provider.DataStorage;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 
 /**
  * Created by Dawid Graczyk on 2014-05-18.
@@ -67,7 +63,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private Button mButtonShare;
     private String mMessageOnFb;
 
-    private Notification facebookNotification;
+    private NotificationCompat.Builder facebookNotification;
     private NotificationManager notificationManager;
     private static final int SHARE_ID = 0;
     private String mAlbumId;
@@ -76,6 +72,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private Request.Callback mCallbackPhoto;
     private String[] mPhotosPath;
     private ProgressDialog mProgressDialog;
+    private String[] mTextOnNotification;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -254,6 +251,9 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
+        mTextOnNotification = new String[2];
+        mTextOnNotification[0] = getString(R.string.sent_photo);
+        mTextOnNotification[1] = getString(R.string.sharing_succeeded);
         buildNotification();
         setNumberOfPhotosToSend();
         setPhotosPathToSend();
@@ -266,13 +266,14 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                         FacebookRequestError error = response.getError();
                         if (error != null) {
                             if (getActivity().getApplicationContext() != null) {
-                                Log.d("FB ERROR",error.getErrorMessage());
+                                errorNotification(error.getErrorMessage());
                                 mProgressDialog.dismiss();
                             }
                         } else {
                             recycleBitmap();
-                            if(mElementToSend == -1) notificationManager.notify(SHARE_ID, facebookNotification);
+                            if(mElementToSend == -1) successNotification();
                             else {
+                                updateNotification();
                                 Request request = sendPhotosToAlbum(mAlbumId,mPhotosPath[mElementToSend],session,mCallbackPhoto);
                                 RequestAsyncTask task = new RequestAsyncTask(request);
                                 task.execute();
@@ -286,12 +287,14 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         Wyjście z Activity nie kończy wątku,
         należy o to zadbać.       */
 
-                RequestAsyncTask mFacebookTask = new RequestAsyncTask(
-                        sendPhotosToAlbum(mAlbumId,mPhotosPath[mElementToSend],session,mCallbackPhoto
-                ));
-                mFacebookTask.execute();
-                mProgressDialog.dismiss();
-                makeAndShowToast(getString(R.string.sharing_in_progress));
+            RequestAsyncTask mFacebookTask = new RequestAsyncTask(
+                    sendPhotosToAlbum(mAlbumId, mPhotosPath[mElementToSend], session, mCallbackPhoto
+                    )
+            );
+            mFacebookTask.execute();
+            mProgressDialog.dismiss();
+            updateNotification();
+            makeAndShowToast(getString(R.string.sharing_in_progress));
         }
     }
 
@@ -350,9 +353,25 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                 .setContentText(getString(R.string.sharing_succeeded))
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentIntent(pIntent)
-                .build();
+                .setAutoCancel(true);
         notificationManager =
                 (NotificationManager) getActivity().getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    private void updateNotification() {
+        String text = String.format(mTextOnNotification[0],(mCount-mElementToSend),mCount);
+        facebookNotification.setContentText(text);
+        notificationManager.notify(SHARE_ID, facebookNotification.build());
+    }
+
+    private void errorNotification(String error) {
+        facebookNotification.setContentText(error);
+        notificationManager.notify(SHARE_ID, facebookNotification.build());
+    }
+
+    private void successNotification() {
+        facebookNotification.setContentText(mTextOnNotification[1]);
+        notificationManager.notify(SHARE_ID, facebookNotification.build());
     }
 
     private Request sendPhotosToAlbum(String album_id,String path,Session session,Request.Callback callback) {
@@ -399,7 +418,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                             FacebookRequestError error = response.getError();
                             if (error != null) {
                                 if (getActivity().getApplicationContext() != null) {
-                                    makeAndShowToast(error.getErrorMessage());
+                                    errorNotification(error.getErrorMessage());
                                     mProgressDialog.dismiss();
                                 }
                             }
