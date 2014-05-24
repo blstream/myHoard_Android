@@ -38,6 +38,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.ImageElementAdapterList;
+import com.myhoard.app.dialogs.ImageInsertDialog;
 import com.myhoard.app.images.PhotoManager;
 import com.myhoard.app.model.Item;
 import com.myhoard.app.provider.DataStorage;
@@ -75,7 +76,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     public static final String MODIFIED_DATE = "elementModifiedDate";
     public static final String TAGS = "elementTags";
     public static final String EDITION = "edition";
-
+    private static final int INSERT_IMAGE_REQUEST_CODE = 100;
     private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
     private static final int REQUEST_GET_PHOTO = 1;
 
@@ -227,7 +228,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 categoryPicker();
                 break;
             case R.id.emptyview_inside:
-                imagePicker();
+                //imagePicker();
+                showImagePickerDialog();
                 break;
         }
     }
@@ -235,7 +237,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         if(i == 0) {
-            imagePicker();
+            //imagePicker();
+            showImagePickerDialog();
         } else {
             imageId = (int) l;
             imagePickerDel();
@@ -318,40 +321,31 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 new LoaderImagesCallbacks());
     }
 
+    private void showImagePickerDialog(){
+        ImageInsertDialog typeDialog = new ImageInsertDialog();
+        typeDialog.setTargetFragment(this, INSERT_IMAGE_REQUEST_CODE);
+        typeDialog.show(getFragmentManager(), "");
+    }
+
     /**
      * Method shows source picker, where user chose source of element image.
      */
-    private void imagePicker() {
-        AlertDialog.Builder pickerDialogBuilder = new AlertDialog.Builder(
-                context);
-
-        pickerDialogBuilder.setItems(R.array.actions_on_picker,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        try{
-                            if (which == 0) // add from camera
-                            {
-                                photoManager.takePicture(PhotoManager.MODE_CAMERA);
-                            } else if (which == 1) // add from gallery
-                            {
-                                photoManager.takePicture(PhotoManager.MODE_GALLERY);
-                            }
-                        } catch (IOException io) {
-                            //TODO show error
-                        }
-                    }
-                });
-        pickerDialogBuilder
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
-                        imageId = -1;
-                    }
-                });
-
-        AlertDialog choseDialog = pickerDialogBuilder.create();
-        choseDialog.show();
-
+    private void imagePicker(int which) {
+        if(which==1){
+            try {
+                photoManager.takePicture(PhotoManager.MODE_CAMERA);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else if(which==2){
+            try {
+                photoManager.takePicture(PhotoManager.MODE_GALLERY);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            imageId = -1;
+        }
     }
 
     private void imagePickerDel() {
@@ -447,27 +441,28 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_GET_PHOTO:
-                        Uri imgUri = photoManager.proceedResultPicture(this,data);
-                        setImage(imgUri);
-                    break;
-                case 9:
+        switch (requestCode) {
+            case INSERT_IMAGE_REQUEST_CODE:
+                imagePicker(data.getIntExtra("insert image", -1));
+                break;
+            case REQUEST_GET_PHOTO:
+                if (resultCode == Activity.RESULT_OK) {
+                    Uri imgUri = photoManager.proceedResultPicture(this, data);
+                    setImage(imgUri);
+                }
+                break;
+            case 9:
+                if (resultCode == Activity.RESULT_OK) {
                     LatLng location = data.getParcelableExtra("localisation");
-                    if(location != null) {
+                    if (location != null) {
                         locationUserSet = true;
-                        updateLocationData(location,LOCATION_FROM_FRAGMENT);
+                        updateLocationData(location, LOCATION_FROM_FRAGMENT);
                     } else {
                         locationUserSet = false;
                     }
-                default:
-                    break;
-            }
-        } else {
-            // Response is wrong - visible only in debug mode
-            if (D)
-                Log.d(TAG, "Response != " + Activity.RESULT_OK);
+                }
+            default:
+                break;
         }
     }
 

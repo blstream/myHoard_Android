@@ -139,5 +139,8 @@
     <string name="sharing_in_progress">Sharing in progress. Check out notification</string>
     <string name="please_wait">Please wait</string>
     <string name="preparing_data">Preparing data to send</string>
+    <string name="take_a_photo">take a photo</string>
+    <string name="choose_from_gallery">choose from gallery</string>
+    <string name="add_element">Add element photo:</string>
 
 </resources>
