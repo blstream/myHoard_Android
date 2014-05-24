@@ -121,6 +121,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private HashMap<Integer,Integer> imagesPositionListTmp;
     private HashMap<Integer,Integer> imagesPositionList;
     private HashMap<Integer,String> imagesIDServerList;
+    private HashMap<Integer,Integer> imagesTmp;
     private ImageElementAdapterList imageListAdapter;
     private int imageId;
     private Item element;
@@ -200,6 +201,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             imagesUriDeleteList = new ArrayList<>();
             imagesIDServerList = new HashMap<>();
             imagesUriInsertListTmp = new HashMap<>();
+            imagesTmp = new HashMap<>();
         }
         gvPhotosList.setAdapter(getPhotosList());
         gvPhotosList.setOnItemClickListener(this);
@@ -403,14 +405,26 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             if(imagesUriInsertList.containsKey(id)){
                 imagesUriInsertList.remove(id);
             }else{
-                if(imagesUriDeleteList.contains(id)){
-                    imagesUriDeleteList.remove(id);
-                }
+                imagesUriDeleteList.add(imagesPositionListTmp.get(id));
                 imagesPositionListTmp.remove(id);
-                imagesUriDeleteList.add(id);
+                Integer key;
+                int i=1;
+                Map<Integer,Integer> map = new TreeMap<Integer,Integer>(imagesPositionListTmp);
+                Iterator<Integer> keySetIterator = map.keySet().iterator();
+                while(keySetIterator.hasNext()){
+                    key = keySetIterator.next();
+                    imagesTmp.put(i,map.get(key));
+                    i++;
+                }
+                imagesPositionListTmp.clear();
+                keySetIterator = imagesTmp.keySet().iterator();
+                while(keySetIterator.hasNext()){
+                    key = keySetIterator.next();
+                    imagesPositionListTmp.put(key,imagesTmp.get(key));
+                }
+                imagesTmp.clear();
                 if(!imagesUriInsertList.isEmpty()){
-                    Integer key=null;
-                    Iterator<Integer> keySetIterator = imagesUriInsertList.keySet().iterator();
+                    keySetIterator = imagesUriInsertList.keySet().iterator();
                     while(keySetIterator.hasNext()){
                         key = keySetIterator.next();
                         imagesUriInsertListTmp.put(key-1,imagesUriInsertList.get(key));
@@ -761,7 +775,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             }
             if(imagesUriDeleteList.size()!=0){
                 for(int i=0;i<imagesUriDeleteList.size();i++){
-                    deleteImage(imagesPositionList.get(imagesUriDeleteList.get(i)));
+                    //deleteImage(imagesPositionList.get(imagesUriDeleteList.get(i)));
+                    deleteImage(imagesUriDeleteList.get(i));
                 }
             }
         }
