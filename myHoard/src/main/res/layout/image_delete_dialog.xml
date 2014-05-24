@@ -18,36 +18,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <RadioButton
-            android:id="@+id/rbPhoto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/take_a_photo"
-            android:textColor="@color/black"
-            android:button="@null"
-            android:background="@color/yellow_main"
-            android:drawableLeft="@drawable/photo_camera"
-            android:padding="10dp"
-            />
-
-        <View
-            android:background="@color/gray_background"
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"/>
-
-        <RadioButton
-            android:id="@+id/rbGallery"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/choose_from_gallery"
-            android:textColor="@color/black"
-            android:button="@null"
-            android:background="@color/yellow_main"
-            android:drawableLeft="@drawable/gallery"
-            android:padding="10dp"
-            />
-
         <View
             android:background="@color/gray_background"
             android:layout_width="fill_parent"

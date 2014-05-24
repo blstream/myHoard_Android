@@ -145,5 +145,7 @@
     <string name="gps_finding_location">Finding location</string>
     <string name="gps_no_signal">No GPS signal</string>
     <string name="gps_no_location">No location</string>
+    <string name="remove_photo">remove photo</string>
+    <string name="edit_element">Edit element photo:</string>
 
 </resources>
