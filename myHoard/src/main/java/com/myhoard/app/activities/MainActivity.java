@@ -17,27 +17,29 @@ package com.myhoard.app.activities;
 
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.SearchView;
-import android.util.Log;
+import android.support.v7.app.ActionBar;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -50,7 +52,6 @@ import com.myhoard.app.dialogs.SynchronizationDialog;
 import com.myhoard.app.fragments.CollectionFragment;
 import com.myhoard.app.fragments.CollectionsListFragment;
 import com.myhoard.app.model.RowItem;
-import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.services.SynchronizationService;
 
 import java.util.ArrayList;
@@ -59,10 +60,8 @@ import java.util.List;
 /*
 Created by Rafał Soudani, modified by Tomasz Nosal, Mateusz Czyszkiewicz
 */
-public class MainActivity extends BaseActivity implements FragmentManager.OnBackStackChangedListener {
-
-    private static final String TAG = "MainActivity";
-
+public class MainActivity extends BaseActivity {
+    private static final int SEARCH_LENGTH = 20;
     private CollectionsListFragment collectionsListFragment;
     private Menu actionBarMenu;
     private AlertDialog.Builder builder;
@@ -94,9 +93,6 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         setContentView(R.layout.activity_main);
 
         FragmentManager fm = getSupportFragmentManager();
-
-        //Listen for changes in the back stack
-        fm.addOnBackStackChangedListener(this);
 
         setVariables();
         openFragment(savedInstanceState, fm);
@@ -141,9 +137,8 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
 
     private void search() {
-        //Set zgodnie z grafikami oparty na drawerze, jesli bedzie zmiana i przeniesienie
-        //na action bar to zrobie na actionbarze ;)
         MenuItem miSearch = actionBarMenu.findItem(R.id.action_search);
+        final EditText searchText = (EditText) MenuItemCompat.getActionView(miSearch);
         if (miSearch != null) {
             miSearch.setVisible(true);
             MenuItemCompat.expandActionView(miSearch);
@@ -155,40 +150,43 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
                 @Override
                 public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                    searchText.setText("");
                     menuItem.setVisible(false);
                     return true;
                 }
             });
 
-            final SearchView svSearch = (SearchView) MenuItemCompat.getActionView(miSearch);
-            if (svSearch != null) {
-                svSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextSubmit(String s) {
-                        //FIXME:CODEREVIEW:AWA: Wartosci hardoced
-                        if (s.equals("generate")) {
-                            GeneratorDialog generatorDialog = new GeneratorDialog();
-                            generatorDialog.show(getSupportFragmentManager(), "");
-                        }
-                        return true;
-                    }
+            searchText.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(searchText, InputMethodManager.SHOW_IMPLICIT);
+            searchText.setLayoutParams(new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
 
-                    @Override
-                    public boolean onQueryTextChange(String s) {
-                        //FIXME:CODEREVIEW:AWA: Wartosci hardoced 20 ?
-                        if (s.length() > 20) {
-                            svSearch.setQuery(s.substring(0, 20), false);
-                        } else if (s.length() >= 2){
-                            Bundle args = new Bundle();
-                            args.putString(CollectionsListFragment.QUERY, s);
-                            collectionsListFragment.fillGridView(args);
-                        } else if (s.length() <2){
-                            collectionsListFragment.fillGridView(null); // reset listy wyników
-                        }
-                        return true;
+            InputFilter[] inputFilters = new InputFilter[1];
+            inputFilters[0] = new InputFilter.LengthFilter(SEARCH_LENGTH);
+            searchText.setFilters(inputFilters);
+
+            searchText.addTextChangedListener(new TextWatcher() {
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if (editable.length() >= 2) {
+                        Bundle args = new Bundle();
+                        args.putString(CollectionsListFragment.QUERY, editable.toString());
+                        collectionsListFragment.fillGridView(args);
+                    } else if (editable.length() < 2) {
+                        collectionsListFragment.fillGridView(null); // reset listy wyników
                     }
-                });
-            }
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+                }
+
+            });
         }
     }
 
@@ -235,7 +233,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
     @Override
     protected void onStop() {
         super.onStop();
-        if (synchronizationIntent!=null)
+        if (synchronizationIntent != null)
             stopService(synchronizationIntent);
     }
 
@@ -339,14 +337,8 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
             synchronizationDialog = new SynchronizationDialog();
             synchronizationDialog.show(getSupportFragmentManager(), "");
         } else {
-            Toast.makeText(getApplicationContext(), getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show();
         }
-    }
-
-    @Override
-    public void onBackStackChanged() {
-        //FIXME:CODEREVIEW:AWA: Martwy kod
-        //    shouldDisplayHomeUp();
     }
 
     @Override
@@ -356,9 +348,8 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         return true;
     }
 
-    private void displayView(int position)
-    {
-        
+    private void displayView(int position) {
+
         switch (position) {
             //search option
             case 0:
@@ -367,7 +358,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                 }
                 break;
 
-              //new collection
+            //new collection
             case 1:
                 if (!getVisibleFragmentTag().equals(NEW_COLLECTION) &&
                         !getVisibleFragmentTag().equals(ITEMS_LIST) &&
@@ -379,18 +370,18 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
                             .commit();
                 } else if (getVisibleFragmentTag().equals(ITEMS_LIST)) {
                     //item.setTitle(R.string.action_new_element);//TODO correct
-                    Intent in = new Intent(this,ElementActivity.class);
-                    in.putExtra("categoryId",collectionSelected);
+                    Intent in = new Intent(this, ElementActivity.class);
+                    in.putExtra("categoryId", collectionSelected);
                     startActivity(in);
                 }
                 break;
             //Friends
             case 2:
-                Toast.makeText(getBaseContext(),getString(R.string.not_implement_yet),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), getString(R.string.not_implement_yet), Toast.LENGTH_SHORT).show();
                 break;
             //profile
             case 3:
-                Toast.makeText(getBaseContext(),getString(R.string.not_implement_yet),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), getString(R.string.not_implement_yet), Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
@@ -398,12 +389,13 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         }
         drawerLayout.closeDrawers();
     }
+
     List<RowItem> preparing_navigationDrawer() {
 
-            String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-            int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
+        String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
+        int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
 
-        List<RowItem> list = new ArrayList<RowItem>();
+        List<RowItem> list = new ArrayList<>();
         for (int i = 0; i < drawerListItems.length; i++) {
             RowItem item = new RowItem(drawerListItems[i], images[i]);
             list.add(item);
@@ -413,7 +405,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
 
-        List <String> errorSynchronizationList = new ArrayList<String>();
+        List<String> errorSynchronizationList = new ArrayList<>();
         private static final String RESULT = "result";
         private static final String SYNCHRONIZED = "synchronized";
         private static final String ERROR = "error";
@@ -423,7 +415,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         public void onReceive(Context context, Intent intent) {
             String stringExtra = intent.getStringExtra(RESULT);
             if (stringExtra != null) {
-                if (stringExtra.equals(SYNCHRONIZED)){
+                if (stringExtra.equals(SYNCHRONIZED)) {
                     synchronizationDialog.dismiss();
                     showErrors();
                 }
@@ -435,7 +427,7 @@ public class MainActivity extends BaseActivity implements FragmentManager.OnBack
         }
 
         private void showErrors() {
-            if (errorSynchronizationList.size()>0) {
+            if (errorSynchronizationList.size() > 0) {
                 builder.setMessage(errorSynchronizationList.toString())
                         .setTitle(ERRORS)
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
