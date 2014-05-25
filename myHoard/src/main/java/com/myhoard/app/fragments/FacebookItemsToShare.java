@@ -46,6 +46,7 @@ import java.io.ByteArrayOutputStream;
  */
 public class FacebookItemsToShare extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    public static boolean isShareRun = false;
     private static final int LOAD_ITEMS = 0;
     public static final String ITEM_ID = "itemId";
     private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
@@ -260,6 +261,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         buildNotification();
         setNumberOfPhotosToSend();
         setPhotosPathToSend();
+        FacebookItemsToShare.isShareRun = true;
     }
 
     public void shareOnFacebook(final Session session) {
@@ -368,11 +370,13 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     }
 
     private void errorNotification(String error) {
+        FacebookItemsToShare.isShareRun = false;
         facebookNotification.setContentText(error);
         notificationManager.notify(SHARE_ID, facebookNotification.build());
     }
 
     private void successNotification() {
+        FacebookItemsToShare.isShareRun = false;
         facebookNotification.setContentText(mTextOnNotification[1]);
         notificationManager.notify(SHARE_ID, facebookNotification.build());
     }

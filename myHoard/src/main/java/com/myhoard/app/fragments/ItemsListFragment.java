@@ -26,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
@@ -436,21 +437,35 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     private void newFacebookShareFragment(long id, int position) {
-        Fragment newFragment = new FacebookItemsToShare();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        Bundle bundle = new Bundle();
-        bundle.putLong(FacebookItemsToShare.ITEM_ID,id);
-        bundle.putString(FacebookItemsToShare.POST_LOCATION,setLocationOnFacebook(position));
-        newFragment.setArguments(bundle);
-        transaction.replace(R.id.container,newFragment,NEW_FACEBOOK_FRAGMENT_NAME);
-        transaction.addToBackStack(NEW_FACEBOOK_FRAGMENT_NAME);
-        transaction.commit();
+        if(FacebookItemsToShare.isShareRun) {
+            makeAndShowToast(getString(R.string.another_share_is_running));
+        } else {
+            Fragment newFragment = new FacebookItemsToShare();
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            Bundle bundle = new Bundle();
+            bundle.putLong(FacebookItemsToShare.ITEM_ID, id);
+            bundle.putString(FacebookItemsToShare.POST_LOCATION, setLocationOnFacebook(position));
+            newFragment.setArguments(bundle);
+            transaction.replace(R.id.container, newFragment, NEW_FACEBOOK_FRAGMENT_NAME);
+            transaction.addToBackStack(NEW_FACEBOOK_FRAGMENT_NAME);
+            transaction.commit();
+        }
     }
 
     private String setLocationOnFacebook(int position) {
         Cursor cursor = mImageAdapterList.getCursor();
         cursor.moveToPosition(position);
         return cursor.getString(cursor.getColumnIndex(DataStorage.Items.LOCATION));
+    }
+
+    public void makeAndShowToast(String message) {
+        if(getActivity().getApplicationContext()!=null) {
+            Toast.makeText(
+                    getActivity().getApplicationContext(),
+                    message,
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
 }
