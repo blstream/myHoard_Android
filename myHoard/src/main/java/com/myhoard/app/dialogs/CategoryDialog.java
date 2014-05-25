@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 import com.myhoard.app.R;
 import com.myhoard.app.provider.DataStorage;
@@ -19,7 +20,7 @@ import com.myhoard.app.provider.DataStorage;
 /**
  * Created by Piotr Brzozowski on 25.05.2014
  */
-public class CategoryDialog extends DialogFragment{
+public class CategoryDialog extends DialogFragment implements View.OnClickListener{
 
     private static final int CATEGORY_RESULT_CODE = 200;
     private static final int LOADER_CATEGORIES = 1;
@@ -47,6 +48,8 @@ public class CategoryDialog extends DialogFragment{
                 dismiss();
             }
         });
+        TextView cancelOption = (TextView)dialog.findViewById(R.id.tvCancelChooseCollection);
+        cancelOption.setOnClickListener(this);
         dialog.show();
         return dialog;
     }
@@ -58,6 +61,18 @@ public class CategoryDialog extends DialogFragment{
 
         mAdapterCategories = new SimpleCursorAdapter(getActivity(),
                 R.layout.category_dialog_row, null, from, to, NO_FLAGS);
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent intent = new Intent();
+        switch(v.getId()){
+            case R.id.tvCancelChooseCollection:
+                intent.putExtra("collectionId",-1);
+                getTargetFragment().onActivityResult(getTargetRequestCode(), CATEGORY_RESULT_CODE, intent);
+                dismiss();
+                break;
+        }
     }
 
     private class LoaderCategoriesCallbacks implements

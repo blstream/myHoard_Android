@@ -264,12 +264,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
      * Method shows category picker with categories from whole database.
      */
     private void categoryPicker(int collectionId_position) {
-        adapterCategories.getCursor().moveToPosition(collectionId_position);
-        int columnIndex = adapterCategories.getCursor()
-                .getColumnIndex(DataStorage.Collections.NAME);
-        tvElementCategory.setText(adapterCategories.getCursor()
-                .getString(columnIndex));
-        iCollectionId = (int) adapterCategories.getItemId(collectionId_position);
+        if(collectionId_position!=-1){
+            adapterCategories.getCursor().moveToPosition(collectionId_position);
+            int columnIndex = adapterCategories.getCursor()
+                    .getColumnIndex(DataStorage.Collections.NAME);
+            tvElementCategory.setText(adapterCategories.getCursor()
+                    .getString(columnIndex));
+            iCollectionId = (int) adapterCategories.getItemId(collectionId_position);
+        }
     }
 
     private void localisationPicker() {
