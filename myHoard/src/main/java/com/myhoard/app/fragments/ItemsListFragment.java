@@ -330,7 +330,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
                         DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR);
                 cursorLoader =  new CursorLoader(mContext, DataStorage.Items.CONTENT_URI,
                         new String[]{DataStorage.Items.NAME, DataStorage.Media.FILE_NAME,
-                                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,DataStorage.Items.DESCRIPTION},
+                                DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID,
+                                DataStorage.Items.DESCRIPTION,DataStorage.Items.LOCATION},
                         selection, null, sortOrder);
                 break;
             //Get name and description of elements collection
