@@ -149,5 +149,6 @@
     <string name="remove_photo">remove photo</string>
     <string name="edit_element">Edit element photo:</string>
     <string name="choose_collection">Please, choose collection</string>
+    <string name="location">Location: </string>
 
 </resources>

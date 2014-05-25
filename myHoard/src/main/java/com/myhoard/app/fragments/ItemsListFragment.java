@@ -281,7 +281,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             // Sharing item from list
             case SHARE_ID:
                 if(info!=null) {
-                    newFacebookShareFragment(info.id);
+                    newFacebookShareFragment(info.id,info.position);
                 }
                 return true;
             case DELETE_ID:
@@ -435,15 +435,22 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         sortByDateTabText.setText(text);
     }
 
-    private void newFacebookShareFragment(long id) {
+    private void newFacebookShareFragment(long id, int position) {
         Fragment newFragment = new FacebookItemsToShare();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         Bundle bundle = new Bundle();
         bundle.putLong(FacebookItemsToShare.ITEM_ID,id);
+        bundle.putString(FacebookItemsToShare.POST_LOCATION,setLocationOnFacebook(position));
         newFragment.setArguments(bundle);
         transaction.replace(R.id.container,newFragment,NEW_FACEBOOK_FRAGMENT_NAME);
         transaction.addToBackStack(NEW_FACEBOOK_FRAGMENT_NAME);
         transaction.commit();
+    }
+
+    private String setLocationOnFacebook(int position) {
+        Cursor cursor = mImageAdapterList.getCursor();
+        cursor.moveToPosition(position);
+        return cursor.getString(cursor.getColumnIndex(DataStorage.Items.LOCATION));
     }
 
 }

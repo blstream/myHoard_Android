@@ -73,6 +73,8 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private String[] mPhotosPath;
     private ProgressDialog mProgressDialog;
     private String[] mTextOnNotification;
+    public static final String POST_LOCATION = "location";
+    private String mPostLocation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,6 +93,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         mButtonShare = (Button)view.findViewById(R.id.btShareOnFb);
         Bundle bundle = this.getArguments();
         mElementId = bundle.getLong(ITEM_ID);
+        mPostLocation = bundle.getString(POST_LOCATION);
         setOnClickActionOnGridView();
         setOnClickButton();
 
@@ -406,7 +409,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
             prepareForShare();
             Bundle params = new Bundle();
             params.putString("name", albumName);
-            params.putString("message", message);
+            params.putString("message", setMessage(message));
         /* make the API call */
             new Request(
                     session,
@@ -428,5 +431,13 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                     }
             ).executeAsync();
         }
+    }
+
+    private String setMessage(String msg) {
+        if(mPostLocation.compareTo("Brak") != 0) {
+            msg = String.format("%s \n \n %s %s",msg,getString(R.string.location),mPostLocation);
+            return msg;
+        }
+        return msg;
     }
 }
