@@ -151,6 +151,9 @@
     <string name="choose_collection">Please, choose collection</string>
     <string name="location">Location: </string>
     <string name="another_share_is_running">Please wait, sharing is running</string>
-    <string name="required_photo">Share requires a photo</string>
+    <string name="gps_enable">Enable GPS</string>
+    <string name="location_manually">Choose position manually</string>
+    <string name="choose_location">Please, choose location</string>
+	<string name="required_photo">Share requires a photo</string>
 
 </resources>
