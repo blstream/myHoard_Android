@@ -286,12 +286,6 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                         }
                     }
                 };
-
-                /* AWA:FIXME: Niebezpieczne używanie wątku
-        Brak anulowania tej operacji.
-        Wyjście z Activity nie kończy wątku,
-        należy o to zadbać.       */
-
             RequestAsyncTask mFacebookTask = new RequestAsyncTask(
                     sendPhotosToAlbum(mAlbumId, mPhotosPath[mElementToSend], session, mCallbackPhoto
                     )
@@ -300,6 +294,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
             mProgressDialog.dismiss();
             updateNotification();
             makeAndShowToast(getString(R.string.sharing_in_progress));
+            getFragmentManager().popBackStackImmediate();
         }
     }
 
