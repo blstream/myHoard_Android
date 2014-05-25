@@ -148,5 +148,6 @@
     <string name="sent_photo">Sending a %1$d photo of the %2$d </string>
     <string name="remove_photo">remove photo</string>
     <string name="edit_element">Edit element photo:</string>
+    <string name="choose_collection">Please, choose collection</string>
 
 </resources>

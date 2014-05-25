@@ -38,6 +38,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.ImageElementAdapterList;
+import com.myhoard.app.dialogs.CategoryDialog;
 import com.myhoard.app.dialogs.ImageDeleteDialog;
 import com.myhoard.app.dialogs.ImageEditDialog;
 import com.myhoard.app.dialogs.ImageInsertDialog;
@@ -81,6 +82,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private static final int INSERT_IMAGE_REQUEST_CODE = 100;
     private static final int EDIT_IMAGE_REQUEST_CODE = 101;
     private static final int DELETE_IMAGE_REQUEST_CODE = 102;
+    private static final int CATEGORY_RESULT_CODE = 200;
     private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
     private static final int REQUEST_GET_PHOTO = 1;
 
@@ -236,7 +238,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 }
                 break;
             case R.id.tvElementCategory:
-                categoryPicker();
+                //categoryPicker();
+                showCategoryPickerDialog();
                 break;
             case R.id.emptyview_inside:
                 //imagePicker();
@@ -260,26 +263,13 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     /**
      * Method shows category picker with categories from whole database.
      */
-    private void categoryPicker() {
-        AlertDialog.Builder categoryDialogBuilder = new AlertDialog.Builder(
-                context);
-
-        categoryDialogBuilder.setAdapter(adapterCategories,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        adapterCategories.getCursor().moveToPosition(i);
-                        int columnIndex = adapterCategories.getCursor()
-                                .getColumnIndex(DataStorage.Collections.NAME);
-                        tvElementCategory.setText(adapterCategories.getCursor()
-                                .getString(columnIndex));
-                        iCollectionId = (int) adapterCategories.getItemId(i);
-                    }
-                });
-
-        AlertDialog choseDialog = categoryDialogBuilder.create();
-        choseDialog.show();
-
+    private void categoryPicker(int collectionId_position) {
+        adapterCategories.getCursor().moveToPosition(collectionId_position);
+        int columnIndex = adapterCategories.getCursor()
+                .getColumnIndex(DataStorage.Collections.NAME);
+        tvElementCategory.setText(adapterCategories.getCursor()
+                .getString(columnIndex));
+        iCollectionId = (int) adapterCategories.getItemId(collectionId_position);
     }
 
     private void localisationPicker() {
@@ -337,6 +327,12 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         ImageInsertDialog insertDialog = new ImageInsertDialog();
         insertDialog.setTargetFragment(this, INSERT_IMAGE_REQUEST_CODE);
         insertDialog.show(getFragmentManager(), "");
+    }
+
+    private void showCategoryPickerDialog(){
+        CategoryDialog categoryDialog = new CategoryDialog();
+        categoryDialog.setTargetFragment(this, CATEGORY_RESULT_CODE);
+        categoryDialog.show(getFragmentManager(), "");
     }
 
     private void showImageEditPickerDialog(){
@@ -463,6 +459,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 break;
             case DELETE_IMAGE_REQUEST_CODE:
                 imagePickerDel(data.getIntExtra("insert image", -1));
+                break;
+            case CATEGORY_RESULT_CODE:
+                categoryPicker(data.getIntExtra("collectionId",-1));
                 break;
             case REQUEST_GET_PHOTO:
                 if (resultCode == Activity.RESULT_OK) {
