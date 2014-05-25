@@ -282,7 +282,9 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             // Sharing item from list
             case SHARE_ID:
                 if(info!=null) {
-                    newFacebookShareFragment(info.id,info.position);
+                    if(isPhotoOnElement(info.position))
+                        newFacebookShareFragment(info.id,info.position);
+                    else makeAndShowToast(getString(R.string.required_photo));
                 }
                 return true;
             case DELETE_ID:
@@ -456,6 +458,14 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         Cursor cursor = mImageAdapterList.getCursor();
         cursor.moveToPosition(position);
         return cursor.getString(cursor.getColumnIndex(DataStorage.Items.LOCATION));
+    }
+
+    private boolean isPhotoOnElement(int position) {
+        Cursor cursor = mImageAdapterList.getCursor();
+        cursor.moveToPosition(position);
+        String path = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
+        if(path != null) return true;
+        else return false;
     }
 
     public void makeAndShowToast(String message) {

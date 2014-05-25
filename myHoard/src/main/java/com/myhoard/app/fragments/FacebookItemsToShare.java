@@ -51,6 +51,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     public static final String ITEM_ID = "itemId";
     private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
     private static final String ALBUM_NAME = "myHoard";
+    private static final String CREATE_ALBUM = "/me/albums";
 
     private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
 
@@ -262,6 +263,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         setNumberOfPhotosToSend();
         setPhotosPathToSend();
         FacebookItemsToShare.isShareRun = true;
+
     }
 
     public void shareOnFacebook(final Session session) {
@@ -412,7 +414,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         /* make the API call */
             new Request(
                     session,
-                    "/me/albums",
+                    CREATE_ALBUM,
                     params,
                     HttpMethod.POST,
                     new Request.Callback() {
