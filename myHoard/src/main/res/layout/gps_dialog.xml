@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
+        android:text="@string/choose_location"
+        android:padding="20dp"/>
+
+    <RadioGroup
+        android:id="@+id/rgType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/rbGpsEnable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/gps_enable"
+            android:textColor="@color/black"
+            android:button="@null"
+            android:background="@color/yellow_main"
+            android:padding="20dp"
+            />
+
+        <View
+            android:background="@color/gray_background"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"/>
+
+        <RadioButton
+            android:id="@+id/rbGpsManually"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/location_manually"
+            android:textColor="@color/black"
+            android:button="@null"
+            android:background="@color/yellow_main"
+            android:padding="20dp"
+            />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/tvCancelGps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
+        android:text="@string/cancel"
+        android:padding="20dp"/>
+
+</LinearLayout>

@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
 import com.myhoard.app.adapters.ImageElementAdapterList;
 import com.myhoard.app.dialogs.CategoryDialog;
+import com.myhoard.app.dialogs.GpsChooseDialog;
 import com.myhoard.app.dialogs.ImageDeleteDialog;
 import com.myhoard.app.dialogs.ImageEditDialog;
 import com.myhoard.app.dialogs.ImageInsertDialog;
@@ -83,6 +84,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private static final int EDIT_IMAGE_REQUEST_CODE = 101;
     private static final int DELETE_IMAGE_REQUEST_CODE = 102;
     private static final int CATEGORY_RESULT_CODE = 200;
+    private static final int GPS_RESULT_CODE = 300;
     private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
     private static final int REQUEST_GET_PHOTO = 1;
 
@@ -230,7 +232,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         switch (view.getId()) {
             case R.id.tvElementLocalisation:
                 if(!gpsEnabled){
-                    localisationPicker();
+                    showGpsPickerDialog();
+                    //localisationPicker();
                 } else {
                     Intent intent = new Intent(getActivity(), ElementMapActivity.class);
                     intent.putExtra("localisation",elementLocation);
@@ -274,32 +277,16 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         }
     }
 
-    private void localisationPicker() {
-        AlertDialog.Builder localisationDialogBuilder = new AlertDialog.Builder(
-                context);
-
-        final String[] element = new String[]{"włącz gps", "ustal pozycje"};
-
-        localisationDialogBuilder.setItems(element, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                switch(i) {
-                    case 0:
-                        startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 10);
-                        break;
-                    case 1:
-                        Intent intent = new Intent(getActivity(), ElementMapActivity.class);
-                        if(elementLocation!=null){
-                            intent.putExtra("localisation",elementLocation);
-                        }
-                        startActivityForResult(intent, 9);
-                        break;
-                }
+    private void localisationPicker(int location_choose) {
+        if(location_choose==1){
+            startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 10);
+        }else if(location_choose==2){
+            Intent intent = new Intent(getActivity(), ElementMapActivity.class);
+            if(elementLocation!=null){
+                intent.putExtra("localisation",elementLocation);
             }
-        });
-
-        AlertDialog choseDialog = localisationDialogBuilder.create();
-        choseDialog.show();
+            startActivityForResult(intent, 9);
+        }
     }
 
     /**
@@ -330,6 +317,13 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         insertDialog.setTargetFragment(this, INSERT_IMAGE_REQUEST_CODE);
         insertDialog.show(getFragmentManager(), "");
     }
+
+    private void showGpsPickerDialog(){
+        GpsChooseDialog gpsDialog = new GpsChooseDialog();
+        gpsDialog.setTargetFragment(this, GPS_RESULT_CODE);
+        gpsDialog.show(getFragmentManager(), "");
+    }
+
 
     private void showCategoryPickerDialog(){
         CategoryDialog categoryDialog = new CategoryDialog();
@@ -464,6 +458,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 break;
             case CATEGORY_RESULT_CODE:
                 categoryPicker(data.getIntExtra("collectionId",-1));
+                break;
+            case GPS_RESULT_CODE:
+                localisationPicker(data.getIntExtra("gps_choose",-1));
                 break;
             case REQUEST_GET_PHOTO:
                 if (resultCode == Activity.RESULT_OK) {
