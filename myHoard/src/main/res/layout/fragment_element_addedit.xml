@@ -36,13 +36,7 @@
             <ImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:src="@drawable/nophoto" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="take a photo"
-                android:textColor="@color/gray_text" />
+                android:src="@drawable/take_photo" />
 
         </LinearLayout>
 

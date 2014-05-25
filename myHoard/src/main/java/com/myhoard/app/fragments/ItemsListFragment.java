@@ -62,6 +62,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private static final int LOAD_COLLECTION_ELEMENTS = 0;
     private static final String NEW_SEARCH_FRAGMENT_NAME = "SearchFragment";
     private static final String SEARCH_COLLECTION_ID = "SearchCollection";
+    private static final String NEW_FACEBOOK_FRAGMENT_NAME = "FacebookFragment";
 
     private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
     private ProgressDialog mProgressDialog; //Facebook
@@ -329,10 +330,12 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             case SHARE_ID:
                 if(info!=null) {
                     mItemPositionOnList = info.position;
-                    FacebookShareDialog facebookShareDialog = new FacebookShareDialog();
+                    /*FacebookShareDialog facebookShareDialog = new FacebookShareDialog();
                     facebookShareDialog.setDefaultPostOnFb(setDefaultPostOnFb());
                     facebookShareDialog.setTargetFragment(this,FacebookShareDialog.DIALOG_ID);
-                    facebookShareDialog.show(getFragmentManager(),null);
+                    facebookShareDialog.show(getFragmentManager(),null);*/
+                    newFacebookShareFragment(info.id);
+
                 }
                 return true;
             case DELETE_ID:
@@ -597,4 +600,16 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
         messageOnFB = String.format("%s \n %s",data[0],data[1]);
         return messageOnFB;
     }
+
+    private void newFacebookShareFragment(long id) {
+        Fragment newFragment = new FacebookItemsToShare();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        Bundle bundle = new Bundle();
+        bundle.putLong(FacebookItemsToShare.ITEM_ID,id);
+        newFragment.setArguments(bundle);
+        transaction.replace(R.id.container,newFragment,NEW_FACEBOOK_FRAGMENT_NAME);
+        transaction.addToBackStack(NEW_FACEBOOK_FRAGMENT_NAME);
+        transaction.commit();
+    }
+
 }

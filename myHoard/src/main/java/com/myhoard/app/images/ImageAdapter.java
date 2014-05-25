@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,7 +67,7 @@ public class ImageAdapter extends CursorAdapter {
             holder.count = (TextView) v.findViewById(R.id.tvSquareCount);
 			holder.nameIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.NAME);
 			holder.tagsIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.TAGS);
-			holder.imgIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.AVATAR_FILE_NAME);
+			holder.imgIndex = cursor.getColumnIndexOrThrow(DataStorage.Media.FILE_NAME);
             holder.countIndex = cursor.getColumnIndexOrThrow(DataStorage.Collections.ITEMS_NUMBER);
 
 			v.setTag(holder);
@@ -100,6 +101,7 @@ public class ImageAdapter extends CursorAdapter {
         }
 
         mImageLoader.DisplayImage(cursor.getString(holder.imgIndex),holder.img);
+
 
 	}
 

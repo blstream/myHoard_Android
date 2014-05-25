@@ -25,21 +25,21 @@ public class LoginActivity extends BaseActivity {
     private EditText email;
     private EditText password;
 
-
     private final static String SAVELOGIN = "saveLogin";
     private final static String LOGINPREFS = "loginPrefs";
     private final static String USERNAMES = "username";
     private final static String PASSWORDS = "password";
-    private final static String CHECK  ="checked";
+    private final static String CHECK = "checked";
     private CheckBox remember_check;
     private SharedPreferences.Editor editor;
     private Button login_button;
     private TextView txt;
     private User user;
 
+    GetUserSingleton getUserSingleton;
 
     @Override
-     protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -72,58 +72,59 @@ public class LoginActivity extends BaseActivity {
     }
 
 
-            public void setVariables() {
-                email = (EditText) findViewById(R.id.login_email);
-                password = (EditText) findViewById(R.id.login_password);
-                login_button = (Button) findViewById(R.id.button_login);
-                txt = (TextView) findViewById(R.id.registration_text);
-                remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
+    public void setVariables() {
+        email = (EditText) findViewById(R.id.login_email);
+        password = (EditText) findViewById(R.id.login_password);
+        login_button = (Button) findViewById(R.id.button_login);
+        txt = (TextView) findViewById(R.id.registration_text);
+        remember_check = (CheckBox) findViewById(R.id.checkbox_remember);
+    }
+
+    public void registration_activity() {
+        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+        startActivity(intent);
+    }
+
+    public void registry() {
+        ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+        if (cd.isConnectingToInternet()) {
+            String email_ch = String.valueOf(email.getText());
+            String password_ch = String.valueOf(password.getText());
+
+            user = new User();
+            user.setEmail(email_ch);
+            user.setPassword(password_ch);
+
+            getUserSingleton = new GetUserSingleton();
+            getUserSingleton.execute();
+
+
+            if (remember_check.isChecked()) {
+
+                editor.putBoolean(SAVELOGIN, true);
+                editor.putString(USERNAMES, email_ch);
+                editor.putString(PASSWORDS, password_ch);
+                editor.putBoolean(CHECK, true);
+                editor.commit();
+            } else {
+                editor.clear();
+                editor.commit();
             }
 
-            public void registration_activity() {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
-            }
+        } else {
+            TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
+            incorrectData.setText(getString(R.string.no_internet_connection));
+        }
+    }
 
-            public void registry() {
-                ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
-                if (cd.isConnectingToInternet()) {
-                    String email_ch = String.valueOf(email.getText());
-                    String password_ch = String.valueOf(password.getText());
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (getUserSingleton != null)
+            getUserSingleton.cancel(true);
+    }
 
-                    user = new User();
-                    user.setEmail(email_ch);
-                    user.setPassword(password_ch);
-
-                    /* AWA:FIXME: AsyncTask canceling
-                    Uruchamiany jest w tym miejscu AsyncTask
-                    Jednak brak jest jego anulowania.
-                    Co gdy uzytkownik opusci to acitivyt przez przycisk BACK?
-                    AsyncTask dalej będzie w tle pracował.
-                    */
-                    new getUserSingleton().execute();
-
-
-                    if (remember_check.isChecked()) {
-
-                        editor.putBoolean(SAVELOGIN, true);
-                        editor.putString(USERNAMES, email_ch);
-                        editor.putString(PASSWORDS, password_ch);
-                        editor.putBoolean(CHECK,true);
-                        editor.commit();
-                    } else {
-                        editor.clear();
-                        editor.commit();
-                    }
-
-                } else {
-                    TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
-                    incorrectData.setText(getString(R.string.no_internet_connection));
-                }
-            }
-
-
-    private class getUserSingleton extends AsyncTask<Void, Void, Boolean> {
+    private class GetUserSingleton extends AsyncTask<Void, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -134,16 +135,15 @@ public class LoginActivity extends BaseActivity {
         protected void onPostExecute(Boolean result) {
             if (result) {
 
-                startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 Toast toast = Toast.makeText(getBaseContext(), getString(R.string.Logged),
                         Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
                 toast.show();
                 finish();
-            }
-            else {
+            } else {
                 TextView incorrectData = (TextView) findViewById(R.id.incorrect_data);
-               incorrectData.setText(getString(R.string.email_or_password_incorrect));
+                incorrectData.setText(getString(R.string.email_or_password_incorrect));
             }
         }
     }

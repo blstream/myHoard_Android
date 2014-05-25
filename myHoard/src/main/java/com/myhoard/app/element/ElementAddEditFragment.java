@@ -52,6 +52,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -119,7 +120,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private boolean gpsEnabled = false;
     private String mActualElementName;
     private PhotoManager photoManager;
-
+    private int mActualCollectionId;
     private LatLng elementLocation;
 
     @Override
@@ -171,7 +172,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             element = b.getParcelable("element");
             elementId = Integer.parseInt(element.getId());
             iCollectionId = Integer.parseInt(element.getCollection());
-
+            mActualCollectionId = iCollectionId;
             tvElementPosition.setText(element.getLocationTxt());
             tvElementPosition.setTextColor(Color.GREEN);
             elementLocation = new LatLng(element.getLocation().lat,element.getLocation().lng);
@@ -552,7 +553,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                             getActivity().getContentResolver()) {
                     };
                     if (elementId != -1) {
-                        if(sName.equals(mActualElementName)){
+                        if(sName.equals(mActualElementName)&&(iCollectionId==mActualCollectionId)){
                             values.put(DataStorage.Items.MODIFIED_DATE, Calendar
                                     .getInstance().getTime().getTime());
                             values.put(DataStorage.Items.SYNCHRONIZED, false);
@@ -561,7 +562,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                                     DataStorage.Items._ID + " = ?",
                                     new String[] { String.valueOf(elementId) });
                             getActivity().finish();
-                        } else{
+                        }
+                        else{
                             if(checkUniquenessElementName(sName)){
                                 values.put(DataStorage.Items.MODIFIED_DATE, Calendar
                                         .getInstance().getTime().getTime());
@@ -598,8 +600,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private boolean checkUniquenessElementName(String sName){
         Cursor cursor = getActivity().getContentResolver().query(DataStorage.Items.CONTENT_URI,
                 new String[] {DataStorage.Items.NAME},DataStorage.Items.NAME + " = '" + sName + "' AND " +
-                        DataStorage.Items.ID_COLLECTION + " = '" + iCollectionId +"' AND " + DataStorage.Items.TABLE_NAME + "."
-                        + DataStorage.Items.DELETED + " != '" + 1 + "'",null,null);
+                        DataStorage.Items.ID_COLLECTION + " = '" + iCollectionId +"' AND (" + DataStorage.Items.TABLE_NAME + "."
+                        + DataStorage.Items.DELETED + " != '" + 1 + "')",null,null);
         if(cursor!=null){
             if(cursor.isAfterLast()){
                 return true;
@@ -669,7 +671,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 first = false;
             }
             if(data!=null){
-                imagesUriList.add(null);
+                if(data.getCount()!=0){
+                    imagesUriList.add(null);
+                }
                 data.moveToFirst();
                 int position = 1;
                 while(!data.isAfterLast()){
@@ -823,7 +827,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 geometry = object.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
                 geometryLocation = geometry.getJSONObject("location");
                 // Get the value of the attribute whose name is "formatted_string"
-                location_string = location.getString("formatted_address");
+                location_string = new String(location.getString("formatted_address").getBytes("ISO-8859-1"),"UTF-8");
                 double lat = Double.parseDouble(geometryLocation.getString("lat"));
                 double lon = Double.parseDouble(geometryLocation.getString("lng"));
                 LatLng latLng = new LatLng(lat,lon);
@@ -832,6 +836,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 tvElementPosition.setTextColor(Color.GREEN);
             } catch (JSONException e1) {
                 e1.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
         }
 
