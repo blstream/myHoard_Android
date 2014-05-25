@@ -337,7 +337,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             case LOAD_COLLECTION_NAME_AND_DESCRIPTION:
                 selection = String.format("%s = %s",mCollectionID,DataStorage.Collections._ID);
                 cursorLoader = new CursorLoader(mContext, DataStorage.Collections.CONTENT_URI,
-                        new String[]{DataStorage.Collections.DESCRIPTION,DataStorage.Collections.TAGS,DataStorage.Collections.NAME},
+                        new String[]{DataStorage.Collections.DESCRIPTION,DataStorage.Collections.TAGS,DataStorage.Collections.NAME,DataStorage.Collections.TYPE},
                         selection, null, null);
                 break;
         }
