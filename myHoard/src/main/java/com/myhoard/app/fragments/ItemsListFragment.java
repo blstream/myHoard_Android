@@ -64,6 +64,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
     private static final String LABEL_BY_DATE_DESC = "> DATE";
     private static final String DEFAULT_SORT = DataStorage.Items.NAME;
     private static String sortOrder = DEFAULT_SORT;
+    private static final int COLLECTION_PUBLIC = 2;
+    private int mCollectionType;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_items_list, container, false);
@@ -267,7 +269,8 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
 
         int groupId = 0;
         menu.add(groupId, DELETE_ID, DELETE_ID, R.string.menu_delete);
-        menu.add(groupId, SHARE_ID, SHARE_ID, R.string.menu_share); // Sharing on FB
+        if(mCollectionType == COLLECTION_PUBLIC)
+            menu.add(groupId, SHARE_ID, SHARE_ID, R.string.menu_share); // Sharing on FB
     }
 
     @Override
@@ -353,6 +356,7 @@ public class ItemsListFragment extends Fragment implements LoaderManager.LoaderC
             mItemsDescription.setText(data.getString(0));
             mItemsTags.setText(data.getString(1));
             getActivity().setTitle(data.getString(2));
+            mCollectionType = data.getInt(3);
         }
         else {
             if(data.getCount()==0){
