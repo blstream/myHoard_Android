@@ -43,4 +43,13 @@ public class SynchronizationDialog extends DialogFragment {
             dialog.dismiss();
         }
     };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Intent askIfServiceEnded = new Intent(getActivity().getBaseContext(),SynchronizationService.class);
+        askIfServiceEnded.putExtra(SynchronizationService.ASK_IF_SERVICE_ENDED, "pusto");
+        askIfServiceEnded.putExtra("option", "pusto");
+        getActivity().startService(askIfServiceEnded);
+    }
 }

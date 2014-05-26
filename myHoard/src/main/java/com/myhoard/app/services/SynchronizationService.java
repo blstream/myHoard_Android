@@ -55,14 +55,21 @@ public class SynchronizationService extends IntentService {
     private static final String MEDIA_ENDPOINT = "media/";
     private static final String SEPARATOR = "#";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
-    private UserManager userManager = UserManager.getInstance();
-    ArrayList<ContentProviderOperation> operations;
     private static final int INDEX_OF_FIRST_ELEMENT = 0;
     private static final int ERROR = -1;
     private static final String ERROR_CREATING_FOLDER = "Error creating folder myHoardFiles";
 
     public static final String CANCEL_COMMAND_KEY = "cancelCommand";
-    Boolean cancel=false;
+    public static final String ASK_IF_SERVICE_ENDED = "ifEnd";
+
+    private UserManager userManager = UserManager.getInstance();
+    ArrayList<ContentProviderOperation> operations;
+    private static Boolean mutex=false;
+    private static Boolean cancel=false;
+
+    CRUDEngine<Collection> collectionCrud;
+    CRUDEngine<Item> itemCrud;
+    MediaCrudEngine<Media> mediaCrud;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -87,12 +94,26 @@ public class SynchronizationService extends IntentService {
             if (intent.hasExtra(CANCEL_COMMAND_KEY)) {
                 cancel();
             }
+            if (intent.hasExtra(ASK_IF_SERVICE_ENDED)) {
+                if(!mutex){
+                    Intent intenttt = new Intent("notification");
+                    intenttt.putExtra("result", "synchronized");
+                    intenttt.putExtra("result2", "downloaded");
+                    sendBroadcast(intenttt);
+                }
+            }
         }
         return super.onStartCommand(intent, flags, startId);
     }
 
     private void cancel(){
         cancel=true;
+        if (collectionCrud != null)
+            collectionCrud.stopRequest();
+        if (itemCrud != null)
+            itemCrud.stopRequest();
+        if (mediaCrud != null)
+            mediaCrud.stopRequest();
     }
 
     @Override
@@ -101,22 +122,25 @@ public class SynchronizationService extends IntentService {
 
         switch (option) {
             case "synchronization":
+                mutex = true;
                 uploadCollections();
                 uploadItems();
                 downloadCollections();
                 downloadItems();
 
                 Intent intenttt = new Intent("notification");
+                //2 notification: 1 to MainActivity, 2 to CollectionListFragment
                 intenttt.putExtra("result", "synchronized");
                 intenttt.putExtra("result2", "downloaded");
                 sendBroadcast(intenttt);
+                mutex = false;
+                cancel = false;
                 break;
         }
-        Log.d("TAG","canel: " + cancel);
     }
 
     private void uploadCollections() {
-        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTIONS_ENDPOINT, Collection.class);
+        collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTIONS_ENDPOINT, Collection.class);
         Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, null, null, null, null);
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -221,7 +245,7 @@ public class SynchronizationService extends IntentService {
     }
 
     private void uploadItems() {
-        CRUDEngine<Item> itemCrud = new CRUDEngine<>(userManager.getIp() + ITEM_ENDPOINT, Item.class);
+        itemCrud = new CRUDEngine<>(userManager.getIp() + ITEM_ENDPOINT, Item.class);
 
         String[] projection = new String[]{Items.TABLE_NAME + "." + Items.ID_SERVER,
                 Items.TABLE_NAME + "." + Items._ID,
@@ -378,7 +402,7 @@ public class SynchronizationService extends IntentService {
 
     private void createMediaOnServerAndUpdateInDatabase(Cursor cursor, List<ItemMedia> listId) {
         try {
-            MediaCrudEngine<Media> mediaCrud = new MediaCrudEngine<>(userManager.getIp() + MEDIA_ENDPOINT);
+            mediaCrud = new MediaCrudEngine<>(userManager.getIp() + MEDIA_ENDPOINT);
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME))));
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -402,10 +426,10 @@ public class SynchronizationService extends IntentService {
 
     private void downloadItems() {
         operations = new ArrayList<>();
-        CRUDEngine<Item> itemReadForSpecificCollection = new CRUDEngine<>(userManager.getIp() + ITEM_ENDPOINT, Item.class);
+        itemCrud = new CRUDEngine<>(userManager.getIp() + ITEM_ENDPOINT, Item.class);
         List<Item> items;
         try {
-            items = itemReadForSpecificCollection.getList(userManager.getToken());
+            items = itemCrud.getList(userManager.getToken());
 
             HashMap<String, Long> idServerToModifiedDate = new HashMap<>();
             if (items.size() > 0) {
@@ -532,9 +556,13 @@ public class SynchronizationService extends IntentService {
 
         boolean success = createFolderMyHoard(path);
         if (success) {
-            MediaCrudEngine<Media> mediaCrud = new MediaCrudEngine<>(userManager.getIp() + MEDIA_ENDPOINT);
-            Media media = mediaCrud.get(med.id, userManager.getToken());
-
+            mediaCrud = new MediaCrudEngine<>(userManager.getIp() + MEDIA_ENDPOINT);
+            Media media = null;
+            try {
+                media = mediaCrud.get(med.id, userManager.getToken());
+            } catch (Exception e) {
+                e.getMessage();
+            }
             Cursor cursor = getContentResolver().query(Items.CONTENT_URI,
                     new String[]{Items.TABLE_NAME + "." + Items._ID, Items.TABLE_NAME + "." + Items.NAME},
                     Items.TABLE_NAME + "." + Items.ID_SERVER + "=" + itemId, null, null);
@@ -554,6 +582,7 @@ public class SynchronizationService extends IntentService {
 
             file = new File(path + "/myHoardFiles", filename + med.id + ".jpg");
 
+            if (media!=null)
             try {
                 fOut = new FileOutputStream(file);
 
@@ -621,7 +650,7 @@ public class SynchronizationService extends IntentService {
     private void downloadCollections() {
         String url = userManager.getIp() + USERS_ENDPOINT + UserManager.getInstance().getToken().getUserId() + "/" + COLLECTIONS_ENDPOINT;
         Log.d("TAG", url);
-        CRUDEngine<Collection> collectionCrud = new CRUDEngine<>(url, Collection.class);
+        collectionCrud = new CRUDEngine<>(url, Collection.class);
         List<Collection> collections = new ArrayList<>();
         try {
             collections = collectionCrud.getList(userManager.getToken());

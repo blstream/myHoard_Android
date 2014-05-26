@@ -30,4 +30,6 @@ import java.util.List;
     public T update(IModel t, String id, Token token);
 
     public boolean remove(String id, Token token);
+
+    public void stopRequest();
 }

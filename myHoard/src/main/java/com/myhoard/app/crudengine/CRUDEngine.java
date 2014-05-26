@@ -41,6 +41,10 @@ import java.util.List;
  public class CRUDEngine<T> implements ICRUDEngine<T> {
 
     private final Class<T> clazz;
+    private HttpGet httpGet;
+    private HttpPost httpPost;
+    private HttpPut httpPut;
+    private HttpDelete httpDelete;
 
     public Class<T> getClazz() {
         return clazz;
@@ -66,13 +70,12 @@ import java.util.List;
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
-            HttpGet httpGet = new HttpGet(url);
+            httpGet = new HttpGet(url);
             httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
             String stringResponse=null;
             try {
                 HttpResponse response = httpClient.execute(httpGet, localContext);
                 HttpEntity entity = response.getEntity();
-
 
                 List<T> newItems = new ArrayList<>();
                 stringResponse = getASCIIContentFromEntity(entity);
@@ -101,7 +104,7 @@ import java.util.List;
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
-            HttpGet httpGet = new HttpGet(url+id);
+            httpGet = new HttpGet(url+id);
             httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
             String stringResponse=null;
             try {
@@ -124,7 +127,7 @@ import java.util.List;
         if (token != null) {
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
-            HttpGet httpGet = new HttpGet(url);
+            httpGet = new HttpGet(url);
             httpGet.setHeader(AUTHORIZATION, token.getAccess_token());
             String stringResponse=null;
             try {
@@ -166,7 +169,7 @@ import java.util.List;
         String HTTP_response=null;
 
         try {
-            HttpPost httpPost = new HttpPost(url);
+            httpPost = new HttpPost(url);
             if (token != null) {
                 httpPost.setHeader(AUTHORIZATION, token.getAccess_token());
             }
@@ -210,7 +213,7 @@ import java.util.List;
         String HTTP_response = null;
 
         try {
-            HttpPut httpPut = new HttpPut(url + id);
+            httpPut = new HttpPut(url + id);
             //httpPut.setHeader("Accept", "application/json");
             httpPut.setHeader(AUTHORIZATION, token.getAccess_token());
 
@@ -247,7 +250,7 @@ import java.util.List;
     public boolean remove(String id, Token token) throws RuntimeException  {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
-        HttpDelete httpDelete = new HttpDelete(url + id);
+        httpDelete = new HttpDelete(url + id);
         HttpResponse response;
 
         httpDelete.setHeader(AUTHORIZATION, token.getAccess_token());
@@ -266,6 +269,18 @@ import java.util.List;
         }
         Log.d("TAG","NIEusunieto");
         return false;
+    }
+
+    @Override
+    public void stopRequest() {
+        if (httpGet != null)
+        httpGet.abort();
+        if (httpPost != null)
+        httpPost.abort();
+        if (httpPut != null)
+        httpPut.abort();
+        if (httpDelete != null)
+        httpDelete.abort();
     }
 
     protected String getASCIIContentFromEntity(HttpEntity entity) throws IllegalStateException, IOException {

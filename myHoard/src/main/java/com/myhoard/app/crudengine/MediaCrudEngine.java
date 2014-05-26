@@ -41,6 +41,11 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
     private static final String AUTHORIZATION = "Authorization";
     private static final int STATUS_NO_CONTENT = 204;
 
+    private HttpGet httpGet;
+    private HttpPost httpPost;
+    private HttpPut httpPut;
+    private HttpDelete httpDelete;
+
     public MediaCrudEngine(String url) {
         this.url = url;
     }
@@ -153,4 +158,16 @@ public class MediaCrudEngine<T> implements ICRUDEngine<T> {
             Log.d("TAG","NIEusunieto");
             throw new RuntimeException("Error: delete media");
         }
+
+    @Override
+    public void stopRequest() {
+        if (httpGet != null)
+            httpGet.abort();
+        if (httpPost != null)
+            httpPost.abort();
+        if (httpPut != null)
+            httpPut.abort();
+        if (httpDelete != null)
+            httpDelete.abort();
     }
+}
