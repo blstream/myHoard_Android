@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Sebastian on 06.04.14.
+ * Modified by Piotr Brzozowski on 16.05.2014
  */
 public class ImageElementAdapterList extends ArrayAdapter<Uri> {
 
@@ -41,7 +42,7 @@ public class ImageElementAdapterList extends ArrayAdapter<Uri> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        ViewHolder holder = null;
+        ViewHolder holder;
 
         if(row == null)
         {
@@ -66,7 +67,6 @@ public class ImageElementAdapterList extends ArrayAdapter<Uri> {
         {
             holder.img.setImageResource(R.drawable.aparat);
         } else {
-            //holder.bmp = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
             holder.bmp = ImageLoader.decodeSampledBitmapFromResource(uri.toString(),100,100);
             holder.img.setImageBitmap(holder.bmp);
         }

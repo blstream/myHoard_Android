@@ -126,10 +126,6 @@ public class GeneratorDialog extends DialogFragment implements View.OnClickListe
         try {
             is = am.open(ASSETS_LIST[random_number]);
         } catch (IOException e) {
-                /* AWA:FIXME: Obsługa błędów
-                Wypychanie błędów do UI
-                Patrz:Ksiazka:Czysty kod:Rozdział 7:Obsługa błędów
-                */
             e.printStackTrace();
         }
         //Create new file in mContext.getFilesDir() path

@@ -6,18 +6,20 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
-
-import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 
 /**
  * Created by Piotr Brzozowski on 25.05.2014
+ * GPS choose dialog used to choose concrete location for element photo
  */
 public class GpsChooseDialog extends DialogFragment implements View.OnClickListener {
 
+    private static final String GPS_INTENT_EXTRA_TEXT = "gps_choose";
     private static final int GPS_RESULT_CODE = 300;
+    private static final int DEFAULT_GPS_INTENT_EXTRA_VALUE = -1;
+    private static final int CHOOSE_LOCATION_MANUALLY_GPS_INTENT_EXTRA_VALUE = 2;
+    private static final int GET_LOCATION_FROM_GPS_INTENT_EXTRA_VALUE = 1;
     RadioButton rbGpsEnable;
     RadioButton rbGpsManually;
     TextView tvCancelGps;
@@ -46,17 +48,17 @@ public class GpsChooseDialog extends DialogFragment implements View.OnClickListe
         Intent intent = new Intent();
         switch (view.getId()) {
             case R.id.rbGpsEnable:
-                intent.putExtra("gps_choose",1);
+                intent.putExtra(GPS_INTENT_EXTRA_TEXT,GET_LOCATION_FROM_GPS_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), GPS_RESULT_CODE, intent);
                 dismiss();
                 break;
             case R.id.rbGpsManually:
-                intent.putExtra("gps_choose",2);
+                intent.putExtra(GPS_INTENT_EXTRA_TEXT,CHOOSE_LOCATION_MANUALLY_GPS_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), GPS_RESULT_CODE, intent);
                 dismiss();
                 break;
             case R.id.tvCancelGps:
-                intent.putExtra("gps_choose",-1);
+                intent.putExtra(GPS_INTENT_EXTRA_TEXT,DEFAULT_GPS_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), GPS_RESULT_CODE, intent);
                 dismiss();
                 break;

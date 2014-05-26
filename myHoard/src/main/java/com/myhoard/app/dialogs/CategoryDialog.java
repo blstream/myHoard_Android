@@ -19,13 +19,15 @@ import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Piotr Brzozowski on 25.05.2014
+ * Category dialog used to choose concrete category for added element
  */
 public class CategoryDialog extends DialogFragment implements View.OnClickListener{
 
+    private static final String CATEGORY_ID_INTENT_EXTRA_TEXT = "collectionId";
     private static final int CATEGORY_RESULT_CODE = 200;
     private static final int LOADER_CATEGORIES = 1;
     private static final int NO_FLAGS = 0;
-    private ListView mCategoryListView;
+    private static final int CATEGORY_ID_INTENT_EXTRA_DEFAULT_VALUE = -1;
     private SimpleCursorAdapter mAdapterCategories;
 
 
@@ -35,7 +37,7 @@ public class CategoryDialog extends DialogFragment implements View.OnClickListen
         dialog.setContentView(R.layout.category_dialog);
         dialog.setCanceledOnTouchOutside(true);
         fillCategoriesData();
-        mCategoryListView = (ListView) dialog.findViewById(R.id.listViewCategory);
+        ListView mCategoryListView = (ListView) dialog.findViewById(R.id.listViewCategory);
         getLoaderManager().initLoader(LOADER_CATEGORIES, null,
                 new LoaderCategoriesCallbacks());
         mCategoryListView.setAdapter(mAdapterCategories);
@@ -43,7 +45,7 @@ public class CategoryDialog extends DialogFragment implements View.OnClickListen
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent();
-                intent.putExtra("collectionId",position);
+                intent.putExtra(CATEGORY_ID_INTENT_EXTRA_TEXT, position);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), CATEGORY_RESULT_CODE, intent);
                 dismiss();
             }
@@ -68,7 +70,7 @@ public class CategoryDialog extends DialogFragment implements View.OnClickListen
         Intent intent = new Intent();
         switch(v.getId()){
             case R.id.tvCancelChooseCollection:
-                intent.putExtra("collectionId",-1);
+                intent.putExtra(CATEGORY_ID_INTENT_EXTRA_TEXT,CATEGORY_ID_INTENT_EXTRA_DEFAULT_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), CATEGORY_RESULT_CODE, intent);
                 dismiss();
                 break;
@@ -82,10 +84,9 @@ public class CategoryDialog extends DialogFragment implements View.OnClickListen
             String[] projection = {DataStorage.Collections.NAME,
                     DataStorage.Collections._ID};
             String selection = String.format("%s!=%d", DataStorage.Collections.DELETED, 1);
-            CursorLoader cursorLoader = new CursorLoader(getActivity(),
+            return new CursorLoader(getActivity(),
                     DataStorage.Collections.CONTENT_URI, projection, selection,
                     null, DataStorage.Collections.NAME + " ASC");
-            return cursorLoader;
         }
 
         @Override
