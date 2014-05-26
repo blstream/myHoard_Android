@@ -13,10 +13,14 @@ import com.myhoard.app.R;
 
 /**
  * Created by Piotr Brzozowski on 24.05.2014
+ * Used to choose delete image option
  */
 public class ImageDeleteDialog extends DialogFragment implements View.OnClickListener {
 
+    private static final String DELETE_IMAGE_INTENT_EXTRA_TEXT = "insert image";
     private static final int DELETE_IMAGE_RESULT_CODE = 102;
+    private static final int DEFAULT_DELETE_IMAGE_INTENT_EXTRA_VALUE = -1;
+    private static final int DELETE_IMAGE_INTENT_EXTRA_VALUE = 1;
     RadioGroup rgImage;
     RadioButton rbDelete;
     TextView tvCancel;
@@ -44,12 +48,12 @@ public class ImageDeleteDialog extends DialogFragment implements View.OnClickLis
         Intent intent = new Intent();
         switch (view.getId()) {
             case R.id.rbDelete:
-                intent.putExtra("insert image", 1);
+                intent.putExtra(DELETE_IMAGE_INTENT_EXTRA_TEXT, DELETE_IMAGE_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), DELETE_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;
             case R.id.tvCancelImage:
-                intent.putExtra("insert image", -1);
+                intent.putExtra(DELETE_IMAGE_INTENT_EXTRA_TEXT, DEFAULT_DELETE_IMAGE_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), DELETE_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;

@@ -13,10 +13,16 @@ import com.myhoard.app.R;
 
 /**
  * Created by Piotr Brzozowski on 24.05.2014
+ * Used to choose edit image option
  */
 public class ImageEditDialog extends DialogFragment implements View.OnClickListener {
 
+    private static final String EDIT_IMAGE_INTENT_EXTRA_TEXT = "insert image";
     private static final int EDIT_IMAGE_RESULT_CODE = 101;
+    private static final int DEFAULT_EDIT_IMAGE_INTENT_EXTRA_VALUE = -1;
+    private static final int EDIT_INSERT_IMAGE_GALLERY_INTENT_EXTRA_VALUE = 1;
+    private static final int EDIT_INSERT_IMAGE_PHOTO_INTENT_EXTRA_VALUE = 0;
+    private static final int EDIT_DELETE_IMAGE_PHOTO_INTENT_EXTRA_VALUE = 2;
     RadioGroup rgImage;
     RadioButton rbPhoto;
     RadioButton rbGallery;
@@ -50,22 +56,22 @@ public class ImageEditDialog extends DialogFragment implements View.OnClickListe
         Intent intent = new Intent();
         switch (view.getId()) {
             case R.id.rbPhoto:
-                intent.putExtra("insert image", 0);
+                intent.putExtra(EDIT_IMAGE_INTENT_EXTRA_TEXT, EDIT_INSERT_IMAGE_PHOTO_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), EDIT_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;
             case R.id.rbGallery:
-                intent.putExtra("insert image", 1);
+                intent.putExtra(EDIT_IMAGE_INTENT_EXTRA_TEXT, EDIT_INSERT_IMAGE_GALLERY_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), EDIT_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;
             case R.id.rbDelete:
-                intent.putExtra("insert image", 2);
+                intent.putExtra(EDIT_IMAGE_INTENT_EXTRA_TEXT, EDIT_DELETE_IMAGE_PHOTO_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), EDIT_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;
             case R.id.tvCancelImage:
-                intent.putExtra("insert image", -1);
+                intent.putExtra(EDIT_IMAGE_INTENT_EXTRA_TEXT, DEFAULT_EDIT_IMAGE_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), EDIT_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;

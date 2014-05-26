@@ -13,10 +13,15 @@ import com.myhoard.app.R;
 
 /**
  * Created by Piotr Brzozowski on 24.05.2014
+ * Used to choose insert image option
  */
 public class ImageInsertDialog extends DialogFragment implements View.OnClickListener {
 
+    private static final String INSERT_IMAGE_INTENT_EXTRA_TEXT = "insert image";
     private static final int INSERT_IMAGE_RESULT_CODE = 100;
+    private static final int DEFAULT_INSERT_IMAGE_INTENT_EXTRA_VALUE = -1;
+    private static final int INSERT_IMAGE_PHOTO_INTENT_EXTRA_VALUE = 1;
+    private static final int INSERT_IMAGE_GALLERY_INTENT_EXTRA_VALUE = 2;
     RadioGroup rgImage;
     RadioButton rbPhoto;
     RadioButton rbGallery;
@@ -47,17 +52,17 @@ public class ImageInsertDialog extends DialogFragment implements View.OnClickLis
         Intent intent = new Intent();
         switch (view.getId()) {
             case R.id.rbPhoto:
-                intent.putExtra("insert image", 1);
+                intent.putExtra(INSERT_IMAGE_INTENT_EXTRA_TEXT, INSERT_IMAGE_PHOTO_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), INSERT_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;
             case R.id.rbGallery:
-                intent.putExtra("insert image", 2);
+                intent.putExtra(INSERT_IMAGE_INTENT_EXTRA_TEXT, INSERT_IMAGE_GALLERY_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), INSERT_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;
             case R.id.tvCancelImage:
-                intent.putExtra("insert image", -1);
+                intent.putExtra(INSERT_IMAGE_INTENT_EXTRA_TEXT, DEFAULT_INSERT_IMAGE_INTENT_EXTRA_VALUE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), INSERT_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;
