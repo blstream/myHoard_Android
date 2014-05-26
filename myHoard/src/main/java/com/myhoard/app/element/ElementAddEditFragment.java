@@ -1,12 +1,10 @@
 package com.myhoard.app.element;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -18,7 +16,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -60,7 +57,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -68,6 +64,7 @@ import java.util.TreeMap;
 
 /*
  * Created by Sebastian Peryt on 27.02.14.
+ * Modified by Piotr Brzozowski on 15.05.14.
  */
 public class ElementAddEditFragment extends Fragment implements View.OnClickListener,
         AdapterView.OnItemClickListener {
@@ -88,53 +85,39 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
     private static final int REQUEST_GET_PHOTO = 1;
 
-    private static final String TAG = "ElementFragment";
-    private static final boolean D = false;
-    private static final int REQUEST_IMAGE_CAPTURE = 2;
-    private static final int SELECT_PICTURE = 1;
-
     private static final int LOADER_CATEGORIES = 1;
     private static final int LOADER_IMAGES = 2;
     private static final int NO_FLAGS = 0;
 
-    private static final int LOCATION_FROM_ACTIVIT = 1;
+    private static final int LOCATION_FROM_ACTIVITY = 1;
     private static final int LOCATION_FROM_FRAGMENT = 0;
 
     private boolean first = true;
-    private static int sLastImageIndex;
 
-    /*
-     * AWA:FIXME: Niepotrzebne prefiksy określające typ Patrz:Ksiazka:Czysty
-     * kod:Rozdział 2:Nazwy klas, metod….
-     */
-    private TextView tvElementPosition,
+    private TextView mElementPosition,
             tvElementCategory;
-    private EditText etElementName, etElementDescription;
-    private String sCurrentPhotoPath;
-    private String sImagePath;
-    private int iCollectionId;
-    private int elementId;
-    private Context context;
-    // private ScaleImageView ivElementPhoto;
-    private SimpleCursorAdapter adapterCategories;
-    private GridView gvPhotosList;
-    private ArrayList<Uri> imagesUriList;
-    private ArrayList<Integer> imagesUriDeleteList;
-    private HashMap<Integer,Uri> imagesUriInsertList;
-    private HashMap<Integer,Uri> imagesUriInsertListTmp;
-    private HashMap<Integer,Integer> imagesPositionListTmp;
-    private HashMap<Integer,Integer> imagesPositionList;
-    private HashMap<Integer,String> imagesIDServerList;
-    private HashMap<Integer,Integer> imagesTmp;
-    private ImageElementAdapterList imageListAdapter;
-    private int imageId;
-    private Item element;
-    private boolean locationUserSet = false;
-    private boolean gpsEnabled = false;
+    private EditText mElementName, mElementDescription;
+    private int mCollectionId;
+    private int mElementId;
+    private Context mContext;
+    private SimpleCursorAdapter mAdapterCategories;
+    private GridView mPhotosList;
+    private ArrayList<Uri> mImagesUriList;
+    private ArrayList<Integer> mImagesUriDeleteList;
+    private HashMap<Integer,Uri> mImagesUriInsertList;
+    private HashMap<Integer,Uri> mImagesUriInsertListTmp;
+    private HashMap<Integer,Integer> mImagesPositionListTmp;
+    private HashMap<Integer,Integer> mImagesPositionList;
+    private HashMap<Integer,String> mImagesIDServerList;
+    private HashMap<Integer,Integer> mImagesTmp;
+    private ImageElementAdapterList mImageListAdapter;
+    private int mImageId;
+    private boolean mLocationUserSet = false;
+    private boolean mGpsEnabled = false;
     private String mActualElementName;
-    private PhotoManager photoManager;
+    private PhotoManager mPhotoManager;
     private int mActualCollectionId;
-    private LatLng elementLocation;
+    private LatLng mElementLocation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -142,110 +125,110 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         final View v = inflater.inflate(R.layout.fragment_element_addedit, container,
                 false);
-        setHasOptionsMenu(true);
-
-        if (savedInstanceState != null) {
-            photoManager = savedInstanceState.getParcelable(PHOTO_MANAGER_KEY);
-        } else {
-            photoManager = new PhotoManager(this,REQUEST_GET_PHOTO);
-        }
-
         final RelativeLayout rlEmptyView = (RelativeLayout) v.findViewById(R.id.element_emptyview);
         final LinearLayout lnEmptyViewClickable = (LinearLayout) v.findViewById(R.id.emptyview_inside);
-        context = getActivity();
-        imagesUriList = new ArrayList<Uri>();
-
-        tvElementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
-        etElementName = (EditText) v.findViewById(R.id.etElementName);
-        etElementDescription = (EditText) v.findViewById(R.id.etElementDescription);
-        tvElementCategory = (TextView) v.findViewById(R.id.tvElementCategory);
-        gvPhotosList = (GridView) v.findViewById(R.id.gvPhotosList);
-        gvPhotosList.setEmptyView(rlEmptyView);
-
-        tvElementPosition.setOnClickListener(this);
-
-        elementId = -1;
-        iCollectionId = -1;
-        imageId = -1;
-
+        mContext = getActivity();
+        mImagesUriList = new ArrayList<>();
+        mElementId = -1;
+        mCollectionId = -1;
+        mImageId = -1;
         Bundle b = getArguments();
-        LatLng location = b.getParcelable("location");
-        gpsEnabled = b.getBoolean("gps");
-
-        if(!gpsEnabled) {
-            tvElementPosition.setText(R.string.gps_no_signal);
-            tvElementPosition.setTextColor(Color.RED);
+        b.getParcelable("location");
+        if (savedInstanceState != null) {
+            mPhotoManager = savedInstanceState.getParcelable(PHOTO_MANAGER_KEY);
         } else {
-            tvElementPosition.setText(R.string.gps_finding_location);
-            tvElementPosition.setTextColor(Color.YELLOW);
+            mPhotoManager = new PhotoManager(this,REQUEST_GET_PHOTO);
         }
-
-        if(b.getLong("categoryId",-1)!=-1) {
-            iCollectionId = (int) b.getLong("categoryId");
-        } else if(b.getParcelable("element")!=null) {
-            element = b.getParcelable("element");
-            elementId = Integer.parseInt(element.getId());
-            iCollectionId = Integer.parseInt(element.getCollection());
-            mActualCollectionId = iCollectionId;
-            if(element.getLocation().lat!=0 && element.getLocation().lng!=0) {
-                tvElementPosition.setText(element.getLocationTxt());
-                locationUserSet = true;
-                tvElementPosition.setTextColor(Color.GREEN);
-                elementLocation = new LatLng(element.getLocation().lat,element.getLocation().lng);
-            }
-
-
-            etElementName.setText(element.getName());
-            mActualElementName = etElementName.getText().toString().trim();
-
-            etElementDescription.setText(element.getDescription());
-            imagesUriInsertList = new HashMap<>();
-            imagesPositionListTmp = new HashMap<>();
-            imagesPositionList = new HashMap<>();
-            imagesUriDeleteList = new ArrayList<>();
-            imagesIDServerList = new HashMap<>();
-            imagesUriInsertListTmp = new HashMap<>();
-            imagesTmp = new HashMap<>();
-        }
-        gvPhotosList.setAdapter(getPhotosList());
-        gvPhotosList.setOnItemClickListener(this);
-        tvElementCategory.setOnClickListener(this);
-        lnEmptyViewClickable.setOnClickListener(this);
-
+        setHasOptionsMenu(true);
+        initVariablesFromLayout(v,rlEmptyView);
+        setGpsFormInitStyle(b);
+        setFormInEditElementMode(b);
+        setOnClickListenerForLayoutElement(lnEmptyViewClickable);
         getLoaderManager().initLoader(LOADER_CATEGORIES, null,
                 new LoaderCategoriesCallbacks());
-//        updateLocationData(location,0);
         return v;
     }
 
+    private void initVariablesFromLayout(View v,View rlEmptyView){
+        mElementPosition = (TextView) v.findViewById(R.id.tvElementLocalisation);
+        mElementName = (EditText) v.findViewById(R.id.etElementName);
+        mElementDescription = (EditText) v.findViewById(R.id.etElementDescription);
+        tvElementCategory = (TextView) v.findViewById(R.id.tvElementCategory);
+        mPhotosList = (GridView) v.findViewById(R.id.gvPhotosList);
+        mPhotosList.setEmptyView(rlEmptyView);
+        mElementPosition.setOnClickListener(this);
+    }
+
+    private void setGpsFormInitStyle(Bundle b){
+        mGpsEnabled = b.getBoolean("gps");
+        if(!mGpsEnabled) {
+            mElementPosition.setText(R.string.gps_no_signal);
+            mElementPosition.setTextColor(Color.RED);
+        } else {
+            mElementPosition.setText(R.string.gps_finding_location);
+            mElementPosition.setTextColor(Color.YELLOW);
+        }
+    }
+
+    private void setFormInEditElementMode(Bundle b){
+        if(b.getLong("categoryId",-1)!=-1) {
+            mCollectionId = (int) b.getLong("categoryId");
+        } else if(b.getParcelable("element")!=null) {
+            Item element = b.getParcelable("element");
+            mElementId = Integer.parseInt(element.getId());
+            mCollectionId = Integer.parseInt(element.getCollection());
+            mActualCollectionId = mCollectionId;
+            if(element.getLocation().lat!=0 && element.getLocation().lng!=0) {
+                mElementPosition.setText(element.getLocationTxt());
+                mLocationUserSet = true;
+                mElementPosition.setTextColor(Color.GREEN);
+                mElementLocation = new LatLng(element.getLocation().lat, element.getLocation().lng);
+            }
+            mElementName.setText(element.getName());
+            mActualElementName = mElementName.getText().toString().trim();
+            mElementDescription.setText(element.getDescription());
+            mImagesUriInsertList = new HashMap<>();
+            mImagesPositionListTmp = new HashMap<>();
+            mImagesPositionList = new HashMap<>();
+            mImagesUriDeleteList = new ArrayList<>();
+            mImagesIDServerList = new HashMap<>();
+            mImagesUriInsertListTmp = new HashMap<>();
+            mImagesTmp = new HashMap<>();
+        }
+    }
+
+    private void setOnClickListenerForLayoutElement(LinearLayout lnEmptyViewClickable){
+        mPhotosList.setAdapter(getPhotosList());
+        mPhotosList.setOnItemClickListener(this);
+        tvElementCategory.setOnClickListener(this);
+        lnEmptyViewClickable.setOnClickListener(this);
+    }
+
     private ListAdapter getPhotosList() {
-        if (elementId != -1) {
+        if (mElementId != -1) {
             fillPhotosData();
         } else{
-            imageListAdapter = new ImageElementAdapterList(getActivity(),NO_FLAGS, imagesUriList);
+            mImageListAdapter = new ImageElementAdapterList(getActivity(),NO_FLAGS, mImagesUriList);
         }
-        return imageListAdapter;
+        return mImageListAdapter;
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tvElementLocalisation:
-                if(!gpsEnabled){
+                if(!mGpsEnabled){
                     showGpsPickerDialog();
-                    //localisationPicker();
                 } else {
                     Intent intent = new Intent(getActivity(), ElementMapActivity.class);
-                    intent.putExtra("localisation",elementLocation);
+                    intent.putExtra("localisation",mElementLocation);
                     startActivityForResult(intent, 9);
                 }
                 break;
             case R.id.tvElementCategory:
-                //categoryPicker();
                 showCategoryPickerDialog();
                 break;
             case R.id.emptyview_inside:
-                //imagePicker();
                 showImagePickerDialog();
                 break;
         }
@@ -254,12 +237,10 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         if(i == 0) {
-            //imagePicker();
             showImagePickerDialog();
         } else {
-            imageId = (int) l;
+            mImageId = (int) l;
             showImageEditPickerDialog();
-            //imagePickerDel();
         }
     }
 
@@ -268,12 +249,12 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
      */
     private void categoryPicker(int collectionId_position) {
         if(collectionId_position!=-1){
-            adapterCategories.getCursor().moveToPosition(collectionId_position);
-            int columnIndex = adapterCategories.getCursor()
+            mAdapterCategories.getCursor().moveToPosition(collectionId_position);
+            int columnIndex = mAdapterCategories.getCursor()
                     .getColumnIndex(DataStorage.Collections.NAME);
-            tvElementCategory.setText(adapterCategories.getCursor()
+            tvElementCategory.setText(mAdapterCategories.getCursor()
                     .getString(columnIndex));
-            iCollectionId = (int) adapterCategories.getItemId(collectionId_position);
+            mCollectionId = (int) mAdapterCategories.getItemId(collectionId_position);
         }
     }
 
@@ -282,8 +263,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 10);
         }else if(location_choose==2){
             Intent intent = new Intent(getActivity(), ElementMapActivity.class);
-            if(elementLocation!=null){
-                intent.putExtra("localisation",elementLocation);
+            if(mElementLocation!=null){
+                intent.putExtra("localisation",mElementLocation);
             }
             startActivityForResult(intent, 9);
         }
@@ -300,7 +281,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         // UI fields in given layout into which elemnts have to be put.
         int[] to = new int[] { android.R.id.text1 };
 
-        adapterCategories = new SimpleCursorAdapter(context,
+        mAdapterCategories = new SimpleCursorAdapter(mContext,
                 android.R.layout.simple_list_item_1, null, from, to, NO_FLAGS);
     }
 
@@ -332,7 +313,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     }
 
     private void showImageEditPickerDialog(){
-        if(elementId!=-1){
+        if(mElementId!=-1){
             ImageDeleteDialog removeDialog = new ImageDeleteDialog();
             removeDialog.setTargetFragment(this, DELETE_IMAGE_REQUEST_CODE);
             removeDialog.show(getFragmentManager(), "");
@@ -349,99 +330,113 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private void imagePicker(int which) {
         if(which==1){
             try {
-                photoManager.takePicture(PhotoManager.MODE_CAMERA);
+                mPhotoManager.takePicture(PhotoManager.MODE_CAMERA);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }else if(which==2){
             try {
-                photoManager.takePicture(PhotoManager.MODE_GALLERY);
+                mPhotoManager.takePicture(PhotoManager.MODE_GALLERY);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }else{
-            imageId = -1;
+            mImageId = -1;
         }
     }
 
     private void imagePickerDel(int which) {
-        if(elementId!=-1){
+        if(mElementId!=-1){
             if (which == 1) {
-                deleteImage(imageId);
+                deleteImage(mImageId);
             }else{
-                imageId = -1;
+                mImageId = -1;
             }
         }else {
             if (which == 0) {
                 try {
-                    photoManager.takePicture(PhotoManager.MODE_CAMERA);
+                    mPhotoManager.takePicture(PhotoManager.MODE_CAMERA);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else if (which == 1) {
                 try {
-                    photoManager.takePicture(PhotoManager.MODE_GALLERY);
+                    mPhotoManager.takePicture(PhotoManager.MODE_GALLERY);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else if (which == 2) {
-                deleteImage(imageId);
+                deleteImage(mImageId);
             } else {
-                imageId = -1;
+                mImageId = -1;
             }
         }
     }
 
     private void deleteImage(int id) {
-        if (elementId != -1) {
-            if(imagesUriInsertList.containsKey(id)){
-                imagesUriInsertList.remove(id);
+        deleteElementInEditMode(id);
+        mImagesUriList.remove(id);
+        if(mImagesUriList.size()==1) {
+            mImagesUriList.clear();
+        }
+        if(mImagesUriList.size() == 2) {
+            mPhotosList.setNumColumns(2);
+        } else {
+            mPhotosList.setNumColumns(3);
+        }
+        mImageId = -1;
+        mImageListAdapter.notifyDataSetChanged();
+    }
+
+    private void deleteElementInEditMode(int id){
+        if (mElementId != -1) {
+            if(mImagesUriInsertList.containsKey(id)){
+                mImagesUriInsertList.remove(id);
             }else{
-                imagesUriDeleteList.add(imagesPositionListTmp.get(id));
-                imagesPositionListTmp.remove(id);
-                Integer key;
-                int i=1;
-                Map<Integer,Integer> map = new TreeMap<Integer,Integer>(imagesPositionListTmp);
-                Iterator<Integer> keySetIterator = map.keySet().iterator();
-                while(keySetIterator.hasNext()){
-                    key = keySetIterator.next();
-                    imagesTmp.put(i,map.get(key));
-                    i++;
-                }
-                imagesPositionListTmp.clear();
-                keySetIterator = imagesTmp.keySet().iterator();
-                while(keySetIterator.hasNext()){
-                    key = keySetIterator.next();
-                    imagesPositionListTmp.put(key,imagesTmp.get(key));
-                }
-                imagesTmp.clear();
-                if(!imagesUriInsertList.isEmpty()){
-                    keySetIterator = imagesUriInsertList.keySet().iterator();
-                    while(keySetIterator.hasNext()){
-                        key = keySetIterator.next();
-                        imagesUriInsertListTmp.put(key-1,imagesUriInsertList.get(key));
-                    }
-                    imagesUriInsertList.clear();
-                    keySetIterator = imagesUriInsertListTmp.keySet().iterator();
-                    while(keySetIterator.hasNext()){
-                        key = keySetIterator.next();
-                        imagesUriInsertList.put(key,imagesUriInsertListTmp.get(key));
-                    }
-                    imagesUriInsertListTmp.clear();
-                }
+                mImagesUriDeleteList.add(mImagesPositionListTmp.get(id));
+                mImagesPositionListTmp.remove(id);
+                updateImagesPositionAfterRemove();
+                updateRecentlyInsertImagesAfterRemove();
             }
         }
-        imagesUriList.remove(id);
-        if(imagesUriList.size()==1) {
-            imagesUriList.clear();
+    }
+
+    private void updateImagesPositionAfterRemove(){
+        Integer key;
+        int i=1;
+        Map<Integer,Integer> map = new TreeMap<>(mImagesPositionListTmp);
+        Iterator<Integer> keySetIterator = map.keySet().iterator();
+        while(keySetIterator.hasNext()){
+            key = keySetIterator.next();
+            mImagesTmp.put(i,map.get(key));
+            i++;
         }
-        if(imagesUriList.size() == 2) {
-            gvPhotosList.setNumColumns(2);
-        } else {
-            gvPhotosList.setNumColumns(3);
+        mImagesPositionListTmp.clear();
+        keySetIterator = mImagesTmp.keySet().iterator();
+        while(keySetIterator.hasNext()){
+            key = keySetIterator.next();
+            mImagesPositionListTmp.put(key,mImagesTmp.get(key));
         }
-        imageId = -1;
-        imageListAdapter.notifyDataSetChanged();
+        mImagesTmp.clear();
+    }
+
+    private void updateRecentlyInsertImagesAfterRemove(){
+        Integer key;
+        Iterator<Integer> keySetIterator;
+        if(!mImagesUriInsertList.isEmpty()){
+            keySetIterator = mImagesUriInsertList.keySet().iterator();
+            while(keySetIterator.hasNext()){
+                key = keySetIterator.next();
+                mImagesUriInsertListTmp.put(key-1,mImagesUriInsertList.get(key));
+            }
+            mImagesUriInsertList.clear();
+            keySetIterator = mImagesUriInsertListTmp.keySet().iterator();
+            while(keySetIterator.hasNext()){
+                key = keySetIterator.next();
+                mImagesUriInsertList.put(key,mImagesUriInsertListTmp.get(key));
+            }
+            mImagesUriInsertListTmp.clear();
+        }
     }
 
     @Override
@@ -464,7 +459,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 break;
             case REQUEST_GET_PHOTO:
                 if (resultCode == Activity.RESULT_OK) {
-                    Uri imgUri = photoManager.proceedResultPicture(this, data);
+                    Uri imgUri = mPhotoManager.proceedResultPicture(this, data);
                     setImage(imgUri);
                 }
                 break;
@@ -472,10 +467,10 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 if (resultCode == Activity.RESULT_OK) {
                     LatLng location = data.getParcelableExtra("localisation");
                     if (location != null) {
-                        locationUserSet = true;
+                        mLocationUserSet = true;
                         updateLocationData(location, LOCATION_FROM_FRAGMENT);
                     } else {
-                        locationUserSet = false;
+                        mLocationUserSet = false;
                     }
                 }
             default:
@@ -484,45 +479,47 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     }
 
     private void setImage(Uri uri) {
-        if(imageListAdapter.getCount()==0) {
-            imagesUriList.add(null);
+        if(mImageListAdapter.getCount()==0) {
+            mImagesUriList.add(null);
         }
-        if (imageId != -1) {
-            if(elementId!=-1){
-                if(imagesUriInsertList.containsKey(imageId)){
-                    imagesUriInsertList.remove(imageId);
-                }
-                imagesUriInsertList.put(imageId,uri);
-                imagesPositionListTmp.put(imageId,-1);
-            }
-            imagesUriList.set(imageId, uri);
-            imageListAdapter.notifyDataSetChanged();
-            imageId = -1;
+        if (mImageId != -1) {
+            removeNewAddedImage(uri);
         } else {
-            if(elementId!=-1){
-                imagesUriInsertList.put(imagesUriList.size(), uri);
-                imagesPositionListTmp.put(imagesUriList.size(),-1);
-            }
-            imagesUriList.add(uri);
-            imageListAdapter.notifyDataSetChanged();
+            setNewImagePosition(uri);
         }
-        if(imageListAdapter.getCount()==2){
-            gvPhotosList.setNumColumns(2);
+        if(mImageListAdapter.getCount()==2){
+            mPhotosList.setNumColumns(2);
         } else {
-            gvPhotosList.setNumColumns(3);
+            mPhotosList.setNumColumns(3);
         }
     }
 
-    private int getCurrentDate() {
-        Date d = new Date();
-        CharSequence s = DateFormat.format("dMMyyyy", d.getTime());
-        return Integer.getInteger(s.toString());
+    private void removeNewAddedImage(Uri uri){
+        if(mElementId!=-1){
+            if(mImagesUriInsertList.containsKey(mImageId)){
+                mImagesUriInsertList.remove(mImageId);
+            }
+            mImagesUriInsertList.put(mImageId,uri);
+            mImagesPositionListTmp.put(mImageId,-1);
+        }
+        mImagesUriList.set(mImageId, uri);
+        mImageListAdapter.notifyDataSetChanged();
+        mImageId = -1;
+    }
+
+    private void setNewImagePosition(Uri uri){
+        if(mElementId!=-1){
+            mImagesUriInsertList.put(mImagesUriList.size(), uri);
+            mImagesPositionListTmp.put(mImagesUriList.size(),-1);
+        }
+        mImagesUriList.add(uri);
+        mImageListAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(PHOTO_MANAGER_KEY,photoManager);
+        outState.putParcelable(PHOTO_MANAGER_KEY,mPhotoManager);
     }
 
     @Override
@@ -536,75 +533,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_accept:
-                String sName;
-                sName = etElementName.getText().toString();
-                sName = sName.trim();
-                if(sName.isEmpty()){
-                    Toast.makeText(getActivity(),
-                            getString(R.string.required_name_element),
-                            Toast.LENGTH_SHORT).show();
-                } else if(sName.length()<2) {
-                    Toast.makeText(getActivity(),
-                            getString(R.string.required_name_element_minimum_length),
-                            Toast.LENGTH_SHORT).show();
-                }else {
-                    String sDescription = "";
-                    if (etElementDescription.getText() != null) {
-                        sDescription = etElementDescription.getText().toString();
-                        sDescription = sDescription.trim();
-                    }
-                    ContentValues values = new ContentValues();
-                    values.put(DataStorage.Items.NAME, sName);
-                    values.put(DataStorage.Items.DESCRIPTION, sDescription);
-                    values.put(DataStorage.Items.ID_COLLECTION, iCollectionId);
-                    if(elementLocation!=null) {
-                        values.put(DataStorage.Items.LOCATION_LAT, elementLocation.latitude);
-                        values.put(DataStorage.Items.LOCATION_LNG, elementLocation.longitude);
-                        values.put(DataStorage.Items.LOCATION, tvElementPosition.getText().toString());
-                    } else {
-                        values.put(DataStorage.Items.LOCATION, getResources().getString(R.string.gps_no_location));
-                    }
-                    AsyncElementQueryHandler asyncHandler = new AsyncElementQueryHandler(
-                            getActivity().getContentResolver()) {
-                    };
-                    if (elementId != -1) {
-                        if(sName.equals(mActualElementName)&&(iCollectionId==mActualCollectionId)){
-                            values.put(DataStorage.Items.MODIFIED_DATE, Calendar
-                                    .getInstance().getTime().getTime());
-                            values.put(DataStorage.Items.SYNCHRONIZED, false);
-                            asyncHandler.startUpdate(0, null,
-                                    DataStorage.Items.CONTENT_URI, values,
-                                    DataStorage.Items._ID + " = ?",
-                                    new String[] { String.valueOf(elementId) });
-                            getActivity().finish();
-                        }
-                        else{
-                            if(checkUniquenessElementName(sName)){
-                                values.put(DataStorage.Items.MODIFIED_DATE, Calendar
-                                        .getInstance().getTime().getTime());
-                                values.put(DataStorage.Items.SYNCHRONIZED, false);
-                                asyncHandler.startUpdate(0, null,
-                                        DataStorage.Items.CONTENT_URI, values,
-                                        DataStorage.Items._ID + " = ?",
-                                        new String[] { String.valueOf(elementId) });
-                                getActivity().finish();
-                            }
-                            else{
-                                Toast.makeText(getActivity(),R.string.element_exist,Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    } else {
-                        if(checkUniquenessElementName(sName)) {
-                            values.put(DataStorage.Items.CREATED_DATE, Calendar
-                                    .getInstance().getTime().getTime());
-                            asyncHandler.startInsert(0, null,
-                                    DataStorage.Items.CONTENT_URI, values);
-                            getActivity().finish();
-                        } else{
-                            Toast.makeText(getActivity(),R.string.element_exist,Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
+                updateOrInsertElement();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -612,19 +541,107 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         return true;
     }
 
+    private void updateOrInsertElement(){
+        String sName = setElementNameFromForm();
+        String sDescription = setElementDescriptionFromForm();
+        if(sName.isEmpty()){
+            Toast.makeText(getActivity(),
+                    getString(R.string.required_name_element),
+                    Toast.LENGTH_SHORT).show();
+        } else if(sName.length()<2) {
+            Toast.makeText(getActivity(),
+                    getString(R.string.required_name_element_minimum_length),
+                    Toast.LENGTH_SHORT).show();
+        }else {
+            ContentValues values = setContentValues(sName,sDescription);
+            AsyncElementQueryHandler asyncHandler = new AsyncElementQueryHandler(
+                    getActivity().getContentResolver()) {
+            };
+            if (mElementId != -1) {
+                updateEditElement(sName,values,asyncHandler);
+            } else {
+                insertNewElement(sName,values,asyncHandler);
+            }
+        }
+    }
+
+    private ContentValues setContentValues(String sName, String sDescription){
+        ContentValues values = new ContentValues();
+        values.put(DataStorage.Items.NAME, sName);
+        values.put(DataStorage.Items.DESCRIPTION, sDescription);
+        values.put(DataStorage.Items.ID_COLLECTION, mCollectionId);
+        if(mElementLocation!=null) {
+            values.put(DataStorage.Items.LOCATION_LAT, mElementLocation.latitude);
+            values.put(DataStorage.Items.LOCATION_LNG, mElementLocation.longitude);
+            values.put(DataStorage.Items.LOCATION, mElementPosition.getText().toString());
+        } else {
+            values.put(DataStorage.Items.LOCATION, getResources().getString(R.string.gps_no_location));
+        }
+        return values;
+    }
+
+    private String setElementNameFromForm(){
+        String sName;
+        sName = mElementName.getText().toString();
+        sName = sName.trim();
+        return sName;
+    }
+
+    private String setElementDescriptionFromForm(){
+        String sDescription = "";
+        if (mElementDescription.getText() != null) {
+            sDescription = mElementDescription.getText().toString();
+            sDescription = sDescription.trim();
+        }
+        return sDescription;
+    }
+
+    private void updateEditElement(String sName,ContentValues values,AsyncQueryHandler asyncHandler){
+        if(sName.equals(mActualElementName)&&(mCollectionId==mActualCollectionId)){
+            values.put(DataStorage.Items.MODIFIED_DATE, Calendar
+                    .getInstance().getTime().getTime());
+            values.put(DataStorage.Items.SYNCHRONIZED, false);
+            asyncHandler.startUpdate(0, null,
+                    DataStorage.Items.CONTENT_URI, values,
+                    DataStorage.Items._ID + " = ?",
+                    new String[] { String.valueOf(mElementId) });
+            getActivity().finish();
+        }
+        else{
+            if(checkUniquenessElementName(sName)){
+                values.put(DataStorage.Items.MODIFIED_DATE, Calendar
+                        .getInstance().getTime().getTime());
+                values.put(DataStorage.Items.SYNCHRONIZED, false);
+                asyncHandler.startUpdate(0, null,
+                        DataStorage.Items.CONTENT_URI, values,
+                        DataStorage.Items._ID + " = ?",
+                        new String[] { String.valueOf(mElementId) });
+                getActivity().finish();
+            }
+            else{
+                Toast.makeText(getActivity(),R.string.element_exist,Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void insertNewElement(String sName,ContentValues values, AsyncQueryHandler asyncHandler){
+        if(checkUniquenessElementName(sName)) {
+            values.put(DataStorage.Items.CREATED_DATE, Calendar
+                    .getInstance().getTime().getTime());
+            asyncHandler.startInsert(0, null,
+                    DataStorage.Items.CONTENT_URI, values);
+            getActivity().finish();
+        } else{
+            Toast.makeText(getActivity(),R.string.element_exist,Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private boolean checkUniquenessElementName(String sName){
         Cursor cursor = getActivity().getContentResolver().query(DataStorage.Items.CONTENT_URI,
                 new String[] {DataStorage.Items.NAME},DataStorage.Items.NAME + " = '" + sName + "' AND " +
-                        DataStorage.Items.ID_COLLECTION + " = '" + iCollectionId +"' AND (" + DataStorage.Items.TABLE_NAME + "."
+                        DataStorage.Items.ID_COLLECTION + " = '" + mCollectionId +"' AND (" + DataStorage.Items.TABLE_NAME + "."
                         + DataStorage.Items.DELETED + " != '" + 1 + "')",null,null);
-        if(cursor!=null){
-            if(cursor.isAfterLast()){
-                return true;
-            }else{
-                return false;
-            }
-        }
-        return true;
+        return cursor == null || cursor.isAfterLast();
     }
 
     private class LoaderCategoriesCallbacks implements
@@ -634,34 +651,30 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             String[] projection = { DataStorage.Collections.NAME,
                     DataStorage.Collections._ID };
             String selection = String.format("%s!=%d",DataStorage.Collections.DELETED,1);
-            CursorLoader cursorLoader = new CursorLoader(getActivity(),
+            return new CursorLoader(getActivity(),
                     DataStorage.Collections.CONTENT_URI, projection, selection,
                     null, DataStorage.Collections.NAME + " ASC");
-            return cursorLoader;
         }
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            // According to documentation moveToPosition range of values is -1 <= position <= count. This is why there is -1
-            // FIXME Dziwny bład z rzutowaniem long na int. Do sprawdzenia na innych wersjach Androida
-//            data.moveToPosition(iCollectionId-1);
             fillCategoriesData();
-            adapterCategories.swapCursor(data);
-            adapterCategories.getCursor().moveToFirst();
-            for(int i=0;i<adapterCategories.getCount();i++){
-                int column_index_id = adapterCategories.getCursor().getColumnIndex(DataStorage.Collections._ID);
-                if(adapterCategories.getCursor().getInt(column_index_id)!=iCollectionId){
-                    adapterCategories.getCursor().moveToNext();
+            mAdapterCategories.swapCursor(data);
+            mAdapterCategories.getCursor().moveToFirst();
+            for(int i=0;i<mAdapterCategories.getCount();i++){
+                int column_index_id = mAdapterCategories.getCursor().getColumnIndex(DataStorage.Collections._ID);
+                if(mAdapterCategories.getCursor().getInt(column_index_id)!=mCollectionId){
+                    mAdapterCategories.getCursor().moveToNext();
                 }else{
-                    int column_index_name = adapterCategories.getCursor().getColumnIndex(DataStorage.Collections.NAME);
-                    tvElementCategory.setText(adapterCategories.getCursor().getString(column_index_name));
+                    int column_index_name = mAdapterCategories.getCursor().getColumnIndex(DataStorage.Collections.NAME);
+                    tvElementCategory.setText(mAdapterCategories.getCursor().getString(column_index_name));
                 }
             }
         }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            adapterCategories.swapCursor(null);
+            mAdapterCategories.swapCursor(null);
         }
     }
 
@@ -672,12 +685,11 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             String[] projection = { DataStorage.Media.FILE_NAME,
                     DataStorage.Media.CREATED_DATE, DataStorage.Media._ID,
                     DataStorage.Media.ID_ITEM,DataStorage.Media.ID_SERVER };
-            CursorLoader cursorLoader = new CursorLoader(getActivity(),
+            return new CursorLoader(getActivity(),
                     DataStorage.Media.CONTENT_URI, projection,
                     DataStorage.Media.ID_ITEM + " =? AND NOT "+ DataStorage.Media.DELETED,
-                    new String[] { String.valueOf(elementId)/*, String.valueOf(true)*/ },
+                    new String[] { String.valueOf(mElementId)/*, String.valueOf(true)*/ },
                     DataStorage.Media.CREATED_DATE + " ASC");
-            return cursorLoader;
         }
 
         @Override
@@ -685,30 +697,27 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             if(data.getCount()!=0) {
                 first = false;
             }
-            if(data!=null){
-                if(data.getCount()!=0){
-                    imagesUriList.add(null);
-                }
-                data.moveToFirst();
-                int position = 1;
-                while(!data.isAfterLast()){
-                    imagesIDServerList.put(data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)),
-                            data.getString(data.getColumnIndexOrThrow(DataStorage.Media.ID_SERVER)));
-                    imagesPositionList.put(position,data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)));
-                    imagesPositionListTmp.put(position,data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)));
-                    imagesUriList.add(Uri.parse(data.getString(data.getColumnIndexOrThrow(DataStorage.Media.FILE_NAME))));
-                    data.moveToNext();
-                    position++;
-                }
-                sLastImageIndex = position;
-                imageListAdapter = new ImageElementAdapterList(getActivity(),NO_FLAGS, imagesUriList);
-                gvPhotosList.setAdapter(imageListAdapter);
+            if(data.getCount()!=0){
+                mImagesUriList.add(null);
             }
+            data.moveToFirst();
+            int position = 1;
+            while(!data.isAfterLast()){
+                mImagesIDServerList.put(data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)),
+                        data.getString(data.getColumnIndexOrThrow(DataStorage.Media.ID_SERVER)));
+                mImagesPositionList.put(position,data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)));
+                mImagesPositionListTmp.put(position,data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)));
+                mImagesUriList.add(Uri.parse(data.getString(data.getColumnIndexOrThrow(DataStorage.Media.FILE_NAME))));
+                data.moveToNext();
+                position++;
+            }
+            mImageListAdapter = new ImageElementAdapterList(getActivity(),NO_FLAGS, mImagesUriList);
+            mPhotosList.setAdapter(mImageListAdapter);
         }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            imagesUriList.clear();
+            mImagesUriList.clear();
         }
     }
 
@@ -752,7 +761,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         @Override
         protected void onUpdateComplete(int token, Object cookie, int result) {
             super.onUpdateComplete(token, cookie, result);
-            Map<Integer,Integer> map = new TreeMap<Integer,Integer>(imagesPositionListTmp);
+            Map<Integer,Integer> map = new TreeMap<>(mImagesPositionListTmp);
             if(!map.isEmpty()){
                 Iterator<Integer> keySetIterator = map.keySet().iterator();
                 if(keySetIterator.hasNext()){
@@ -764,17 +773,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     }
                 }
             }
-            if(imagesUriInsertList.size()!=0){
-                Iterator<Integer> keySetIterator = imagesUriInsertList.keySet().iterator();
-                while(keySetIterator.hasNext()){
-                    Integer key = keySetIterator.next();
-                    insertImage(elementId, imagesUriInsertList.get(key));
+            if(mImagesUriInsertList.size()!=0){
+                for (Integer key : mImagesUriInsertList.keySet()) {
+                    insertImage(mElementId, mImagesUriInsertList.get(key));
                 }
             }
-            if(imagesUriDeleteList.size()!=0){
-                for(int i=0;i<imagesUriDeleteList.size();i++){
-                    //deleteImage(imagesPositionList.get(imagesUriDeleteList.get(i)));
-                    deleteImage(imagesUriDeleteList.get(i));
+            if(mImagesUriDeleteList.size()!=0){
+                for (Integer anImagesUriDeleteList : mImagesUriDeleteList) {
+                    deleteImage(anImagesUriDeleteList);
                 }
             }
         }
@@ -783,9 +789,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         protected void onInsertComplete(int token, Object cookie, Uri uri) {
             super.onInsertComplete(token, cookie, uri);
             int id = Integer.parseInt(uri.getLastPathSegment());
-            if (imagesUriList.size()!=0)
-                imagesUriList.remove(0);
-            for (Uri imageUri : imagesUriList) {
+            if (mImagesUriList.size()!=0)
+                mImagesUriList.remove(0);
+            for (Uri imageUri : mImagesUriList) {
                 insertImage(id, imageUri);
             }
         }
@@ -800,7 +806,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
         private void deleteImage(int id){
             ContentValues values = new ContentValues();
-            values.put(DataStorage.Media.ID_SERVER,imagesIDServerList.get(id));
+            values.put(DataStorage.Media.ID_SERVER,mImagesIDServerList.get(id));
             AsyncImageQueryHandler asyncHandler = new AsyncImageQueryHandler(cr) {};
             asyncHandler.startDelete(0,null,DataStorage.Media.CONTENT_URI,
                     DataStorage.Media._ID + " =? ",new String[] {String.valueOf(id)});
@@ -829,8 +835,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private class AsyncLocationName extends AsyncTask<LatLng,Integer,JSONObject> {
         @Override
         protected JSONObject doInBackground(LatLng... params) {
-            JSONObject json = getLocationInfo(params[0].latitude, params[0].longitude);
-            return json;
+            return getLocationInfo(params[0].latitude, params[0].longitude);
         }
 
         @Override
@@ -846,14 +851,11 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 location_string = new String(location.getString("formatted_address").getBytes("ISO-8859-1"),"UTF-8");
                 double lat = Double.parseDouble(geometryLocation.getString("lat"));
                 double lon = Double.parseDouble(geometryLocation.getString("lng"));
-                LatLng latLng = new LatLng(lat,lon);
-                elementLocation = latLng;
-                tvElementPosition.setText(location_string);
-                tvElementPosition.setTextColor(Color.GREEN);
-            } catch (JSONException e1) {
+                mElementLocation = new LatLng(lat,lon);
+                mElementPosition.setText(location_string);
+                mElementPosition.setTextColor(Color.GREEN);
+            } catch (JSONException | UnsupportedEncodingException e1) {
                 e1.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
             }
         }
 
@@ -873,15 +875,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     stringBuilder.append((char) b);
                 }
             } catch (IOException e) {
-                //TODO push to UI
-//                Toast.makeText(getActivity(),"Brak połaczenia internetowego",Toast.LENGTH_SHORT).show();
+                Log.d("NO CONNECTION", "No internet connection");
             } finally {
                 try{
                     if(stream != null) {
                         stream.close();
                     }
                 } catch(IOException e) {
-
+                    Log.d("IOException stream", "Stream IOException");
                 }
             }
 
@@ -898,26 +899,28 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     }
 
     public void gpsEnabled(boolean gpsEnabled) {
-        this.gpsEnabled = gpsEnabled;
-        if(tvElementPosition!=null && elementLocation==null) {
+        this.mGpsEnabled = gpsEnabled;
+        if(mElementPosition!=null && mElementLocation==null) {
             if(!gpsEnabled) {
-                tvElementPosition.setText(R.string.gps_no_signal);
-                tvElementPosition.setTextColor(Color.RED);
+                mElementPosition.setText(R.string.gps_no_signal);
+                mElementPosition.setTextColor(Color.RED);
             } else {
-                tvElementPosition.setText(R.string.gps_finding_location);
-                tvElementPosition.setTextColor(Color.YELLOW);
+                mElementPosition.setText(R.string.gps_finding_location);
+                mElementPosition.setTextColor(Color.YELLOW);
             }
         } else {
             // TODO loading
             // TODO after return when wifi off with no location change don't change text
-            tvElementPosition.setText(R.string.gps_finding_location);
-            tvElementPosition.setTextColor(Color.YELLOW);
+            if(mElementPosition!=null) {
+                mElementPosition.setText(R.string.gps_finding_location);
+                mElementPosition.setTextColor(Color.YELLOW);
+            }
         }
     }
 
     public void putLocation(LatLng location) {
-        if(tvElementPosition != null) {
-            updateLocationData(location,LOCATION_FROM_ACTIVIT);
+        if(mElementPosition != null) {
+            updateLocationData(location,LOCATION_FROM_ACTIVITY);
         }
     }
 
@@ -926,7 +929,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             return;
         }
 
-        if(location == elementLocation) {
+        if(location == mElementLocation) {
             return;
         }
 
@@ -935,14 +938,14 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 new AsyncLocationName().execute(location);
 //                elementLocation = location;
                 break;
-            case LOCATION_FROM_ACTIVIT:
-                if(locationUserSet) {
+            case LOCATION_FROM_ACTIVITY:
+                if(mLocationUserSet) {
                     break;
                 }
-                if(imagesUriList != null && imagesUriList.size()>1) {
+                if(mImagesUriList != null && mImagesUriList.size()>1) {
                     new AsyncLocationName().execute(location);
                 }
-                elementLocation = location;
+                mElementLocation = location;
                 break;
             default:
                 break;
