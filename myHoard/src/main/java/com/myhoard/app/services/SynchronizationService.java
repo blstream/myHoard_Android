@@ -6,8 +6,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -27,11 +25,10 @@ import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.provider.DataStorage.TypeOfCollection;
 import com.myhoard.app.model.Media;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -306,7 +303,6 @@ public class SynchronizationService extends IntentService {
             where = String.format("%s = %s", Items.ID_SERVER, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)));
             getContentResolver().update(Items.CONTENT_URI, values, where, null);
         } catch (RuntimeException re) {
-            //TODO: trzeba wysłac wszystkie obrazki od nowa, mimo że mogą być synchronized, ktoś skasował nasza kolekcje z serwera
             //try {
             //    IModel imodel = itemCrud.create(item, userManager.getToken());
             //    where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
@@ -326,7 +322,7 @@ public class SynchronizationService extends IntentService {
             IModel imodel = itemCrud.create(item, userManager.getToken());
             where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
             values.put(Items.ID_SERVER, imodel.getId());
-
+            if (!cancel)
             values.put(Items.SYNCHRONIZED, true);
             getContentResolver().update(Items.CONTENT_URI, values, where, null);
         } catch (RuntimeException re) {
@@ -364,6 +360,7 @@ public class SynchronizationService extends IntentService {
                 String where = String.format("%s = %s", Items._ID, cursor.getString(cursor.getColumnIndex(Items._ID)));
                 ContentValues values = new ContentValues();
                 values.put(Items.ID_SERVER, imodel.getId());
+                if (!cancel)
                 values.put(Items.SYNCHRONIZED, true);
                 getContentResolver().update(Items.CONTENT_URI, values, where, null);
             } catch (RuntimeException e) {
@@ -403,11 +400,27 @@ public class SynchronizationService extends IntentService {
     private void createMediaOnServerAndUpdateInDatabase(Cursor cursor, List<ItemMedia> listId) {
         try {
             mediaCrud = new MediaCrudEngine<>(userManager.getIp() + MEDIA_ENDPOINT);
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME))));
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] byteArray = stream.toByteArray();
-            IModel imodel = mediaCrud.create(new Media(byteArray), userManager.getToken());
+            //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME))));
+            //File imageFile = new File(cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+            //File imageFile2 = new File(URI.create(cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME))));
+            Uri urri = Uri.parse(cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME)));
+            String uri = cursor.getString(cursor.getColumnIndex(DataStorage.Media.FILE_NAME));
+
+            //File imageFile3 = new File(String.valueOf(urri));
+            //ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            //bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            //byte[] byteArray = stream.toByteArray();
+
+            File imageFile3=null;
+            if (uri!=null)
+                if (!uri.contains("file")) {
+                String test = getRealPathFromURI(urri);
+                imageFile3 = new File(test);
+            } else {
+                imageFile3 = new File(new URI(uri));
+            }
+
+            IModel imodel = mediaCrud.create(new Media(imageFile3), userManager.getToken());
             if (imodel != null) {
                 listId.add(new ItemMedia(imodel.getId()));
 
@@ -417,10 +430,12 @@ public class SynchronizationService extends IntentService {
                 String where = String.format("%s = %s", DataStorage.Media._ID, cursor.getString(cursor.getColumnIndex(DataStorage.Media._ID)));
                 getContentResolver().update(DataStorage.Media.CONTENT_URI, values, where, null);
             }
+        } catch (SocketException e) {
+            //nie rob nic, użytkownik przerwał połączenie
         } catch (RuntimeException re) {
             sendError(re.getMessage());
-        } catch (IOException e) {
-            sendError(e.toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
     }
 
@@ -552,17 +567,9 @@ public class SynchronizationService extends IntentService {
     private void insert(ItemMedia med, String itemId, String name) {
         ContentValues values = new ContentValues();
         String path = Environment.getExternalStorageDirectory().toString();
-        OutputStream fOut;
 
         boolean success = createFolderMyHoard(path);
         if (success) {
-            mediaCrud = new MediaCrudEngine<>(userManager.getIp() + MEDIA_ENDPOINT);
-            Media media = null;
-            try {
-                media = mediaCrud.get(med.id, userManager.getToken());
-            } catch (Exception e) {
-                e.getMessage();
-            }
             Cursor cursor = getContentResolver().query(Items.CONTENT_URI,
                     new String[]{Items.TABLE_NAME + "." + Items._ID, Items.TABLE_NAME + "." + Items.NAME},
                     Items.TABLE_NAME + "." + Items.ID_SERVER + "=" + itemId, null, null);
@@ -580,22 +587,17 @@ public class SynchronizationService extends IntentService {
                     id = cursor.getString(cursor.getColumnIndex(Items._ID));
                 }
 
+
             file = new File(path + "/myHoardFiles", filename + med.id + ".jpg");
-
-            if (media!=null)
+            mediaCrud = new MediaCrudEngine<>(userManager.getIp() + MEDIA_ENDPOINT);
             try {
-                fOut = new FileOutputStream(file);
-
-                BitmapFactory.decodeByteArray(media.getFile(), 0, media.getFile().length).compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+                mediaCrud.getAndSaveInFile(med.id, userManager.getToken(), file);
 
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 File f = new File(file.getPath());
                 Uri contentUri = Uri.fromFile(f);
                 mediaScanIntent.setData(contentUri);
                 this.sendBroadcast(mediaScanIntent);
-
-                fOut.flush();
-                fOut.close();
 
                 values.put(DataStorage.Media.FILE_NAME, contentUri.toString());
                 values.put(DataStorage.Media.ID_SERVER, med.getId());
@@ -618,8 +620,11 @@ public class SynchronizationService extends IntentService {
                     values.put(DataStorage.Media.AVATAR, false);
 
                 getContentResolver().insert(DataStorage.Media.CONTENT_URI, values);
-            } catch (IOException e) {
-                sendError(e.toString());
+            } catch (SocketException e) {
+                //trzeba usunac plik ktory zaczal sie zapisywac
+                file.delete();
+            } catch (RuntimeException e) {
+                sendError(e.getMessage());
             }
         } else {
             sendError(ERROR_CREATING_FOLDER);
@@ -833,5 +838,20 @@ public class SynchronizationService extends IntentService {
             } else return null;
         }
         return values;
+    }
+
+    public String getRealPathFromURI(Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = getApplicationContext().getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 }

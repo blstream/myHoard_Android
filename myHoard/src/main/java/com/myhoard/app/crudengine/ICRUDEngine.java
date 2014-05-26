@@ -3,6 +3,7 @@ package com.myhoard.app.crudengine;
 import com.myhoard.app.model.IModel;
 import com.myhoard.app.model.Token;
 
+import java.net.SocketException;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ import java.util.List;
      * @param token token uwierzytelniający
      * @return id dodanego obiektu lub ERROR_CODE w przypadku błędu
      */
-    public IModel create(IModel t, Token token);
+    public IModel create(IModel t, Token token) throws SocketException;
 
     public T update(IModel t, String id, Token token);
 

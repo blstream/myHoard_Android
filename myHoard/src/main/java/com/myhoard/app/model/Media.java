@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 /**
  * Description
  *
@@ -17,17 +19,17 @@ public class Media implements IModel {
     private String id;
 
     @SerializedName("file")
-    private byte[] file;
+    private File file;
 
-    public byte[] getFile() {
+    public File getFile() {
         return file;
     }
 
-    public void setFile(byte[] file) {
+    public void setFile(File file) {
         this.file = file;
     }
 
-    public Media(byte[] file) {
+    public Media(File file) {
         this.file = file;
     }
 

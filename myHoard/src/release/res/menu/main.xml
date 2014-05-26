@@ -33,7 +33,7 @@
         android:icon="@drawable/ic_action_phone"
         android:orderInCategory="60"
         app:showAsAction="ifRoom|withText"
-        android:visible="false"/>
+        android:visible="true"/>
 
     <item
         android:id="@+id/action_generate"
@@ -41,14 +41,14 @@
         android:visible="false"/>
 
     <item
-        android:id="@+id/action_download"
-        android:title="download"
-        android:visible="false"/>
+        android:id="@+id/action_java1"
+        android:title="serwer java1"
+        android:visible="true"/>
 
     <item
-        android:id="@+id/action_upload"
-        android:title="upload"
-        android:visible="false"/>
+        android:id="@+id/action_java2"
+        android:title="serwer java2"
+        android:visible="true"/>
 
 
 </menu>

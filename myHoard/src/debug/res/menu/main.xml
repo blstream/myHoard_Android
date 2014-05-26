@@ -32,12 +32,12 @@
         android:title="@string/action_generate"/>
 
     <item
-        android:id="@+id/action_download"
-        android:title="download"/>
+        android:id="@+id/action_java1"
+        android:title="serwer java1"/>
 
     <item
-        android:id="@+id/action_upload"
-        android:title="upload"/>
+        android:id="@+id/action_java2"
+        android:title="serwer java2"/>
 
     <item
         android:id="@+id/action_synchronize"

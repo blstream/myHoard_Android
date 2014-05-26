@@ -158,6 +158,7 @@ public class RegisterActivity extends BaseActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
+            if (UserManager.getInstance().getIp() == null)
             UserManager.getInstance().setIp(getString(R.string.serverJava2));
             try {
                 UserManager.getInstance().register(user);

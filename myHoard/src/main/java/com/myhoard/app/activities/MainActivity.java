@@ -308,6 +308,16 @@ public class MainActivity extends BaseActivity {
             case R.id.action_synchronize:
                 startSynchronization();
                 break;
+            case R.id.action_java1:
+                UserManager userManager = UserManager.getInstance();
+                userManager.logout();
+                userManager.setIp(getString(R.string.serverJava1));
+                break;
+            case R.id.action_java2:
+                UserManager userManager2 = UserManager.getInstance();
+                userManager2.logout();
+                userManager2.setIp(getString(R.string.serverJava2));
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }

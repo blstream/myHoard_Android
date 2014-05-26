@@ -90,7 +90,7 @@
     <string name="progress">In progress…</string>
     <string name="element_category">Category:</string>
     <string name="no_internet_connection">YOU DON\'T HAVE INTERNET CONNECTION</string>
-    <string name="Logged">Zalogowano</string>
+    <string name="Logged">Logged</string>
     <string name="email_or_password_incorrect">E-MAIL OR PASSWORD IS INCORRECT</string>
     <string name="password_pattern">.{4,}</string>
     <string name="invalid_mail">invalid email</string>
@@ -118,6 +118,7 @@
     <string name="synchronization_not_implement">Synchronization is not implemented yet</string>
     <string name="serverJava2">http://78.133.154.39:2080/</string>
     <string name="serverJava1">http://78.133.154.39:1080/</string>
+    <string name="python">http://78.133.154.18:8080/</string>
     <string name="search_hint">Enter search text</string>
     <string name="collection_added">Collection added successfully</string>
     <string name="delete_picker">Delete</string>

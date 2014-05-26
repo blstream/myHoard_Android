@@ -123,17 +123,9 @@ public class CollectionsListFragment extends Fragment implements
         UserManager userManager = UserManager.getInstance();
         MenuItem menuItem;
         if (userManager.isLoggedIn()) {
-            menuItem = menu.findItem(R.id.action_upload);
-            if(menuItem!=null) menuItem.setVisible(true);
-            menuItem = menu.findItem(R.id.action_download);
-            if(menuItem!=null) menuItem.setVisible(true);
             menuItem = menu.findItem(R.id.action_synchronize);
             if(menuItem!=null) menuItem.setVisible(true);
         } else {
-            menuItem = menu.findItem(R.id.action_upload);
-            if(menuItem!=null) menuItem.setVisible(false);
-            menuItem = menu.findItem(R.id.action_download);
-            if(menuItem!=null) menuItem.setVisible(false);
             menuItem = menu.findItem(R.id.action_synchronize);
             if(menuItem!=null) menuItem.setVisible(false);
         }
