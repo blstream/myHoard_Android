@@ -18,7 +18,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
@@ -32,24 +31,27 @@ import com.myhoard.app.provider.DataStorage;
 
 /**
  * Created by Sebastian Peryt on 27.04.14.
+ * Modified by Piotr Brzozowski on 26.05.14.
+ * Base activity used to add/edit element, view element, gps location
  */
 
-/**
- * FIXME: AWA: CLEAN CODE
- *
- * README
- * Ta klasa jak i wszystkie w tym pakiecie sa jeszcze przebudowywane, dlatego sa tam rózne hard coded wartości.
- * Zostanie to niedlugo naprawione.
- */
 public class ElementActivity extends ActionBarActivity {
 
-    private Item element;
-    private long elementId;
-    private long categoryId = -1;
-    private AsyncElementRead asyncElementRead;
-    private Intent intent;
-    private GPSInfoDialog gpsInfoDialog;
-    private boolean gpsEnabled= false;
+    private static final String CATEGORY_ID_EXTRA =  "categoryId";
+    private static final String ELEMENT_ID_EXTRA = "elementId";
+    private static final String LOCATION_TEXT = "location";
+    private static final String ELEMENT_TEXT = "element";
+    private static final String GPS_DIALOG_TEXT = "gps_dialog";
+    private static final String GPS_TEXT = "gps";
+    private static final int ELEMENT_READ_FRAGMENT_DISPLAY = 0;
+    private static final int ELEMENT_ADD_EDIT_FRAGMENT_DISPLAY = 1;
+    private static final int DEFAULT_INTENT_EXTRA_VALUE = 0;
+    private Item mElement;
+    private long mElementId;
+    private long mCategoryId = -1;
+    private Intent mIntent;
+    private GPSInfoDialog mGpsInfoDialog;
+    private boolean mGpsEnabled= false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,21 +63,21 @@ public class ElementActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
-        intent = new Intent(this, GPSProvider.class);
+        mIntent = new Intent(this, GPSProvider.class);
 
         bindService(
-                intent, mConnection,
+                mIntent, mConnection,
                 Context.BIND_AUTO_CREATE);
 
-        asyncElementRead = new AsyncElementRead();
+        AsyncElementRead asyncElementRead = new AsyncElementRead();
 
-        if(getIntent().hasExtra("categoryId")) {
-            categoryId = getIntent().getLongExtra("categoryId", 0);
-            displayFragment(1);
-        } else if(getIntent().hasExtra("elementId")) {
-            elementId = getIntent().getLongExtra("elementId", 0);
-            asyncElementRead.execute(elementId);
-            displayFragment(0);
+        if(getIntent().hasExtra(CATEGORY_ID_EXTRA)) {
+            mCategoryId = getIntent().getLongExtra(CATEGORY_ID_EXTRA, DEFAULT_INTENT_EXTRA_VALUE);
+            displayFragment(ELEMENT_ADD_EDIT_FRAGMENT_DISPLAY);
+        } else if(getIntent().hasExtra(ELEMENT_ID_EXTRA)) {
+            mElementId = getIntent().getLongExtra(ELEMENT_ID_EXTRA, DEFAULT_INTENT_EXTRA_VALUE);
+            asyncElementRead.execute(mElementId);
+            displayFragment(ELEMENT_READ_FRAGMENT_DISPLAY);
         } else {
             finish();
         }
@@ -91,7 +93,7 @@ public class ElementActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_accept:
-                displayFragment(1);
+                displayFragment(ELEMENT_ADD_EDIT_FRAGMENT_DISPLAY);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -103,27 +105,27 @@ public class ElementActivity extends ActionBarActivity {
                 .beginTransaction();
         Bundle bundle = new Bundle();
         switch (position) {
-            case 0:
+            case ELEMENT_READ_FRAGMENT_DISPLAY:
                 fragment = fragmentManager.findFragmentByTag(String
                         .valueOf(position));
                 if (fragment == null) {
                     fragment = new ElementReadFragment();
-                    bundle.putLong("elementId", elementId);
+                    bundle.putLong(ELEMENT_ID_EXTRA, mElementId);
                     fragment.setArguments(bundle);
                 }
                 break;
-            case 1:
+            case ELEMENT_ADD_EDIT_FRAGMENT_DISPLAY:
                 fragment = fragmentManager.findFragmentByTag(String
                         .valueOf(position));
                 if (fragment == null) {
                     fragment = new ElementAddEditFragment();
-                    bundle.putParcelable("location",location);
-                    if(categoryId == -1){
-                        bundle.putParcelable("element",element);
+                    bundle.putParcelable(LOCATION_TEXT,location);
+                    if(mCategoryId == -1){
+                        bundle.putParcelable(ELEMENT_TEXT,mElement);
                     } else {
-                        bundle.putLong("categoryId", categoryId);
+                        bundle.putLong(CATEGORY_ID_EXTRA, mCategoryId);
                     }
-                    bundle.putBoolean("gps",gpsEnabled);
+                    bundle.putBoolean(GPS_TEXT,mGpsEnabled);
                     fragment.setArguments(bundle);
                 }
                 break;
@@ -148,7 +150,7 @@ public class ElementActivity extends ActionBarActivity {
                     DataStorage.Items.LOCATION,
                     DataStorage.Items.LOCATION_LAT,
                     DataStorage.Items.LOCATION_LNG};
-            String[] selection = {String.valueOf(elementId)};
+            String[] selection = {String.valueOf(mElementId)};
             Cursor cursorItems = getContentResolver().query(DataStorage.Items.CONTENT_URI, projection, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID + " =? ", selection, DataStorage.Items.TABLE_NAME + "." + DataStorage.Items._ID + " DESC");
 
             cursorItems.moveToFirst();
@@ -159,7 +161,7 @@ public class ElementActivity extends ActionBarActivity {
             String locationTxt = cursorItems.getString(cursorItems.getColumnIndex(DataStorage.Items.LOCATION));
             float lat = cursorItems.getFloat(cursorItems.getColumnIndex(DataStorage.Items.LOCATION_LAT));
             float lon = cursorItems.getFloat(cursorItems.getColumnIndex(DataStorage.Items.LOCATION_LNG));
-            element.setId(String.valueOf(elementId));
+            element.setId(String.valueOf(mElementId));
             element.setCollection(String.valueOf(collection));
             element.setName(name);
             element.setDescription(description);
@@ -170,7 +172,7 @@ public class ElementActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Item item) {
-            element = item;
+            mElement = item;
         }
     }
 
@@ -208,34 +210,31 @@ public class ElementActivity extends ActionBarActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
-            gpsEnabled = bundle.getBoolean("gps");
+            mGpsEnabled = bundle.getBoolean(GPS_TEXT);
 
             ElementAddEditFragment elementAdd = (ElementAddEditFragment) getSupportFragmentManager().findFragmentByTag(String.valueOf(1));
             if(elementAdd != null) {
-                elementAdd.gpsEnabled(gpsEnabled);
+                elementAdd.gpsEnabled(mGpsEnabled);
             }
 
-            if(gpsInfoDialog == null) {
-                gpsInfoDialog = new GPSInfoDialog();
+            if(mGpsInfoDialog == null) {
+                mGpsInfoDialog = new GPSInfoDialog();
             }
-            if(gpsEnabled) {
-                if(isDialogVisible(gpsInfoDialog)){
-                    gpsInfoDialog.dismiss();
+            if(mGpsEnabled) {
+                if(isDialogVisible(mGpsInfoDialog)){
+                    mGpsInfoDialog.dismiss();
                 }
                 updatePosition(intent);
             } else {
-                if(!isDialogVisible(gpsInfoDialog)) {
-                    gpsInfoDialog.show(getSupportFragmentManager(), "gps_dialog");
+                if(!isDialogVisible(mGpsInfoDialog)) {
+                    mGpsInfoDialog.show(getSupportFragmentManager(), GPS_DIALOG_TEXT);
                 }
             }
         }
     };
 
     private boolean isDialogVisible(GPSInfoDialog dialog){
-        if(dialog != null) {
-            return dialog.getDialog() != null;
-        }
-        return false;
+        return dialog != null && dialog.getDialog() != null;
     }
 
 	/*
@@ -248,9 +247,9 @@ public class ElementActivity extends ActionBarActivity {
         if (mBound) {
             try {
                 unbindService(mConnection);
-                Log.d("TAG", "unbind ok");
+                Log.d("TAG_GPS", "unbind ok");
             } catch (Exception e) {
-                Log.d("TAG", "nie unbind");
+                Log.d("TAG_GPS", "nie unbind");
             }
             mBound = false;
         }
@@ -260,7 +259,7 @@ public class ElementActivity extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
         if (!mBound) {
-            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            bindService(mIntent, mConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
@@ -282,18 +281,18 @@ public class ElementActivity extends ActionBarActivity {
         try{
             unbindService(mConnection);
         } catch (IllegalArgumentException iae) {
-            // TODO
+           Log.e("TAG_GPS",iae.getMessage());
         }
         super.onDestroy();
     }
 
     private void updatePosition(Intent intent) {
-        Log.e("TAG", "In");
+        Log.e("TAG_GPS", "In");
         if (intent == null) {
-            Log.e("TAG", "error");
+            Log.e("TAG_GPS", "error");
             return;
         }
-        Log.e("TAG", "OK");
+        Log.e("TAG_GPS", "OK");
         Bundle b = intent.getExtras();
         double lat = b.getDouble(GPSProvider.POS_LAT);
         double lon = b.getDouble(GPSProvider.POS_LON);
