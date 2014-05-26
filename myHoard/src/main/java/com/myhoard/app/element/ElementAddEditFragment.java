@@ -77,12 +77,21 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     public static final String MODIFIED_DATE = "elementModifiedDate";
     public static final String TAGS = "elementTags";
     public static final String EDITION = "edition";
-    private static final int INSERT_IMAGE_REQUEST_CODE = 100;
-    private static final int EDIT_IMAGE_REQUEST_CODE = 101;
-    private static final int DELETE_IMAGE_REQUEST_CODE = 102;
+    private static final String GET_GPS_DATA_FROM_DIALOG_TEXT = "gps_choose";
+    private static final String GET_CATEGORY_ID_FROM_DIALOG_TEXT = "collectionId";
+    private static final String GET_DATA_FROM_DIALOG_TEXT = "insert image";
+    private static final String LOCALIZATION_PUT_INTENT_EXTRA_TEXT = "localisation";
+    private static final String CATEGORY_ID_TEXT = "categoryId";
+    private static final String ELEMENT_TEXT = "element";
+    private static final String LOCATION_GET_PARCELABLE_TEXT = "location";
+    private static final String GPS_GET_BOOLEAN_TEXT = "gps";
+    private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
+    private static final int INSERT_IMAGE_RESULT_CODE = 100;
+    private static final int EDIT_IMAGE_RESULT_CODE = 101;
+    private static final int DELETE_IMAGE_RESULT_CODE = 102;
     private static final int CATEGORY_RESULT_CODE = 200;
     private static final int GPS_RESULT_CODE = 300;
-    private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
+    private static final int LOCALIZATION_RESULT_CODE = 9;
     private static final int REQUEST_GET_PHOTO = 1;
 
     private static final int LOADER_CATEGORIES = 1;
@@ -107,7 +116,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private HashMap<Integer,Uri> mImagesUriInsertList;
     private HashMap<Integer,Uri> mImagesUriInsertListTmp;
     private HashMap<Integer,Integer> mImagesPositionListTmp;
-    private HashMap<Integer,Integer> mImagesPositionList;
     private HashMap<Integer,String> mImagesIDServerList;
     private HashMap<Integer,Integer> mImagesTmp;
     private ImageElementAdapterList mImageListAdapter;
@@ -133,7 +141,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         mCollectionId = -1;
         mImageId = -1;
         Bundle b = getArguments();
-        b.getParcelable("location");
+        b.getParcelable(LOCATION_GET_PARCELABLE_TEXT);
         if (savedInstanceState != null) {
             mPhotoManager = savedInstanceState.getParcelable(PHOTO_MANAGER_KEY);
         } else {
@@ -160,7 +168,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     }
 
     private void setGpsFormInitStyle(Bundle b){
-        mGpsEnabled = b.getBoolean("gps");
+        mGpsEnabled = b.getBoolean(GPS_GET_BOOLEAN_TEXT);
         if(!mGpsEnabled) {
             mElementPosition.setText(R.string.gps_no_signal);
             mElementPosition.setTextColor(Color.RED);
@@ -171,10 +179,10 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     }
 
     private void setFormInEditElementMode(Bundle b){
-        if(b.getLong("categoryId",-1)!=-1) {
-            mCollectionId = (int) b.getLong("categoryId");
-        } else if(b.getParcelable("element")!=null) {
-            Item element = b.getParcelable("element");
+        if(b.getLong(CATEGORY_ID_TEXT,-1)!=-1) {
+            mCollectionId = (int) b.getLong(CATEGORY_ID_TEXT);
+        } else if(b.getParcelable(ELEMENT_TEXT)!=null) {
+            Item element = b.getParcelable(ELEMENT_TEXT);
             mElementId = Integer.parseInt(element.getId());
             mCollectionId = Integer.parseInt(element.getCollection());
             mActualCollectionId = mCollectionId;
@@ -189,7 +197,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             mElementDescription.setText(element.getDescription());
             mImagesUriInsertList = new HashMap<>();
             mImagesPositionListTmp = new HashMap<>();
-            mImagesPositionList = new HashMap<>();
             mImagesUriDeleteList = new ArrayList<>();
             mImagesIDServerList = new HashMap<>();
             mImagesUriInsertListTmp = new HashMap<>();
@@ -221,8 +228,8 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     showGpsPickerDialog();
                 } else {
                     Intent intent = new Intent(getActivity(), ElementMapActivity.class);
-                    intent.putExtra("localisation",mElementLocation);
-                    startActivityForResult(intent, 9);
+                    intent.putExtra(LOCALIZATION_PUT_INTENT_EXTRA_TEXT,mElementLocation);
+                    startActivityForResult(intent, LOCALIZATION_RESULT_CODE);
                 }
                 break;
             case R.id.tvElementCategory:
@@ -264,9 +271,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         }else if(location_choose==2){
             Intent intent = new Intent(getActivity(), ElementMapActivity.class);
             if(mElementLocation!=null){
-                intent.putExtra("localisation",mElementLocation);
+                intent.putExtra(LOCALIZATION_PUT_INTENT_EXTRA_TEXT,mElementLocation);
             }
-            startActivityForResult(intent, 9);
+            startActivityForResult(intent, LOCALIZATION_RESULT_CODE);
         }
     }
 
@@ -274,11 +281,11 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
      * Fill adapter data with proper cursor values
      */
     private void fillCategoriesData() {
-        // Fields from databse from which data will be taken. Has to include _id
+        // Fields from database from which data will be taken. Has to include _id
         // column.
         String[] from = new String[] { DataStorage.Collections.NAME,
                 DataStorage.Collections._ID };
-        // UI fields in given layout into which elemnts have to be put.
+        // UI fields in given layout into which elements have to be put.
         int[] to = new int[] { android.R.id.text1 };
 
         mAdapterCategories = new SimpleCursorAdapter(mContext,
@@ -295,7 +302,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
     private void showImagePickerDialog(){
         ImageInsertDialog insertDialog = new ImageInsertDialog();
-        insertDialog.setTargetFragment(this, INSERT_IMAGE_REQUEST_CODE);
+        insertDialog.setTargetFragment(this, INSERT_IMAGE_RESULT_CODE);
         insertDialog.show(getFragmentManager(), "");
     }
 
@@ -315,11 +322,11 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     private void showImageEditPickerDialog(){
         if(mElementId!=-1){
             ImageDeleteDialog removeDialog = new ImageDeleteDialog();
-            removeDialog.setTargetFragment(this, DELETE_IMAGE_REQUEST_CODE);
+            removeDialog.setTargetFragment(this, DELETE_IMAGE_RESULT_CODE);
             removeDialog.show(getFragmentManager(), "");
         }else{
             ImageEditDialog editDialog = new ImageEditDialog();
-            editDialog.setTargetFragment(this, EDIT_IMAGE_REQUEST_CODE);
+            editDialog.setTargetFragment(this, EDIT_IMAGE_RESULT_CODE);
             editDialog.show(getFragmentManager(), "");
         }
     }
@@ -442,20 +449,20 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case INSERT_IMAGE_REQUEST_CODE:
-                imagePicker(data.getIntExtra("insert image", -1));
+            case INSERT_IMAGE_RESULT_CODE:
+                imagePicker(data.getIntExtra(GET_DATA_FROM_DIALOG_TEXT, -1));
                 break;
-            case EDIT_IMAGE_REQUEST_CODE:
-                imagePickerDel(data.getIntExtra("insert image", -1));
+            case EDIT_IMAGE_RESULT_CODE:
+                imagePickerDel(data.getIntExtra(GET_DATA_FROM_DIALOG_TEXT, -1));
                 break;
-            case DELETE_IMAGE_REQUEST_CODE:
-                imagePickerDel(data.getIntExtra("insert image", -1));
+            case DELETE_IMAGE_RESULT_CODE:
+                imagePickerDel(data.getIntExtra(GET_DATA_FROM_DIALOG_TEXT, -1));
                 break;
             case CATEGORY_RESULT_CODE:
-                categoryPicker(data.getIntExtra("collectionId",-1));
+                categoryPicker(data.getIntExtra(GET_CATEGORY_ID_FROM_DIALOG_TEXT,-1));
                 break;
             case GPS_RESULT_CODE:
-                localisationPicker(data.getIntExtra("gps_choose",-1));
+                localisationPicker(data.getIntExtra(GET_GPS_DATA_FROM_DIALOG_TEXT,-1));
                 break;
             case REQUEST_GET_PHOTO:
                 if (resultCode == Activity.RESULT_OK) {
@@ -463,9 +470,9 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                     setImage(imgUri);
                 }
                 break;
-            case 9:
+            case LOCALIZATION_RESULT_CODE:
                 if (resultCode == Activity.RESULT_OK) {
-                    LatLng location = data.getParcelableExtra("localisation");
+                    LatLng location = data.getParcelableExtra(LOCALIZATION_PUT_INTENT_EXTRA_TEXT);
                     if (location != null) {
                         mLocationUserSet = true;
                         updateLocationData(location, LOCATION_FROM_FRAGMENT);
@@ -705,7 +712,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
             while(!data.isAfterLast()){
                 mImagesIDServerList.put(data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)),
                         data.getString(data.getColumnIndexOrThrow(DataStorage.Media.ID_SERVER)));
-                mImagesPositionList.put(position,data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)));
                 mImagesPositionListTmp.put(position,data.getInt(data.getColumnIndexOrThrow(DataStorage.Media._ID)));
                 mImagesUriList.add(Uri.parse(data.getString(data.getColumnIndexOrThrow(DataStorage.Media.FILE_NAME))));
                 data.moveToNext();
@@ -846,7 +852,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 //Get JSON Array called "results" and then get the 0th complete object as JSON
                 location = object.getJSONArray("results").getJSONObject(0);
                 geometry = object.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-                geometryLocation = geometry.getJSONObject("location");
+                geometryLocation = geometry.getJSONObject(LOCATION_GET_PARCELABLE_TEXT);
                 // Get the value of the attribute whose name is "formatted_string"
                 location_string = new String(location.getString("formatted_address").getBytes("ISO-8859-1"),"UTF-8");
                 double lat = Double.parseDouble(geometryLocation.getString("lat"));
