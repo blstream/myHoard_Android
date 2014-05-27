@@ -26,7 +26,18 @@ import com.myhoard.app.provider.DataStorage.Collections;
 import com.myhoard.app.provider.DataStorage.TypeOfCollection;
 import com.myhoard.app.model.Media;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -333,7 +344,6 @@ public class SynchronizationService extends IntentService {
                 String url = userManager.getIp() + ITEM_ENDPOINT + "?name=" + item.getName() + "&collection=" + item.getCollection();
                 IModel imodel = itemCrud.searchByName(url, userManager.getToken());
 
-                //TODO: pobrac zdjecia?
                 HashMap<String, String> mapka = new HashMap<>();
                 if (item.getMedia().size() > 0) {
                     Cursor cursorMedia = getContentResolver().query(DataStorage.Media.CONTENT_URI,
@@ -826,6 +836,7 @@ public class SynchronizationService extends IntentService {
         if (item.location != null) {
             values.put(DataStorage.Items.LOCATION_LAT, item.location.lat);
             values.put(DataStorage.Items.LOCATION_LNG, item.location.lng);
+            values.put(DataStorage.Items.LOCATION, getLocationInfo((double) item.location.lat, item.location.lng));
         }
         try {
             java.util.Date modDate = new SimpleDateFormat(DATE_FORMAT).parse(item.modifiedDate);
@@ -853,6 +864,51 @@ public class SynchronizationService extends IntentService {
         }
         return values;
     }
+
+    public String getLocationInfo(double lat, double lng) {
+        HttpGet httpGet = new HttpGet("http://maps.google.com/maps/api/geocode/json?latlng="+lat+","+lng+"&language=pl&sensor=false");
+        HttpClient client = new DefaultHttpClient();
+        HttpResponse response;
+        StringBuilder stringBuilder = new StringBuilder();
+        InputStream stream = null;
+
+        try {
+            response = client.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            stream = entity.getContent();
+            int b;
+            while ((b = stream.read()) != -1) {
+                stringBuilder.append((char) b);
+            }
+        } catch (IOException e) {
+            sendError("No internet connection");
+        } finally {
+            try{
+                if(stream != null) {
+                    stream.close();
+                }
+            } catch(IOException e) {
+                sendError("Stream IOException");
+            }
+        }
+
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(stringBuilder.toString());
+
+            JSONObject location = jsonObject.getJSONArray("results").getJSONObject(0);
+            // Get the value of the attribute whose name is "formatted_string"
+            return new String(location.getString("formatted_address").getBytes("ISO-8859-1"),"UTF-8");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            return null;
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+        return null;
+    }
+
 
     public String getRealPathFromURI(Uri contentUri) {
         Cursor cursor = null;
