@@ -40,6 +40,10 @@
         android:title="serwer java2"/>
 
     <item
+        android:id="@+id/action_python"
+        android:title="serwer python"/>
+
+    <item
         android:id="@+id/action_synchronize"
         android:title="synchronize"/>
 

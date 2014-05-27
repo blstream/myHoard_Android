@@ -66,7 +66,7 @@ public class MainActivity extends BaseActivity {
     private Menu actionBarMenu;
     private AlertDialog.Builder builder;
     private Intent synchronizationIntent;
-
+    private UserManager userManager;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
     private static final int X_OFFSET = 0;
@@ -309,14 +309,19 @@ public class MainActivity extends BaseActivity {
                 startSynchronization();
                 break;
             case R.id.action_java1:
-                UserManager userManager = UserManager.getInstance();
+                userManager = UserManager.getInstance();
                 userManager.logout();
                 userManager.setIp(getString(R.string.serverJava1));
                 break;
             case R.id.action_java2:
-                UserManager userManager2 = UserManager.getInstance();
-                userManager2.logout();
-                userManager2.setIp(getString(R.string.serverJava2));
+                userManager = UserManager.getInstance();
+                userManager.logout();
+                userManager.setIp(getString(R.string.serverJava2));
+                break;
+            case R.id.action_python:
+                userManager = UserManager.getInstance();
+                userManager.logout();
+                userManager.setIp(getString(R.string.python));
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -385,13 +390,15 @@ public class MainActivity extends BaseActivity {
                     startActivity(in);
                 }
                 break;
-            //Friends
+            //Synchronize
             case 2:
-                Toast.makeText(getBaseContext(), getString(R.string.not_implement_yet), Toast.LENGTH_SHORT).show();
-                break;
-            //profile
-            case 3:
-                Toast.makeText(getBaseContext(), getString(R.string.not_implement_yet), Toast.LENGTH_SHORT).show();
+                userManager = UserManager.getInstance();
+                if (userManager.isLoggedIn())
+                    startSynchronization();
+                else {
+                    Intent logIn = new Intent(getBaseContext(), LoginActivity.class);
+                    startActivity(logIn);
+                }
                 break;
             default:
                 break;
@@ -403,7 +410,7 @@ public class MainActivity extends BaseActivity {
     List<RowItem> preparing_navigationDrawer() {
 
         String[] drawerListItems = getResources().getStringArray(R.array.drawer_menu);
-        int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.znajomi, R.drawable.profilpng};
+        int[] images = {R.drawable.szukaj, R.drawable.kolekcje, R.drawable.synchronizacja};
 
         List<RowItem> list = new ArrayList<>();
         for (int i = 0; i < drawerListItems.length; i++) {

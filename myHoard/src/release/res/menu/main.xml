@@ -50,5 +50,9 @@
         android:title="serwer java2"
         android:visible="true"/>
 
+    <item
+        android:id="@+id/action_python"
+        android:title="serwer python"
+        android:visible="true"/>
 
 </menu>

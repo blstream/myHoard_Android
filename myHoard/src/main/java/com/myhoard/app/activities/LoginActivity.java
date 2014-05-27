@@ -136,8 +136,9 @@ public class LoginActivity extends BaseActivity {
 
         protected void onPostExecute(Boolean result) {
             if (result) {
-
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 Toast toast = Toast.makeText(getBaseContext(), getString(R.string.Logged),
                         Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);

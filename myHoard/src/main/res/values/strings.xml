@@ -83,6 +83,7 @@
     <string name="action_synchronize">Synchronize</string>
     <string name="collection">Collection</string>
     <string name="friends">Friends</string>
+    <string name="synchronize">Synchronize</string>
     <string name="profile">Profile</string>
     <string name="sign_up">Sign up</string>
     <string name="create_first_collection">Create first collection</string>
