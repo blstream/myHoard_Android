@@ -18,6 +18,7 @@ import com.myhoard.app.crudengine.MediaCrudEngine;
 import com.myhoard.app.model.Collection;
 import com.myhoard.app.model.IModel;
 import com.myhoard.app.model.Item;
+import com.myhoard.app.model.ItemLocation;
 import com.myhoard.app.model.ItemMedia;
 import com.myhoard.app.provider.DataStorage;
 import com.myhoard.app.provider.DataStorage.Items;
@@ -50,7 +51,7 @@ public class SynchronizationService extends IntentService {
     private static final String USERS_ENDPOINT = "users/";
     private static final String ITEM_ENDPOINT = "items/";
     private static final String MEDIA_ENDPOINT = "media/";
-    private static final String SEPARATOR = "#";
+    private static final String SEPARATOR = " ";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     private static final int INDEX_OF_FIRST_ELEMENT = 0;
     private static final int ERROR = -1;
@@ -190,7 +191,6 @@ public class SynchronizationService extends IntentService {
         if (tags != null) {
             String[] splitedTags = tags.split(SEPARATOR);
             List<String> list = new LinkedList<>(Arrays.asList(splitedTags));
-            list.remove(0); //zero element is always empty, remove it
             for (int i = 0; i < list.size(); i++) {
                 list.set(i, list.get(i).trim());
             }
@@ -250,7 +250,9 @@ public class SynchronizationService extends IntentService {
                 Items.TABLE_NAME + "." + Items.SYNCHRONIZED,
                 Items.TABLE_NAME + "." + Items.DESCRIPTION,
                 Items.TABLE_NAME + "." + Items.NAME,
-                Items.TABLE_NAME + "." + Items.DELETED
+                Items.TABLE_NAME + "." + Items.DELETED,
+                Items.TABLE_NAME + "." + Items.LOCATION_LAT,
+                Items.TABLE_NAME + "." + Items.LOCATION_LNG
         };
         Cursor cursor = getContentResolver().query(Items.CONTENT_URI, projection, null, null, null);
 
@@ -375,6 +377,18 @@ public class SynchronizationService extends IntentService {
         item.setName(cursor.getString(cursor.getColumnIndex(Items.NAME)));
         item.setDescription(cursor.getString(cursor.getColumnIndex(Items.DESCRIPTION)));
         item.setCollection(cursorCollection.getString(cursorCollection.getColumnIndex(Collections.ID_SERVER)));
+
+        String location_lat = cursor.getString(cursor.getColumnIndex(Items.LOCATION_LAT));
+        String location_lng = cursor.getString(cursor.getColumnIndex(Items.LOCATION_LNG));
+
+        if(location_lat != null) {
+            float location_latitude = Float.parseFloat(location_lat);
+            if (location_lng != null) {
+                float location_longtitude = Float.parseFloat(location_lng);
+                item.setLocation(new ItemLocation(location_latitude, location_longtitude));
+            }
+        }
+
 
         List<ItemMedia> mediaId = uploadMedia(cursor.getString(cursor.getColumnIndex(Items._ID)));
         if (mediaId.size() > 0)
@@ -753,7 +767,7 @@ public class SynchronizationService extends IntentService {
         String tags = "";
         if (collection.getTags() != null)
         for (String s : collection.getTags()) {
-            tags = tags + "#" + s + " ";
+            tags = tags + s + " ";
         }
         values.put(Collections.TAGS, tags.trim());
         if (collection.getIfPublic())
