@@ -70,10 +70,12 @@
                     android:id="@+id/checkbox_remember"
                     android:checked="false"
                     android:layout_marginLeft="28dp"
+                    android:layout_marginRight="10dp"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_centerInParent="true"
+                    android:button="@drawable/custom_checkbox"
                     android:layout_alignParentEnd="false" />
 
                 <TextView
