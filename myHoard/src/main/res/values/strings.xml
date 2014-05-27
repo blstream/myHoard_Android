@@ -119,7 +119,7 @@
     <string name="synchronization_not_implement">Synchronization is not implemented yet</string>
     <string name="serverJava2">http://78.133.154.39:2080/</string>
     <string name="serverJava1">http://78.133.154.39:1080/</string>
-    <string name="python">http://78.133.154.18:8080/</string>
+    <string name="python">http://78.133.154.18:8081/</string>
     <string name="search_hint">Enter search text</string>
     <string name="collection_added">Collection added successfully</string>
     <string name="delete_picker">Delete</string>
