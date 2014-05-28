@@ -159,7 +159,9 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         mButtonShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                facebookShareDialog();
+                if(mFacebookImageAdapterList.mSelectedItems.size() > 0)
+                    facebookShareDialog();
+                else makeAndShowToast(getString(R.string.required_photo));
             }
         });
     }
