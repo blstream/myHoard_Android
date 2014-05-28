@@ -39,14 +39,11 @@ import com.myhoard.app.provider.DataStorage;
  * SearchFragment class used to search concrete sentence in table of elements
  */
 public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String SEARCH_COLLECTION_ID = "SearchCollection";
     private static final String TEXT_TO_SEARCH = "TextSearch";
     private static final String SEARCH_BY_NAME_TAB = "name";
     private static final String SEARCH_ALL_TAB = "all";
     private static final String SEARCH_BY_DESCRIPTION_TAB = "description";
-    private static final String NEW_FACEBOOK_FRAGMENT_NAME = "FacebookFragment";
     private static final int DELETE_ID = Menu.FIRST + 1;
-    private static final int SHARE_ID = Menu.FIRST + 3;
     private static final int TEXT_TO_SEARCH_MIN_LENGTH = 2;
     private static final int SEARCH_ALL = 0;
     private static final int SEARCH_BY_NAME = 1;
@@ -56,7 +53,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     private EditText mSearchText;
     private Context mContext;
     private ImageAdapterList mImageAdapterList;
-    private Long mCollectionId;
     private TextView mSearchByName;
     private TextView mSearchAll;
     private TextView mSearchByDescription;
@@ -66,8 +62,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_search, container, false);
         setHasOptionsMenu(true);
-        Bundle b = this.getArguments();
-        mCollectionId = b.getLong(SEARCH_COLLECTION_ID);
         mContext = getActivity();
         mGridView = (GridView) v.findViewById(R.id.gridViewSearch);
         //Create adapter to adapt data to individual list row
@@ -240,7 +234,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         super.onCreateContextMenu(menu, v, menuInfo);
         int groupId = 0;
         menu.add(groupId, DELETE_ID, DELETE_ID, R.string.menu_delete);
-        menu.add(groupId, SHARE_ID, SHARE_ID, R.string.menu_share);
     }
 
     @Override
@@ -249,11 +242,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
                 (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             // Sharing item from list
-            case SHARE_ID:
-                if(info!=null) {
-                    newFacebookShareFragment(info.id);
-                }
-                return true;
             case DELETE_ID:
                 new AlertDialog.Builder(getActivity())
                         .setTitle(mContext.getString(R.string.edit_colection_dialog_title))
@@ -281,20 +269,20 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         String selection = null;
         switch(id){
             case SEARCH_ALL:
-                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                selection = String.format("%s!=%d AND (%s=%d OR %s is null) AND (%s LIKE '%%%s%%' OR %s LIKE '%%%s%%')",
+                        DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
                         DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.DESCRIPTION,collectionElementText,DataStorage.Items.NAME,collectionElementText);
                 break;
             case SEARCH_BY_NAME:
-                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND %s LIKE '%%%s%%'",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                selection = String.format("%s!=%d AND (%s=%d OR %s is null) AND %s LIKE '%%%s%%'",
+                        DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
                         DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.NAME,collectionElementText);
                 break;
             case SEARCH_BY_DESCRIPTION:
-                selection = String.format("%s = %s AND %s!=%d AND (%s=%d OR %s is null) AND %s LIKE '%%%s%%'",
-                        mCollectionId,DataStorage.Items.ID_COLLECTION,DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
+                selection = String.format("%s!=%d AND (%s=%d OR %s is null) AND %s LIKE '%%%s%%'",
+                        DataStorage.Items.TABLE_NAME + "." +DataStorage.Items.DELETED,1,
                         DataStorage.Media.AVATAR,1,DataStorage.Media.AVATAR,
                         DataStorage.Items.DESCRIPTION,collectionElementText);
                 break;
@@ -366,17 +354,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
         actionBar.setDisplayShowTitleEnabled(true);
-    }
-
-    private void newFacebookShareFragment(long id) {
-        Fragment newFragment = new FacebookItemsToShare();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        Bundle bundle = new Bundle();
-        bundle.putLong(FacebookItemsToShare.ITEM_ID,id);
-        newFragment.setArguments(bundle);
-        transaction.replace(R.id.container,newFragment,NEW_FACEBOOK_FRAGMENT_NAME);
-        transaction.addToBackStack(NEW_FACEBOOK_FRAGMENT_NAME);
-        transaction.commit();
     }
 
     private void deleteElement(long id){
