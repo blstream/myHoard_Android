@@ -451,6 +451,7 @@ public class MainActivity extends BaseActivity {
                             public void onClick(DialogInterface dialog, int id) {
                             }
                         });
+                errorSynchronizationList = new ArrayList<>();
                 builder.create();
                 builder.show();
             }

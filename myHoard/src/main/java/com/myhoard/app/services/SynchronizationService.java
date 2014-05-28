@@ -75,6 +75,8 @@ public class SynchronizationService extends IntentService {
     ArrayList<ContentProviderOperation> operations;
     private static Boolean mutex=false;
     private static Boolean cancel=false;
+    private List<String> listIdCollection;
+    //private List<String> listIdDeletedCollection;
 
     CRUDEngine<Collection> collectionCrud;
     CRUDEngine<Item> itemCrud;
@@ -135,7 +137,7 @@ public class SynchronizationService extends IntentService {
                 uploadCollections();
                 uploadItems();
                 downloadCollections();
-                downloadItems();
+                preDownloadItems();
 
                 Intent intenttt = new Intent("notification");
                 //2 notification: 1 to MainActivity, 2 to CollectionListFragment
@@ -149,6 +151,7 @@ public class SynchronizationService extends IntentService {
     }
 
     private void uploadCollections() {
+        //listIdDeletedCollection = new ArrayList<>();
         collectionCrud = new CRUDEngine<>(userManager.getIp() + COLLECTIONS_ENDPOINT, Collection.class);
         Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, null, null, null, null);
         if (cursor != null)
@@ -170,8 +173,9 @@ public class SynchronizationService extends IntentService {
                 createCollectionOnServerAndUpdateInDatabase(collectionCrud, cursor, collection);
             }
         } else if (cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)) != null) {
+            //listIdDeletedCollection.add(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)));
             collectionCrud.remove(cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)), userManager.getToken());
-            String where = String.format("%s = %s", Collections.ID_SERVER, cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)));
+            String where = String.format("%s = \"%s\"", Collections.ID_SERVER, cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER)));
             ContentValues values = new ContentValues();
             values.putNull(Collections.ID_SERVER);
             getContentResolver().update(Collections.CONTENT_URI, values, where, null);
@@ -181,13 +185,12 @@ public class SynchronizationService extends IntentService {
     private void deleteCollectionOnServerAndInDatabase(CRUDEngine<Collection> collectionCrud, Cursor cursor) {
         String idCollectionOnServer = cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER));
         String id = cursor.getString(cursor.getColumnIndex(Collections._ID));
-        String where = Collections._ID + "=?";
-        String[] args = new String[]{id};
+        String where = Collections._ID + "=\""+id+"\"";
         if (idCollectionOnServer == null) {
-            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+            getContentResolver().delete(Collections.CONTENT_URI, where, null);
         } else {
             collectionCrud.remove(idCollectionOnServer, userManager.getToken());
-            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+            getContentResolver().delete(Collections.CONTENT_URI, where, null);
         }
     }
 
@@ -207,13 +210,16 @@ public class SynchronizationService extends IntentService {
             }
             collection.setTags(list);
         }
+        if (tags != null)
+        if (tags.equals(""))
+            collection.setTags(null);
         return collection;
     }
 
     private void updateCollectionOnServerAndUpdateInDatabase(CRUDEngine<Collection> collectionCrud, Cursor cursor, Collection collection) {
         try {
             collectionCrud.update(collection, collection.getId(), userManager.getToken());
-            String where = String.format("%s = %s", Collections.ID_SERVER, collection.getId());
+            String where = String.format("%s = \"%s\"", Collections.ID_SERVER, collection.getId());
             ContentValues values = new ContentValues();
             values.put(Collections.SYNCHRONIZED, true);
             getContentResolver().update(Collections.CONTENT_URI, values, where, null);
@@ -229,7 +235,7 @@ public class SynchronizationService extends IntentService {
     private void createCollectionOnServerAndUpdateInDatabase(CRUDEngine<Collection> collectionCrud, Cursor cursor, Collection collection) {
         try {
             IModel imodel = collectionCrud.create(collection, userManager.getToken());
-            String where = String.format("%s = %s", Collections._ID, cursor.getString(cursor.getColumnIndex(Collections._ID)));
+            String where = String.format("%s = \"%s\"", Collections._ID, cursor.getString(cursor.getColumnIndex(Collections._ID)));
             ContentValues values = new ContentValues();
             values.put(Collections.ID_SERVER, imodel.getId());
             values.put(Collections.SYNCHRONIZED, true);
@@ -241,7 +247,7 @@ public class SynchronizationService extends IntentService {
                 collection.setId(imodel.getId());
                 collectionCrud.update(collection, collection.getId(), userManager.getToken());
 
-                String where = String.format("%s = %s", Collections._ID, cursor.getString(cursor.getColumnIndex(Collections._ID)));
+                String where = String.format("%s = \"%s\"", Collections._ID, cursor.getString(cursor.getColumnIndex(Collections._ID)));
                 ContentValues values = new ContentValues();
                 values.put(Collections.ID_SERVER, imodel.getId());
                 values.put(Collections.SYNCHRONIZED, true);
@@ -278,7 +284,7 @@ public class SynchronizationService extends IntentService {
         if (cursor.getInt(cursor.getColumnIndex(Items.DELETED)) == 1) {
             deleteItemOnServerAndInDatabase(itemCrud, cursor);
         } else if (cursor.getInt(cursor.getColumnIndex(Items.SYNCHRONIZED)) == 0) {
-            String where = String.format("%s = %s", Collections._ID, cursor.getString(cursor.getColumnIndex(Items.ID_COLLECTION)));
+            String where = String.format("%s = \"%s\"", Collections._ID, cursor.getString(cursor.getColumnIndex(Items.ID_COLLECTION)));
             Cursor c = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.TYPE}, where, null, null);
             if (c != null) {
                 c.moveToFirst();
@@ -296,13 +302,12 @@ public class SynchronizationService extends IntentService {
     private void deleteItemOnServerAndInDatabase(CRUDEngine<Item> itemCrud, Cursor cursor) {
         String idItemOnServer = cursor.getString(cursor.getColumnIndex(Items.ID_SERVER));
         String id = cursor.getString(cursor.getColumnIndex(Items._ID));
-        String where = Items._ID + "=?";
-        String[] args = new String[]{id};
+        String where = Items._ID + "=\""+id+"\"";
         if (idItemOnServer == null) {
-            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+            getContentResolver().delete(Collections.CONTENT_URI, where, null);
         } else {
             itemCrud.remove(idItemOnServer, userManager.getToken());
-            getContentResolver().delete(Collections.CONTENT_URI, where, args);
+            getContentResolver().delete(Collections.CONTENT_URI, where, null);
         }
     }
 
@@ -313,7 +318,7 @@ public class SynchronizationService extends IntentService {
         try {
             values.put(Items.SYNCHRONIZED, true);
             itemCrud.update(item, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)), userManager.getToken());
-            where = String.format("%s = %s", Items.ID_SERVER, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)));
+            where = String.format("%s = \"%s\"", Items.ID_SERVER, cursor.getString(cursor.getColumnIndex(Items.ID_SERVER)));
             getContentResolver().update(Items.CONTENT_URI, values, where, null);
         } catch (RuntimeException re) {
             //try {
@@ -463,9 +468,22 @@ public class SynchronizationService extends IntentService {
         }
     }
 
-    private void downloadItems() {
+    //funkcja wcisnieta na sam koniec, zeby dzialalo z wszystkimi serwerami
+    private void preDownloadItems() {
+        List <Item> itemDownloaded = new ArrayList<>();
+        for (String idCollection: listIdCollection) {
+            List <Item> i = downloadItems(idCollection);
+            if (i != null)
+                itemDownloaded.addAll(i);
+        }
+
+        if (!cancel)
+            deleteNotFoundItems(itemDownloaded);
+    }
+
+    private List<Item> downloadItems(String idCollection) {
         operations = new ArrayList<>();
-        itemCrud = new CRUDEngine<>(userManager.getIp() + ITEM_ENDPOINT, Item.class);
+        itemCrud = new CRUDEngine<>(userManager.getIp() + COLLECTIONS_ENDPOINT + idCollection + "/" + ITEM_ENDPOINT, Item.class);
         List<Item> items;
         try {
             items = itemCrud.getList(userManager.getToken());
@@ -485,16 +503,17 @@ public class SynchronizationService extends IntentService {
             }
             executeOperations();
 
-            if (!cancel)
-            deleteNotFoundItems(items);
+
 
             for (Item item : items) {
                 if (!cancel)
                 if (item.getMedia() != null)
                     downloadMedia(item.getMedia(), item.getId());
             }
+            return items;
         } catch (RuntimeException re) {
             sendError(re.getMessage());
+            return null;
         }
     }
 
@@ -505,16 +524,30 @@ public class SynchronizationService extends IntentService {
     }
 
     private String createSelection(List<Item> items) {
-        String selection = String.format(" IN (");
+        String selection = String.format(" IN (\"");
         for (Item item : items) {
-            if (selection.charAt(selection.length() - 1) != '(') {
-                selection += ",";
+            if (selection.charAt(selection.length() - 1) != '"') {
+                selection += "\",\"";
             }
             selection += item.getId();
         }
-        selection += ")";
+        selection += "\")";
         return selection;
     }
+
+    /*private String createSelection2(List<Item> items) {
+        String selection = String.format(" IN (\"");
+        for (Item item : items) {
+            if (listIdDeletedCollection.indexOf(item.getCollection()) == -1) {
+                if (selection.charAt(selection.length() - 1) != '"') {
+                    selection += "\",\"";
+                }
+                selection += item.getId();
+            }
+        }
+        selection += "\")";
+        return selection;
+    }*/
 
     private void addItemsIdServerAndModifiedDateToHashMap(List<Item> items, HashMap<String, Long> idServerToModifiedDate) {
         Cursor cursor = getContentResolver().query(Items.CONTENT_URI,
@@ -539,7 +572,7 @@ public class SynchronizationService extends IntentService {
 
     private void deleteNotFoundItems(List<Item> items) {
         Cursor cursor = getContentResolver().query(Items.CONTENT_URI,
-                new String[]{Items.TABLE_NAME + "." + Items.ID_SERVER},
+                new String[]{Items.TABLE_NAME + "." + Items.ID_SERVER, Items.TABLE_NAME + "." + Items.ID_COLLECTION},
                 Items.TABLE_NAME + "." + Items.ID_SERVER + " NOT" + createSelection(items),
                 null,
                 null
@@ -547,9 +580,28 @@ public class SynchronizationService extends IntentService {
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 String idServer = cursor.getString(cursor.getColumnIndex(Items.ID_SERVER));
-                String where = Items.ID_SERVER + "=?";
-                String[] args = new String[]{idServer};
-                getContentResolver().delete(Items.CONTENT_URI, where, args);
+                String idCollection = cursor.getString(cursor.getColumnIndex(Items.ID_COLLECTION));
+
+                Cursor c = getContentResolver().query(Collections.CONTENT_URI,
+                        new String[]{Collections.TYPE},
+                        Collections._ID + "=\"" + idCollection + "\"",
+                        null,
+                        null);
+
+                String where = Items.TABLE_NAME + "." +Items.ID_SERVER + "=\"" + idServer + "\"";
+                if (c != null)
+                c.moveToFirst();
+                if (c != null)
+                if (c.getInt(c.getColumnIndex(Collections.TYPE)) != TypeOfCollection.OFFLINE.getType())
+                    getContentResolver().delete(Items.CONTENT_URI, where, null);
+                else {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(Items.SYNCHRONIZED, false);
+                    contentValues.putNull(Items.ID_SERVER);
+                    int i = getContentResolver().update(Items.CONTENT_URI, contentValues,
+                            Items.TABLE_NAME + "." +Items.ID_SERVER + "=\"" + idServer + "\"", null);
+                    Log.d("TAG","Updated(synchro): " + i);
+                }
             }
     }
 
@@ -577,14 +629,14 @@ public class SynchronizationService extends IntentService {
     }
 
     private String createSelectionForMedia(List<ItemMedia> media) {
-        String selection = String.format(" IN (");
+        String selection = String.format(" IN (\"");
         for (ItemMedia med : media) {
-            if (selection.charAt(selection.length() - 1) != '(') {
-                selection += ",";
+            if (selection.charAt(selection.length() - 1) != '"') {
+                selection += "\",\"";
             }
-            selection += med.id;
+            selection += med.getId();
         }
-        selection += ")";
+        selection += "\")";
         return selection;
     }
 
@@ -596,7 +648,7 @@ public class SynchronizationService extends IntentService {
         if (success) {
             Cursor cursor = getContentResolver().query(Items.CONTENT_URI,
                     new String[]{Items.TABLE_NAME + "." + Items._ID, Items.TABLE_NAME + "." + Items.NAME},
-                    Items.TABLE_NAME + "." + Items.ID_SERVER + "=" + itemId, null, null);
+                    Items.TABLE_NAME + "." + Items.ID_SERVER + "=\"" + itemId + "\"", null, null);
             File file;
             if (cursor != null)
                 cursor.moveToFirst();
@@ -663,16 +715,15 @@ public class SynchronizationService extends IntentService {
     private void deleteNotFoundMedia(List<ItemMedia> media, String itemId) {
         Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI,
                 new String[]{DataStorage.Media.ID_SERVER},
-                DataStorage.Media.ID_SERVER + " NOT" + createSelectionForMedia(media) + " AND " + DataStorage.Media.ID_ITEM + "="+itemId,
+                DataStorage.Media.ID_SERVER + " NOT" + createSelectionForMedia(media) + " AND " + DataStorage.Media.ID_ITEM + "=\""+itemId+"\"",
                 null,
                 null
         );
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 String idServer = cursor.getString(cursor.getColumnIndex(DataStorage.Media.ID_SERVER));
-                String where = DataStorage.Media.ID_SERVER + "=?";
-                String[] args = new String[]{idServer};
-                getContentResolver().delete(DataStorage.Media.CONTENT_URI, where, args);
+                String where = DataStorage.Media.ID_SERVER + "=\""+idServer+"\"";
+                getContentResolver().delete(DataStorage.Media.CONTENT_URI, where, null);
             }
     }
 
@@ -687,14 +738,16 @@ public class SynchronizationService extends IntentService {
             sendError(re.getMessage());
         }
 
-        String selection = String.format(" IN (");
+        listIdCollection = new ArrayList<>();
+        String selection = String.format(" IN (\"");
         for (Collection collection : collections) {
-            if (selection.charAt(selection.length() - 1) != '(') {
-                selection += ",";
+            if (selection.charAt(selection.length() - 1) != '"') {
+                selection += "\",\"";
             }
             selection += collection.getId();
+            listIdCollection.add(collection.getId());
         }
-        selection += ")";
+        selection += "\")";
 
         Cursor cursor = getContentResolver().query(Collections.CONTENT_URI, new String[]{Collections.ID_SERVER, Collections.MODIFIED_DATE}, Collections.ID_SERVER + selection, null, null);
         HashMap<String, Long> idServerToModifiedDate = new HashMap<>();
@@ -728,9 +781,8 @@ public class SynchronizationService extends IntentService {
         if (cursor != null)
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 String idServer = cursor.getString(cursor.getColumnIndex(Collections.ID_SERVER));
-                String where = Collections.ID_SERVER + "=?";
-                String[] args = new String[]{idServer};
-                getContentResolver().delete(Collections.CONTENT_URI, where, args);
+                String where = Collections.ID_SERVER + "=\""+idServer+"\"";
+                getContentResolver().delete(Collections.CONTENT_URI, where, null);
             }
     }
 
@@ -749,7 +801,7 @@ public class SynchronizationService extends IntentService {
     private void update(Collection collection) {
         ContentValues values = getContentValuesForCollection(collection);
 
-        String where = String.format("%s = %s", Collections.ID_SERVER, collection.getId());
+        String where = String.format("%s = \"%s\"", Collections.ID_SERVER, collection.getId());
         operations.add(ContentProviderOperation.
                         newUpdate(Collections.CONTENT_URI)
                         .withSelection(where, null)
@@ -799,7 +851,6 @@ public class SynchronizationService extends IntentService {
         } catch (ParseException e) {
             values.put(Collections.MODIFIED_DATE, Calendar.getInstance().getTimeInMillis());
             values.put(Collections.CREATED_DATE, Calendar.getInstance().getTimeInMillis());
-            sendError(e.toString());
         }
         return values;
     }
@@ -807,7 +858,7 @@ public class SynchronizationService extends IntentService {
     private void update(Item item) {
         ContentValues values = getContentValuesForItem(item);
         if (values != null) {
-            String where = String.format("%s = %s", Items.ID_SERVER, item.getId());
+            String where = String.format("%s = \"%s\"", Items.ID_SERVER, item.getId());
             operations.add(ContentProviderOperation.
                             newUpdate(Items.CONTENT_URI)
                             .withSelection(where, null)
@@ -854,7 +905,7 @@ public class SynchronizationService extends IntentService {
         }
         Uri uri = Collections.CONTENT_URI;
         String[] projection = new String[]{Collections._ID, Collections.TYPE};
-        String selection = String.format("%s = %s", Collections.ID_SERVER, item.collection);
+        String selection = String.format("%s = \"%s\"", Collections.ID_SERVER, item.collection);
         Cursor cursor = getContentResolver().query(uri, projection, selection, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
