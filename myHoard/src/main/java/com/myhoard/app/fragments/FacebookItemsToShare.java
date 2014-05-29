@@ -52,6 +52,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private static final String[] PERMISSIONS = {"publish_actions"}; // Facebook
     private static final String ALBUM_NAME = "myHoard";
     private static final String CREATE_ALBUM = "/me/albums";
+    private static final String SEND_PHOTO = "/me/photos";
 
     private Session.StatusCallback statusCallback = new SessionStatusCallback(); //Facebook
 
@@ -247,7 +248,8 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private class SessionStatusCallback implements Session.StatusCallback {
         @Override
         public void call(Session session, SessionState state, Exception exception) {
-            createAlbumOnFacebook(session, mMessageOnFb, ALBUM_NAME);
+            if(mFacebookImageAdapterList.mSelectedItems.size() == 1) shareOnFacebookSinglePhoto(session);
+            else createAlbumOnFacebook(session, mMessageOnFb, ALBUM_NAME);
         }
     }
 
@@ -268,31 +270,54 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
 
     }
 
-    public void shareOnFacebook(final Session session) {
+    public void shareOnFacebookMultiPhotos(final Session session) {
         if (session != null && session.isOpened()) {
             mCallbackPhoto = new Request.Callback() {
-                    public void onCompleted(Response response) {
-                        FacebookRequestError error = response.getError();
-                        if (error != null) {
-                            if (getActivity().getApplicationContext() != null) {
-                                errorNotification(error.getErrorMessage());
-                                mProgressDialog.dismiss();
-                            }
-                        } else {
-                            recycleBitmap();
-                            if(mElementToSend == -1) successNotification();
-                            else {
-                                updateNotification();
-                                Request request = sendPhotosToAlbum(mAlbumId,mPhotosPath[mElementToSend],session,mCallbackPhoto);
-                                RequestAsyncTask task = new RequestAsyncTask(request);
-                                task.execute();
-                            }
+                public void onCompleted(Response response) {
+                    FacebookRequestError error = response.getError();
+                    if (error != null) {
+                        errorNotification(error.getErrorMessage());
+                        mProgressDialog.dismiss();
+                    } else {
+                        recycleBitmap();
+                        if (mElementToSend == -1) successNotification();
+                        else {
+                            updateNotification();
+                            Request request = sendPhotosToAlbum(mAlbumId, mPhotosPath[mElementToSend], session, mCallbackPhoto);
+                            RequestAsyncTask task = new RequestAsyncTask(request);
+                            task.execute();
                         }
                     }
-                };
+                }
+            };
             RequestAsyncTask mFacebookTask = new RequestAsyncTask(
-                    sendPhotosToAlbum(mAlbumId, mPhotosPath[mElementToSend], session, mCallbackPhoto
-                    )
+                    sendPhotosToAlbum(mAlbumId, mPhotosPath[mElementToSend], session, mCallbackPhoto)
+            );
+            mFacebookTask.execute();
+            mProgressDialog.dismiss();
+            updateNotification();
+            makeAndShowToast(getString(R.string.sharing_in_progress));
+            getFragmentManager().popBackStackImmediate();
+        }
+    }
+
+    public void shareOnFacebookSinglePhoto(final Session session) {
+        if (session != null && session.isOpened()) {
+            prepareForShare();
+            mCallbackPhoto = new Request.Callback() {
+                public void onCompleted(Response response) {
+                    FacebookRequestError error = response.getError();
+                    if (error != null) {
+                        errorNotification(error.getErrorMessage());
+                        mProgressDialog.dismiss();
+                    } else {
+                        recycleBitmap();
+                        successNotification();
+                    }
+                }
+            };
+            RequestAsyncTask mFacebookTask = new RequestAsyncTask(
+                    sendPhoto(mPhotosPath[mElementToSend], session, mCallbackPhoto)
             );
             mFacebookTask.execute();
             mProgressDialog.dismiss();
@@ -365,6 +390,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private void updateNotification() {
         String text = String.format(mTextOnNotification[0],(mCount-mElementToSend),mCount);
         facebookNotification.setContentText(text);
+        mElementToSend--;
         notificationManager.notify(SHARE_ID, facebookNotification.build());
     }
 
@@ -385,8 +411,16 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         if(path != null) {
             bundle.putByteArray("source", prepareBitmapToSend(path));
             String publish = String.format("%s/photos",album_id);
-            mElementToSend--;
             return new Request(session, publish, bundle, HttpMethod.POST,callback);
+        } else return null;
+    }
+
+    private Request sendPhoto(String path,Session session,Request.Callback callback) {
+        Bundle bundle = new Bundle();
+        if(path != null) {
+            bundle.putByteArray("source", prepareBitmapToSend(path));
+            bundle.putString("message", setMessage(mMessageOnFb));
+            return new Request(session, SEND_PHOTO, bundle, HttpMethod.POST,callback);
         } else return null;
     }
 
@@ -429,7 +463,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                                 }
                             }
                             mAlbumId = (String)response.getGraphObject().getProperty("id");
-                            shareOnFacebook(session);
+                            shareOnFacebookMultiPhotos(session);
                         }
                     }
             ).executeAsync();
@@ -437,7 +471,8 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     }
 
     private String setMessage(String msg) {
-        if(mPostLocation.compareTo("Brak") != 0) {
+        if((mPostLocation.compareTo(getString(R.string.gps_no_location)) != 0) &&
+                mPostLocation.compareTo(getString(R.string.gps_finding_location))!=0) {
             msg = String.format("%s \n \n %s %s",msg,getString(R.string.location),mPostLocation);
             return msg;
         }
