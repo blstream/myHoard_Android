@@ -282,9 +282,9 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
                         recycleBitmap();
                         if (mElementToSend == -1) successNotification();
                         else {
-                            updateNotification();
                             Request request = sendPhotosToAlbum(mAlbumId, mPhotosPath[mElementToSend], session, mCallbackPhoto);
                             RequestAsyncTask task = new RequestAsyncTask(request);
+                            updateNotification();
                             task.execute();
                         }
                     }
