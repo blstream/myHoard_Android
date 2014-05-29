@@ -69,6 +69,7 @@ public class SynchronizationService extends IntentService {
     private static final String ERROR_CREATING_FOLDER = "Error creating folder myHoardFiles";
 
     public static final String CANCEL_COMMAND_KEY = "cancelCommand";
+    public static final String OPTION_KEY = "option";
     public static final String ASK_IF_SERVICE_ENDED = "ifEnd";
 
     private UserManager userManager = UserManager.getInstance();
@@ -76,7 +77,7 @@ public class SynchronizationService extends IntentService {
     private static Boolean mutex=false;
     private static Boolean cancel=false;
     private List<String> listIdCollection;
-    //private List<String> listIdDeletedCollection;
+    private List<ItemMedia> listItemMedia;
 
     CRUDEngine<Collection> collectionCrud;
     CRUDEngine<Item> itemCrud;
@@ -129,7 +130,7 @@ public class SynchronizationService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        String option = intent.getStringExtra("option");
+        String option = intent.getStringExtra(OPTION_KEY);
 
         switch (option) {
             case "synchronization":
@@ -471,6 +472,7 @@ public class SynchronizationService extends IntentService {
     //funkcja wcisnieta na sam koniec, zeby dzialalo z wszystkimi serwerami
     private void preDownloadItems() {
         List <Item> itemDownloaded = new ArrayList<>();
+        listItemMedia = new ArrayList<>();
         for (String idCollection: listIdCollection) {
             List <Item> i = downloadItems(idCollection);
             if (i != null)
@@ -479,6 +481,9 @@ public class SynchronizationService extends IntentService {
 
         if (!cancel)
             deleteNotFoundItems(itemDownloaded);
+        //TODO przeniesc
+        if (!cancel)
+            deleteNotFoundMedia(listItemMedia);
     }
 
     private List<Item> downloadItems(String idCollection) {
@@ -624,11 +629,26 @@ public class SynchronizationService extends IntentService {
                 insert(med, itemId, null);
             }
         }
-        if (!cancel)
-        deleteNotFoundMedia(media, itemId);
+
+        //zbieram media, zeby pozniej jednym zapytaniem sprawdzic, ktore beda do usuniecia
+        if (media!=null){
+            listItemMedia.addAll(media);
+        }
     }
 
     private String createSelectionForMedia(List<ItemMedia> media) {
+        String selection = String.format(" IN (");
+        for (ItemMedia med : media) {
+            if (selection.charAt(selection.length() - 1) != '(') {
+                selection += ",";
+            }
+            selection += med.getId();
+        }
+        selection += ")";
+        return selection;
+    }
+
+    private String createSelectionForMedia2(List<ItemMedia> media) {
         String selection = String.format(" IN (\"");
         for (ItemMedia med : media) {
             if (selection.charAt(selection.length() - 1) != '"') {
@@ -712,10 +732,10 @@ public class SynchronizationService extends IntentService {
         return folder.exists() || folder.mkdir();
     }
 
-    private void deleteNotFoundMedia(List<ItemMedia> media, String itemId) {
+    private void deleteNotFoundMedia(List<ItemMedia> media) {
         Cursor cursor = getContentResolver().query(DataStorage.Media.CONTENT_URI,
                 new String[]{DataStorage.Media.ID_SERVER},
-                DataStorage.Media.ID_SERVER + " NOT" + createSelectionForMedia(media) + " AND " + DataStorage.Media.ID_ITEM + "=\""+itemId+"\"",
+                DataStorage.Media.ID_SERVER + " NOT" + createSelectionForMedia(media),// + " AND " + DataStorage.Media.ID_ITEM + "=\""+itemId+"\"",
                 null,
                 null
         );

@@ -73,7 +73,7 @@ public class MainActivity extends BaseActivity {
     private static final int Y_OFFSET = 0;
     private static final String NEW_COLLECTION = "NewCollection";
     private static final String MAIN = "Main";
-    private static final String LOGOUT = "Wylogowano";
+    private static final String LOGOUT = "Logged out";
     private static final String NEW_ELEMENT = "NewElement";
     private static final String ITEMS_LIST = "ItemsList";
     private static final String FRAGMENT = "fragment";
