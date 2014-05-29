@@ -472,7 +472,8 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     }
 
     private String setMessage(String msg) {
-        if(mPostLocation.compareTo(getString(R.string.gps_no_location)) != 0) {
+        if((mPostLocation.compareTo(getString(R.string.gps_no_location)) != 0) &&
+                mPostLocation.compareTo(getString(R.string.gps_finding_location))!=0) {
             msg = String.format("%s \n \n %s %s",msg,getString(R.string.location),mPostLocation);
             return msg;
         }
