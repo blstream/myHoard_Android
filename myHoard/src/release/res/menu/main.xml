@@ -55,4 +55,11 @@
         android:title="serwer python"
         android:visible="true"/>
 
+    <item
+        android:id="@+id/action_camera"
+        android:title="@string/action_camera"
+        android:icon="@drawable/ic_action_camera"
+        android:visible="true"
+        app:showAsAction="ifRoom|withText"/>
+
 </menu>

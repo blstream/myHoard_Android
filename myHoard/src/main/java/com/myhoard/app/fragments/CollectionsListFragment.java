@@ -15,6 +15,7 @@
 
 package com.myhoard.app.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -23,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -43,13 +45,17 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.myhoard.app.Managers.UserManager;
 import com.myhoard.app.R;
 import com.myhoard.app.activities.ElementActivity;
 import com.myhoard.app.activities.MainActivity;
 import com.myhoard.app.images.ImageAdapter;
+import com.myhoard.app.images.PhotoManager;
 import com.myhoard.app.provider.DataStorage;
+
+import java.io.IOException;
 
 /**
  * Created by Rafał Soudani on 20/02/2014
@@ -64,15 +70,18 @@ public class CollectionsListFragment extends Fragment implements
     private static final String ItemsList = "ItemsList";
     private static final String NEWCOLLECTION = "NewCollection";
     private static final String EDITCOLLECTION = "EditCollection";
+    private static final String CAMERA_INFO = "You can't take a picture";
     public static final java.lang.String QUERY = "Query";
     private static final int SEARCH = 1;
+    private static final int REQUEST_GET_PHOTO = 1;
     private GridView gridView;
     RelativeLayout empty, loading;
     private Context context;
     private ImageAdapter adapter;
-
+    private PhotoManager mPhotoManager;
     private static TextView sortByNameTabText;
     private static TextView sortByDateTabText;
+    private static final String PHOTO_MANAGER_KEY = "photoManagerKey";
     private static final String LABEL_BY_NAME_ASC = "A-Z";
     private static final String LABEL_BY_NAME_DESC = "Z-A";
     private static final String LABEL_BY_DATE_ASC = "< DATE";
@@ -91,6 +100,11 @@ public class CollectionsListFragment extends Fragment implements
                              Bundle savedInstanceState) {
         context = getActivity();
         setHasOptionsMenu(true);
+        if (savedInstanceState != null) {
+            mPhotoManager = savedInstanceState.getParcelable(PHOTO_MANAGER_KEY);
+        } else {
+            mPhotoManager = new PhotoManager(this,REQUEST_GET_PHOTO);
+        }
         return inflater.inflate(R.layout.fragment_collections_list, container, false);
     }
 
@@ -309,7 +323,7 @@ public class CollectionsListFragment extends Fragment implements
         ContentValues values = new ContentValues();
         values.put(DataStorage.Collections.DELETED, true);
         getActivity().getContentResolver().update(
-                DataStorage.Collections.CONTENT_URI,values,
+                DataStorage.Collections.CONTENT_URI, values,
                 String.format("%s = %s", DataStorage.Collections._ID, collection_id), null);
 
         fillGridView();
@@ -333,6 +347,31 @@ public class CollectionsListFragment extends Fragment implements
         }else{
             gridViewWasFilled = true;
             getLoaderManager().restartLoader(0, null, this);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(PHOTO_MANAGER_KEY,mPhotoManager);
+    }
+
+    public void takePhoto(){
+        try {
+            mPhotoManager.takePicture(PhotoManager.MODE_CAMERA);
+        } catch (IOException e) {
+            Toast.makeText(getActivity(),CAMERA_INFO,Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode){
+            case REQUEST_GET_PHOTO:
+                if (resultCode == Activity.RESULT_OK) {
+                    mPhotoManager.proceedResultPicture(this, data);
+                }
+            break;
         }
     }
 

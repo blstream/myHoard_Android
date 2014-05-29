@@ -323,6 +323,9 @@ public class MainActivity extends BaseActivity {
                 userManager.logout();
                 userManager.setIp(getString(R.string.python));
                 break;
+            case R.id.action_camera:
+                collectionsListFragment.takePhoto();
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
