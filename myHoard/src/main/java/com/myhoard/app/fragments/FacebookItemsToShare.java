@@ -390,6 +390,7 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
     private void updateNotification() {
         String text = String.format(mTextOnNotification[0],(mCount-mElementToSend),mCount);
         facebookNotification.setContentText(text);
+        mElementToSend--;
         notificationManager.notify(SHARE_ID, facebookNotification.build());
     }
 
@@ -410,7 +411,6 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         if(path != null) {
             bundle.putByteArray("source", prepareBitmapToSend(path));
             String publish = String.format("%s/photos",album_id);
-            mElementToSend--;
             return new Request(session, publish, bundle, HttpMethod.POST,callback);
         } else return null;
     }
@@ -420,7 +420,6 @@ public class FacebookItemsToShare extends Fragment implements LoaderManager.Load
         if(path != null) {
             bundle.putByteArray("source", prepareBitmapToSend(path));
             bundle.putString("message", setMessage(mMessageOnFb));
-            mElementToSend--;
             return new Request(session, SEND_PHOTO, bundle, HttpMethod.POST,callback);
         } else return null;
     }
