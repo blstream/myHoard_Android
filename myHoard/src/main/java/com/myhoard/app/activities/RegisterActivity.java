@@ -171,7 +171,7 @@ public class RegisterActivity extends BaseActivity {
 
         protected void onPostExecute(Boolean result) {
             if (result) {
-                Toast.makeText(getBaseContext(), getString(R.string.registration_succesfully), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), getString(R.string.registration_successfully), Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(activity, MainActivity.class);
                 startActivity(intent);
                 activity.finish();
