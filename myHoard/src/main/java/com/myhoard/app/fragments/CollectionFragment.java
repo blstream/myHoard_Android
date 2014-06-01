@@ -37,6 +37,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.myhoard.app.R;
+import com.myhoard.app.dialogs.TypeConfirmDialog;
 import com.myhoard.app.dialogs.TypeDialog;
 import com.myhoard.app.provider.DataStorage;
 
@@ -53,8 +54,9 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
 
     private static final int LOAD_DATA_FOR_EDIT = 20;
     private static final int LOAD_NAMES = 30;
-    private static final int MIN_NUMBER_OF_CHARAKCTERS = 2;
+    private static final int MIN_NUMBER_OF_CHARACTERS = 2;
     private static final int TYPE_REQUEST_CODE = 100;
+    private static final int CONFIRM_REQUEST_CODE = 110;
 
     private Context context;
     private Long mEditId;
@@ -63,6 +65,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
     private String mTags = "";
     private EditText etCollectionName, etCollectionDescription, etCollectionTags, etCollectionType;
     private final HashMap<Integer, String> typesMap = new HashMap<>();
+    private int typeOfCollectionBeforeChange;
     Toast toast;
 
     @Override
@@ -147,12 +150,17 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                         if (etCollectionTags.getText() != null) {
                             if (validateTags()) {
                                 mTags = etCollectionTags.getText().toString();
-                            }else{
+                            } else {
                                 return false;
                             }
                         }
-                        saveDataInDataBase();
-                        getActivity().getSupportFragmentManager().popBackStack();
+                        if (typeOfCollectionBeforeChange != DataStorage.TypeOfCollection.OFFLINE.getType()
+                                && getTypeOfCollection(String.valueOf(etCollectionType.getText())) == DataStorage.TypeOfCollection.OFFLINE.getType()) {
+                            showConfirmTypeDialog();
+                        } else {
+                            saveDataInDataBase();
+                            getActivity().getSupportFragmentManager().popBackStack();
+                        }
                     }
                 }
                 break;
@@ -162,16 +170,21 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
         return true;
     }
 
+    private void showConfirmTypeDialog() {
+        TypeConfirmDialog confirmDialog = new TypeConfirmDialog();
+        confirmDialog.setTargetFragment(this, CONFIRM_REQUEST_CODE);
+        confirmDialog.show(getFragmentManager(), "");
+    }
+
     private boolean validateTags() {
         String sentence = String.valueOf(etCollectionTags.getText());
         String[] tags = sentence.split(" ");
         List<String> result = new ArrayList<>();
 
-        for (String tag : tags)
-        {
-            if(!result.contains(tag)){
+        for (String tag : tags) {
+            if (!result.contains(tag)) {
                 result.add(tag);
-            }else{
+            } else {
                 String toastText = String.format(getString(R.string.tag_exist), tag);
                 showAToast(toastText, Toast.LENGTH_SHORT);
                 return false;
@@ -189,7 +202,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
             showAToast(getString(R.string.required_name_collection), Toast.LENGTH_SHORT);
         } else if (isWhiteSpaces(strCollectionName)) {
             showAToast(getString(R.string.required_name_collection), Toast.LENGTH_SHORT);
-        } else if (strCollectionName.length() < MIN_NUMBER_OF_CHARAKCTERS) {
+        } else if (strCollectionName.length() < MIN_NUMBER_OF_CHARACTERS) {
             showAToast(getString(R.string.name_too_short), Toast.LENGTH_SHORT);
         } else if (mNamesList.contains(strCollectionName)) {
             showAToast(getString(R.string.name_already_exist), Toast.LENGTH_SHORT);
@@ -223,7 +236,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                 .getTime().getTime());
         values.put(DataStorage.Collections.TYPE, getTypeOfCollection(String.valueOf(etCollectionType.getText())));
         if (this.getTag().equals("EditCollection")) {
-            values.put(DataStorage.Collections.SYNCHRONIZED,false);
+            values.put(DataStorage.Collections.SYNCHRONIZED, false);
             Toast.makeText(getActivity(), context.getString(R.string
                     .collection_edited), Toast.LENGTH_LONG).show();
 
@@ -285,6 +298,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                 etCollectionTags.setText(mTags);
                 int type = cursor.getInt(cursor.getColumnIndex(DataStorage.Collections.TYPE));
                 etCollectionType.setText(getNameOfCollectionType(type));
+                typeOfCollectionBeforeChange = type;
             case LOAD_NAMES:
                 while (!cursor.isAfterLast()) {
                     if (mEditId != null) {
@@ -300,7 +314,6 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
 
         }
     }
-
 
 
     @Override
@@ -340,6 +353,12 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
         switch (requestCode) {
             case TYPE_REQUEST_CODE:
                 etCollectionType.setText(data.getStringExtra("type"));
+                break;
+            case CONFIRM_REQUEST_CODE:
+                saveDataInDataBase();
+                getActivity().getSupportFragmentManager().popBackStack();
+                break;
+
         }
     }
 

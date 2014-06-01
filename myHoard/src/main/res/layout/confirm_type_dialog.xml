@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/gray_background">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/confirm_offline_type_text"
+        android:background="@color/gray_background"
+        android:textColor="@color/yellow_main"
+        android:id="@+id/textViewGeneratorDialog"
+        android:padding="10dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/accept"
+        android:background="@color/yellow_main"
+        android:id="@+id/bAcceptType"
+        android:padding="20dp"
+        android:layout_marginTop="3dp"
+        android:layout_below="@+id/textViewGeneratorDialog" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:background="@color/yellow_main"
+        android:id="@+id/bCancelType"
+        android:padding="20dp"
+        android:layout_below="@+id/bAcceptType"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="2dp"/>
+
+
+</RelativeLayout>

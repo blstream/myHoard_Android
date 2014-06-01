@@ -157,5 +157,7 @@
     <string name="location_manually">Choose position manually</string>
     <string name="choose_location">Please, choose location</string>
 	<string name="required_photo">Share requires a photo</string>
+    <string name="confirm_offline_type_text">Are you sure you want to change collection type to private?
+        All data will be removed from server, but they will still remain locally on your phone.</string>
 
 </resources>
