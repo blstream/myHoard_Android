@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.myhoard.app.R;
 import com.myhoard.app.services.SynchronizationService;
@@ -21,6 +22,8 @@ public class SynchronizationDialog extends DialogFragment {
 
     private Dialog dialog;
     TextView stopSynchronization;
+    private static final String SYNCHRONIZATION_STOPPED = "Synchronization stopped";
+    private static final String INVALID_VALUE = "invalid";
 
     public SynchronizationDialog() {}
 
@@ -37,10 +40,11 @@ public class SynchronizationDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             Intent cancelSynchronization = new Intent(getActivity().getBaseContext(),SynchronizationService.class);
-            cancelSynchronization.putExtra(SynchronizationService.CANCEL_COMMAND_KEY, "pusto");
-            cancelSynchronization.putExtra("option", "pusto");
+            cancelSynchronization.putExtra(SynchronizationService.CANCEL_COMMAND_KEY, INVALID_VALUE);
+            cancelSynchronization.putExtra(SynchronizationService.OPTION_KEY, INVALID_VALUE);
             getActivity().startService(cancelSynchronization);
             dialog.dismiss();
+            Toast.makeText(getActivity().getBaseContext(), SYNCHRONIZATION_STOPPED, Toast.LENGTH_LONG).show();
         }
     };
 
@@ -48,8 +52,8 @@ public class SynchronizationDialog extends DialogFragment {
     public void onResume() {
         super.onResume();
         Intent askIfServiceEnded = new Intent(getActivity().getBaseContext(),SynchronizationService.class);
-        askIfServiceEnded.putExtra(SynchronizationService.ASK_IF_SERVICE_ENDED, "pusto");
-        askIfServiceEnded.putExtra("option", "pusto");
+        askIfServiceEnded.putExtra(SynchronizationService.ASK_IF_SERVICE_ENDED, INVALID_VALUE);
+        askIfServiceEnded.putExtra(SynchronizationService.OPTION_KEY, INVALID_VALUE);
         getActivity().startService(askIfServiceEnded);
     }
 }

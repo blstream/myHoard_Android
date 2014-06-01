@@ -175,7 +175,7 @@ public class Item implements IModel, Parcelable
 
         JSONObject json = new JSONObject();
 
-        json.put(API_ID, id);
+        //json.put(API_ID, id);
         json.put(API_NAME, name);
         json.put(API_DESC, description);
 

@@ -213,7 +213,7 @@ import java.util.List;
         String HTTP_response = null;
 
         try {
-            httpPut = new HttpPut(url + id);
+            httpPut = new HttpPut(url + id + "/");
             //httpPut.setHeader("Accept", "application/json");
             httpPut.setHeader(AUTHORIZATION, token.getAccess_token());
 
@@ -250,7 +250,7 @@ import java.util.List;
     public boolean remove(String id, Token token) throws RuntimeException  {
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000); //Timeout Limit
-        httpDelete = new HttpDelete(url + id);
+        httpDelete = new HttpDelete(url + id + "/");
         HttpResponse response;
 
         httpDelete.setHeader(AUTHORIZATION, token.getAccess_token());

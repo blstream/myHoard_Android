@@ -32,7 +32,6 @@ public class RegisterActivity extends BaseActivity {
     private static final String TAG = "REGISTRATION";
     private EditText emailRegistry;
     private EditText passwordRegistry;
-    private EditText usernameRegistry;
     private TextView password_strength;
     private TextView txt;
     private TextView textViewEmailAlreadyExists;
@@ -46,7 +45,6 @@ public class RegisterActivity extends BaseActivity {
         emailRegistry = (EditText) findViewById(R.id.email_register);
         emailRegistry.addTextChangedListener(emailWatcher);
         passwordRegistry = (EditText) findViewById(R.id.password_register);
-        usernameRegistry = (EditText) findViewById(R.id.username_register);
         Button registryButton = (Button) findViewById(R.id.reg_button);
         passwordRegistry.addTextChangedListener(PasswordEditorMatcher);
         password_strength = (TextView) findViewById(R.id.passwordStrenghtText);
@@ -91,10 +89,6 @@ public class RegisterActivity extends BaseActivity {
             if (passwordFound && emailFound) {
                 User user = new User();
                 user.setEmail(String.valueOf(emailRegistry.getText()).toLowerCase());
-                Log.d("blah",String.valueOf(emailRegistry.getText()));
-                if (String.valueOf(usernameRegistry.getText()).length() > 0) {
-                    user.setUsername(String.valueOf(usernameRegistry.getText()).toLowerCase());
-                }
                 user.setPassword(String.valueOf(passwordRegistry.getText()));
 
                 register = new RegisterUser();
@@ -171,7 +165,7 @@ public class RegisterActivity extends BaseActivity {
 
         protected void onPostExecute(Boolean result) {
             if (result) {
-                Toast.makeText(getBaseContext(), getString(R.string.registration_succesfully), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), getString(R.string.registration_successfully), Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(activity, MainActivity.class);
                 startActivity(intent);
                 activity.finish();

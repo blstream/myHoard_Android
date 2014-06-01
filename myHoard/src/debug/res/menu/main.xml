@@ -47,4 +47,11 @@
         android:id="@+id/action_synchronize"
         android:title="synchronize"/>
 
+    <item
+        android:id="@+id/action_camera"
+        android:title="@string/action_camera"
+        android:icon="@drawable/ic_action_camera"
+        android:visible="true"
+        app:showAsAction="ifRoom|withText"/>
+
 </menu>

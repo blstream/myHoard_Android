@@ -53,28 +53,6 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="@color/gray_text"
-
-                android:text="@string/Username"
-                android:id="@+id/textViewUser"
-                android:layout_marginLeft="20dp" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="35dp"
-                android:textColor="@color/yellow_text"
-                android:paddingLeft="5dp"
-                android:background="@drawable/login_and_registration_border"
-                android:inputType="text"
-                android:digits="0,1,2,3,4,5,6,7,8,9,*,qwertzuiopasdfghjklyxcvbnm,_,-"
-                android:ems="10"
-                android:id="@+id/username_register"
-                android:layout_margin="20dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/gray_text"
                 android:text="@string/Password"
                 android:id="@+id/textView3"
                 android:layout_marginLeft="20dp" />
