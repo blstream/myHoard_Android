@@ -35,6 +35,12 @@ public final class DataStorage {
 		 */
 		public static final String NAME = "name";
 
+        /**
+         * Name to uppercase. Column name.
+         * <p>Type: TEXT</p>
+         */
+		public static final String NAME_UPPER = "nameUpper";
+
 		/**
 		 * Description. Column name.
 		 * <p>Type: TEXT</p>
@@ -223,6 +229,7 @@ public final class DataStorage {
 				_ID,
                 ID_SERVER,
 				NAME,
+                NAME_UPPER,
 				DESCRIPTION,
 				AVATAR_FILE_NAME,
 				TAGS,

@@ -38,6 +38,7 @@ public class CollectionsTable extends DatabaseTable {
 				.append(Collections._ID + " INTEGER PRIMARY KEY, ")
 				.append(Collections.ID_SERVER + " TEXT, ")
 				.append(Collections.NAME + " TEXT, ")
+				.append(Collections.NAME_UPPER + " TEXT, ")
 				.append(Collections.DESCRIPTION + " TEXT, ")
 				.append(Collections.AVATAR_FILE_NAME + " TEXT, ")
 				.append(Collections.TAGS + " TEXT, ")

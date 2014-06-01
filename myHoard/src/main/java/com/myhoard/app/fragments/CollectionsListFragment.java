@@ -33,6 +33,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,6 +57,7 @@ import com.myhoard.app.images.PhotoManager;
 import com.myhoard.app.provider.DataStorage;
 
 import java.io.IOException;
+import java.util.Locale;
 
 /**
  * Created by Rafał Soudani on 20/02/2014
@@ -270,7 +272,7 @@ public class CollectionsListFragment extends Fragment implements
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add(0, EDIT_ID, 0, R.string.menu_edit);
         menu.add(0, DELETE_ID, 1, R.string.menu_delete);
-        menu.add(0, NEW_ELEMENT_ID,2,R.string.action_new_element);
+        menu.add(0, NEW_ELEMENT_ID, 2, R.string.action_new_element);
     }
 
     @Override
@@ -353,7 +355,7 @@ public class CollectionsListFragment extends Fragment implements
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(PHOTO_MANAGER_KEY,mPhotoManager);
+        outState.putParcelable(PHOTO_MANAGER_KEY, mPhotoManager);
     }
 
     public void takePhoto(){
@@ -438,6 +440,7 @@ public class CollectionsListFragment extends Fragment implements
         final String[] projection = {
                 collectionsAlias+DataStorage.Collections._ID,
                 collectionsAlias+DataStorage.Collections.NAME,
+                collectionsAlias+DataStorage.Collections.NAME_UPPER,
                 collectionsAlias+DataStorage.Collections.TAGS,
                 collectionsAlias+DataStorage.Collections.AVATAR_FILE_NAME,
                 collectionsAlias+DataStorage.Collections.ITEMS_NUMBER,
@@ -451,9 +454,9 @@ public class CollectionsListFragment extends Fragment implements
                 mediaAlias+DataStorage.Media.AVATAR,
                 mediaAlias+DataStorage.Media.AVATAR);
         if (args != null) {
-            selection = String.format("%s LIKE '%%%s%%' AND NOT %s AND (%s OR %s IS NULL)",
-                    collectionsAlias+DataStorage.Collections.NAME,
-                    args.getString(QUERY),
+            selection = String.format("UPPER(%s) LIKE UPPER('%%%s%%') AND NOT %s AND (%s OR %s IS NULL)",
+                    collectionsAlias+DataStorage.Collections.NAME_UPPER,
+                    args.getString(QUERY).toUpperCase(new Locale("pl", "PL")),
                     collectionsAlias+DataStorage.Collections.DELETED,
                     mediaAlias+DataStorage.Media.AVATAR,
                     mediaAlias+DataStorage.Media.AVATAR);

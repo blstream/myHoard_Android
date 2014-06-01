@@ -154,7 +154,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
                                 return false;
                             }
                         }
-                        if (typeOfCollectionBeforeChange != DataStorage.TypeOfCollection.OFFLINE.getType()
+                        if (this.getTag().equals("EditCollection") && typeOfCollectionBeforeChange != DataStorage.TypeOfCollection.OFFLINE.getType()
                                 && getTypeOfCollection(String.valueOf(etCollectionType.getText())) == DataStorage.TypeOfCollection.OFFLINE.getType()) {
                             showConfirmTypeDialog();
                         } else {
@@ -230,6 +230,7 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
     private void saveDataInDataBase() {
         ContentValues values = new ContentValues();
         values.put(DataStorage.Collections.NAME, mName);
+        values.put(DataStorage.Collections.NAME_UPPER, mName.toUpperCase());
         values.put(DataStorage.Collections.DESCRIPTION, mDescription);
         values.put(DataStorage.Collections.TAGS, mTags);
         values.put(DataStorage.Collections.MODIFIED_DATE, Calendar.getInstance()
