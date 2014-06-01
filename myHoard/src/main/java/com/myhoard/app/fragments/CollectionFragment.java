@@ -180,14 +180,16 @@ public class CollectionFragment extends Fragment implements LoaderManager.Loader
         String sentence = String.valueOf(etCollectionTags.getText());
         String[] tags = sentence.split(" ");
         List<String> result = new ArrayList<>();
+        List<String> temp = new ArrayList<>();
 
         for (String tag : tags) {
-            if (!result.contains(tag)) {
-                result.add(tag);
-            } else {
+            if (temp.contains(tag.toUpperCase())) {
                 String toastText = String.format(getString(R.string.tag_exist), tag);
                 showAToast(toastText, Toast.LENGTH_SHORT);
                 return false;
+            } else {
+                temp.add(tag.toUpperCase());
+                result.add(tag);
             }
         }
         return true;
