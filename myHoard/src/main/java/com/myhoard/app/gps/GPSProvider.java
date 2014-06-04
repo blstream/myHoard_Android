@@ -18,7 +18,6 @@ import android.util.Log;
  * <p/>
  * Created by Sebastian Peryt on 07.03.14.
  */
-//TODO in production
 public class GPSProvider extends Service implements LocationListener {
 
 	public static final String BROADCAST_ACTION = "com.myhoard.app.displayevent";

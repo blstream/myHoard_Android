@@ -915,8 +915,6 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
                 mElementPosition.setTextColor(Color.YELLOW);
             }
         } else {
-            // TODO loading
-            // TODO after return when wifi off with no location change don't change text
             if(mElementPosition!=null) {
                 mElementPosition.setText(R.string.gps_finding_location);
                 mElementPosition.setTextColor(Color.YELLOW);

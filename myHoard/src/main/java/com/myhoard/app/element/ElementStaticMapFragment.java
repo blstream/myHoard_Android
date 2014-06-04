@@ -50,7 +50,6 @@ public class ElementStaticMapFragment extends Fragment {
             builder.append(marker);
             builder.append(latlng);
             builder.append(sensor);
-            // TODO display error about lack of Internet connection
             mapLoader.DisplayImage(builder.toString(), img);
         } else {
             img.setImageResource(R.drawable.nophoto);

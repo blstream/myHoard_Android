@@ -186,8 +186,6 @@ public class ElementReadFragment extends Fragment {
             if(item.getLocation()!=null) {
                 pagerAdapter.swapPosition(new LatLng(item.getLocation().lat,item.getLocation().lng));
             }
-//            // TODO change test data
-//            pagerAdapter.swapPosition(new LatLng(53.42778,14.553384));
             pager.setAdapter(pagerAdapter);
         }
     }

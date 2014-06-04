@@ -155,7 +155,6 @@ public class CollectionsListFragment extends Fragment implements
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 //launching ItemsListFragment - author Maciej Plewko
-                //TODO passing the clicked collection ID
                 Fragment newFragment = new ItemsListFragment();
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                 Bundle b = new Bundle();
