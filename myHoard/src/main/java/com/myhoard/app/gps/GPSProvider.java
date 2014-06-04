@@ -21,6 +21,8 @@ import android.util.Log;
 public class GPSProvider extends Service implements LocationListener {
 
 	public static final String BROADCAST_ACTION = "com.myhoard.app.displayevent";
+    private static final long MIN_TIME_REQUEST = 1000;
+    private static final float MIN_DISTANCE_REQUEST = 5;
 	private static final String TAG = GPSProvider.class
 			.getSimpleName();
 	private static final boolean D = true;// debug
@@ -95,10 +97,8 @@ public class GPSProvider extends Service implements LocationListener {
 	public IBinder onBind(Intent arg0) {
 		if (D)
 			Log.d(TAG, "bind");
-/* AWA:FIXME: Magic numbers
-*/
-		locationManager
-				.requestLocationUpdates(locationProvider, 10000, 5, this);
+        locationManager
+				.requestLocationUpdates(locationProvider,MIN_TIME_REQUEST,MIN_DISTANCE_REQUEST,this);
 
 		return mBinder;
 	}

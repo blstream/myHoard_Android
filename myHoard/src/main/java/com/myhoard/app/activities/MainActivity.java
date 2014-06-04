@@ -252,19 +252,11 @@ public class MainActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        //FIXME:CODEREVIEW:AWA: Martwy kod
-        //setting sort option unvisible
-        //Mplewko: usunę jak ostatecznie zakończę sortowanie
-        //menu.findItem(R.id.action_sort).setVisible(false);
-        //set search option unvisible
-        //menu.findItem(R.id.action_search).setVisible(false);
 
         actionBarMenu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
-    //FIXME:CODEREVIEW:AWA: Za dlugie ciało metody.
-    //Patrz Książka R. Martin Czysty kod Rozdział 3
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -289,22 +281,6 @@ public class MainActivity extends BaseActivity {
                 GeneratorDialog generatorDialog = new GeneratorDialog();
                 generatorDialog.show(getSupportFragmentManager(), "");
                 break;
-            //FIXME:CODEREVIEW:AWA: Martwy kod
-            //MPLewko: usunę jak ostatecznie zakończę sortowanie
-            /*case R.id.action_sort:
-
-                if (!getVisibleFragmentTag().equals(NEWCOLLECTION) &&
-                        !getVisibleFragmentTag().equals(ITEMSLIST) &&
-                        !getVisibleFragmentTag().equals(NEWELEMNT)) {
-                    //TODO collection list custom sort
-
-                } else if (getVisibleFragmentTag().equals(ITEMSLIST)) {
-                    // items list sort order change
-                    ItemsListFragment fragment = (ItemsListFragment) getSupportFragmentManager().
-                            findFragmentByTag(ITEMSLIST);
-                    fragment.itemsSortOrderChange(item);
-                }
-                break;*/
             case R.id.action_synchronize:
                 startSynchronization();
                 break;
@@ -381,13 +357,11 @@ public class MainActivity extends BaseActivity {
                 if (!getVisibleFragmentTag().equals(NEW_COLLECTION) &&
                         !getVisibleFragmentTag().equals(ITEMS_LIST) &&
                         !getVisibleFragmentTag().equals(NEW_ELEMENT)) {
-                    //item.setTitle(R.string.action_new_collection);//TODO correct
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.container, new CollectionFragment(), NEW_COLLECTION)
                             .addToBackStack(NEW_COLLECTION)
                             .commit();
                 } else if (getVisibleFragmentTag().equals(ITEMS_LIST)) {
-                    //item.setTitle(R.string.action_new_element);//TODO correct
                     Intent in = new Intent(this, ElementActivity.class);
                     in.putExtra("categoryId", collectionSelected);
                     startActivity(in);

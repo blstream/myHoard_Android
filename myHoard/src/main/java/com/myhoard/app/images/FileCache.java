@@ -36,7 +36,6 @@ public class FileCache {
                 uee.printStackTrace();;
 //            return null;
         } catch (IOException e) {
-            //TODO dodaj gora
             e.printStackTrace();
         }
         return file;
