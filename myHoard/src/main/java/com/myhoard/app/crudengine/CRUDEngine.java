@@ -1,7 +1,5 @@
 package com.myhoard.app.crudengine;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -187,19 +185,16 @@ import java.util.List;
                 HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                 if (response.getStatusLine().getStatusCode()==STATUS_CREATED) {
                     IModel imodel = new Gson().fromJson(HTTP_response, item.getClass());
-                    Log.d("TAG", "Jsontext = " + HTTP_response);
                     String id = imodel.getId();
                     return imodel;
                 }
                 else {
-                    Log.d("TAG", "Jsontext = " + HTTP_response);
                     throw new RuntimeException(HTTP_response);
                 }
             }
         } catch (ConnectTimeoutException e) {
             throw new RuntimeException(NO_INTERNET_CONNECTION);
         } catch (Exception e) {
-            Log.d("TAG", e.toString());
             throw new RuntimeException(handleError(HTTP_response));
         }
         return null;
@@ -214,7 +209,6 @@ import java.util.List;
 
         try {
             httpPut = new HttpPut(url + id + "/");
-            //httpPut.setHeader("Accept", "application/json");
             httpPut.setHeader(AUTHORIZATION, token.getAccess_token());
 
             JSONObject json = item.toJson();
@@ -230,18 +224,15 @@ import java.util.List;
                 if (response.getStatusLine().getStatusCode()==STATUS_OK) {
                     HTTP_response = EntityUtils.toString(responseEntity, HTTP.UTF_8);
                     T model = (T) new Gson().fromJson(HTTP_response, item.getClass());
-                    Log.d("TAG", "update Jsontext = " + HTTP_response);
                     return model;
                 }
                 else {
                     HTTP_response = EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
-                    Log.d("TAG", "update Jsontext = " + HTTP_response);
                     throw new RuntimeException(handleError(HTTP_response));
                 }
             } else
                 throw new RuntimeException("No response");
         } catch (Exception e) {
-            Log.d("TAG", e.toString());
             throw new RuntimeException(handleError(HTTP_response));
         }
     }
@@ -259,15 +250,12 @@ import java.util.List;
             response = httpClient.execute(httpDelete);
             if (response != null) {
                 if (response.getStatusLine().getStatusCode() == STATUS_NO_CONTENT) {
-                    Log.d("TAG","usunieto");
                     return true;
                 }
             }
         } catch (IOException e) {
-            Log.d("TAG","NIEusunieto");
             throw new RuntimeException("Error: delete");
         }
-        Log.d("TAG","NIEusunieto");
         return false;
     }
 

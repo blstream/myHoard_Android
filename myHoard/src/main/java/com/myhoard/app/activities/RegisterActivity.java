@@ -37,6 +37,11 @@ public class RegisterActivity extends BaseActivity {
     private TextView textViewEmailAlreadyExists;
     private RegisterUser register;
 
+    private static final int LOW = 1;
+    private static final int NICE = 2;
+    private static final int OK = 3;
+    private static final int EPIC = 4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -170,10 +175,8 @@ public class RegisterActivity extends BaseActivity {
                 startActivity(intent);
                 activity.finish();
             } else if (warning.equals(getString(R.string.no_internet_connection))) {
-                Log.d(TAG,"error");
                 txt.setText(getString(R.string.no_internet_connection));
             } else {
-                Log.d(TAG,"error");
                 textViewEmailAlreadyExists.setText(getString(R.string.email_already_exists));
             }
         }
@@ -190,7 +193,6 @@ public class RegisterActivity extends BaseActivity {
 
             }
 
-            //FIXME:CODEREVIEW:AWA: Wartości hardcoded low, nice, ....
             @Override
             public void afterTextChanged(Editable s) {
 
@@ -199,26 +201,26 @@ public class RegisterActivity extends BaseActivity {
 
                 switch (passwordStrenght) {
 
-                    case 1: {
+                    case LOW: {
 
                         password_strength.setTextColor(getResources().getColor(R.color.orange));
                         password_strength.setText("low");
 
                         break;
                     }
-                    case 2:
+                    case NICE:
                     {
                         password_strength.setTextColor(getResources().getColor(R.color.yellow_text));
                         password_strength.setText("nice");
                         break;
                     }
-                    case 3:
+                    case OK:
                     {
                         password_strength.setTextColor(getResources().getColor(R.color.green));
                         password_strength.setText("ok");
                         break;
                     }
-                    case 4:
+                    case EPIC:
                     {
                         password_strength.setTextColor(getResources().getColor(R.color.green));
                         password_strength.setText("Epic");

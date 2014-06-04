@@ -481,7 +481,6 @@ public class SynchronizationService extends IntentService {
 
         if (!cancel)
             deleteNotFoundItems(itemDownloaded);
-        //TODO przeniesc
         if (!cancel)
             deleteNotFoundMedia(listItemMedia);
     }

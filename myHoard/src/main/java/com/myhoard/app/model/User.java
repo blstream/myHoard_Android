@@ -16,6 +16,10 @@ import org.json.JSONObject;
     private String email;
     private String password;
 
+    private static final String USERNAME = "username";
+    private static final String EMAIL = "email";
+    private static final String PASSWORD = "password";
+
     public User() {
     }
 
@@ -68,14 +72,9 @@ import org.json.JSONObject;
     public JSONObject toJson() throws JSONException {
         JSONObject json = new JSONObject();
 
-
-/* AWA:FIXME: Hardcoded value
-            String "" powinien być jako stała np.
-            private final static String NAZWA_STALEJ="Main"
-                    */
-        json.put("username", getUsername());
-        json.put("email", getEmail());
-        json.put("password", getPassword());
+        json.put(USERNAME, getUsername());
+        json.put(EMAIL, getEmail());
+        json.put(PASSWORD, getPassword());
 
         return json;
     }
