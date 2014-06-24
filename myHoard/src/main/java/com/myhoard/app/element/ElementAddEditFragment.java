@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.myhoard.app.R;
+import com.myhoard.app.activities.ImageProcessingActivity;
 import com.myhoard.app.adapters.ImageElementAdapterList;
 import com.myhoard.app.dialogs.CategoryDialog;
 import com.myhoard.app.dialogs.GpsChooseDialog;
@@ -65,9 +67,12 @@ import java.util.TreeMap;
 /*
  * Created by Sebastian Peryt on 27.02.14.
  * Modified by Piotr Brzozowski on 15.05.14.
+ * * Modified by Marcin Łaszcz on 24.06.14.
  */
 public class ElementAddEditFragment extends Fragment implements View.OnClickListener,
         AdapterView.OnItemClickListener {
+
+    public static final int START_IMG_PROC_ACTIVITY_CODE =6667;
 
     public static final String ID = "elementId";
     public static final String NAME = "elementName";
@@ -356,6 +361,11 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
         if(mElementId!=-1){
             if (which == 1) {
                 deleteImage(mImageId);
+            } else if(which == START_IMG_PROC_ACTIVITY_CODE)
+            {
+                Intent intent = new Intent(this.getActivity(), ImageProcessingActivity.class);
+                intent.putExtra(ImageProcessingActivity.IMAGE_URI, (Parcelable)mImagesUriList.get(mImageId));
+                startActivity(intent);
             }else{
                 mImageId = -1;
             }
@@ -448,6 +458,7 @@ public class ElementAddEditFragment extends Fragment implements View.OnClickList
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         switch (requestCode) {
             case INSERT_IMAGE_RESULT_CODE:
                 imagePicker(data.getIntExtra(GET_DATA_FROM_DIALOG_TEXT, -1));

@@ -28,6 +28,7 @@
     <string name="title_activity_log">Log</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_register">RegisterActivity</string>
+    <string name="title_activity_image_processing">Filters</string>
     <string name="collection_edit">EDIT COLLECTION</string>
     <string name="collection_edited">COLLECTION EDITED</string>
     <string name="camera_picker">Camera</string>

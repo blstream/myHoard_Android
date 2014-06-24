@@ -11,5 +11,6 @@
         android:layout_height="match_parent"
         android:id="@+id/map"
         tools:context="com.myhoard.app.fragments.MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment"/>
-    </FrameLayout>
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_gravity="center" />
+</FrameLayout>

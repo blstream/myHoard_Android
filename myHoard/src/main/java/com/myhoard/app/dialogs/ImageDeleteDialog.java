@@ -10,6 +10,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.myhoard.app.R;
+import com.myhoard.app.activities.ImageProcessingActivity;
+import com.myhoard.app.element.ElementAddEditFragment;
 
 /**
  * Created by Piotr Brzozowski on 24.05.2014
@@ -23,6 +25,7 @@ public class ImageDeleteDialog extends DialogFragment implements View.OnClickLis
     private static final int DELETE_IMAGE_INTENT_EXTRA_VALUE = 1;
     RadioGroup rgImage;
     RadioButton rbDelete;
+    RadioButton rbFilters;
     TextView tvCancel;
 
 
@@ -35,9 +38,11 @@ public class ImageDeleteDialog extends DialogFragment implements View.OnClickLis
 
         rgImage = (RadioGroup) dialog.findViewById(R.id.rgImage);
         rbDelete = (RadioButton) dialog.findViewById(R.id.rbDelete);
+        rbFilters = (RadioButton) dialog.findViewById(R.id.rbFilters);
         tvCancel = (TextView) dialog.findViewById(R.id.tvCancelImage);
 
         rbDelete.setOnClickListener(this);
+        rbFilters.setOnClickListener(this);
         tvCancel.setOnClickListener(this);
 
         return dialog;
@@ -46,9 +51,15 @@ public class ImageDeleteDialog extends DialogFragment implements View.OnClickLis
     @Override
     public void onClick(View view) {
         Intent intent = new Intent();
+
         switch (view.getId()) {
             case R.id.rbDelete:
                 intent.putExtra(DELETE_IMAGE_INTENT_EXTRA_TEXT, DELETE_IMAGE_INTENT_EXTRA_VALUE);
+                getTargetFragment().onActivityResult(getTargetRequestCode(), DELETE_IMAGE_RESULT_CODE, intent);
+                dismiss();
+                break;
+            case R.id.rbFilters:
+                intent.putExtra(DELETE_IMAGE_INTENT_EXTRA_TEXT, ElementAddEditFragment.START_IMG_PROC_ACTIVITY_CODE);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), DELETE_IMAGE_RESULT_CODE, intent);
                 dismiss();
                 break;

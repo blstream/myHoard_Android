@@ -24,6 +24,17 @@
             android:layout_height="1dp"/>
 
         <RadioButton
+            android:id="@+id/rbFilters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/title_activity_image_processing"
+            android:textColor="@color/black"
+            android:button="@null"
+            android:background="@color/yellow_main"
+            android:drawableLeft="@drawable/ic_launcher"
+            android:padding="10dp" />
+
+        <RadioButton
             android:id="@+id/rbDelete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
