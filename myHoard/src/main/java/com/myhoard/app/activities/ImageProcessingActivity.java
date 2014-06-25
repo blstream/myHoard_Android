@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -45,6 +46,8 @@ public class ImageProcessingActivity extends BaseActivity {
     private static final int SHARPEN_ORDER = 5;
     private static final int NEGATIVE_ID = 6;
     private static final int NEGATIVE_ORDER = 6;
+    private static final int SEPIA_ID = 7;
+    private static final int SEPIA_ORDER = 7;
 
     private Uri imageUri;
     private ImageView imageView;
@@ -89,6 +92,24 @@ public class ImageProcessingActivity extends BaseActivity {
             for (int j = 0; j < src.getHeight(); ++j) {
                 int color = src.getPixel(i,j);
                 dst.setPixel(i,j, Color.rgb(Color.red(color) + value, Color.green(color) + value, Color.blue(color) + value ));
+            }
+        }
+    }
+
+    void toSepia(Bitmap src, Bitmap dst)
+    {
+        for (int i = 0; i < src.getWidth(); ++i) {
+            for (int j = 0; j < src.getHeight(); ++j) {
+                int color = src.getPixel(i,j);
+                int r = (int) (Color.red(color) * 0.39 + Color.green(color) *0.769 + Color.blue(color) * 0.189);
+                int g = (int) (Color.red(color) * 0.349 + Color.green(color) * 0.686 + Color.blue(color) * 0.168);
+                int b = (int) (Color.red(color) * 0.272 + Color.green(color) * 0.534 + Color.blue(color) * 0.131);
+
+                r = r < 0 ? 0 : r > 255 ? 255 : r;
+                g = g < 0 ? 0 : g > 255 ? 255 : g;
+                b = b < 0 ? 0 : b > 255 ? 255 : b;
+
+                dst.setPixel(i,j, Color.rgb(r, g, b));
             }
         }
     }
@@ -322,6 +343,8 @@ public class ImageProcessingActivity extends BaseActivity {
         menu.add(0, EMBOSS_ID, EMBOSS_ORDER, R.string.ip_filter_emboss);
         menu.add(0, SHARPEN_ID, SHARPEN_ORDER, R.string.ip_filter_sharpen);
         menu.add(0, NEGATIVE_ID, NEGATIVE_ORDER, R.string.ip_filter_negative);
+        menu.add(0, SEPIA_ID, SEPIA_ORDER, R.string.ip_filter_sepia);
+
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -341,6 +364,7 @@ public class ImageProcessingActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        ImageProcessingTask task;
 
         switch (item.getItemId()) {
 
@@ -349,39 +373,128 @@ public class ImageProcessingActivity extends BaseActivity {
                 return true;
 
             case BLUR_ID:
-                final int blurKernelSize = 10;
-                blur(originalImage, modifiedImage, blurKernelSize);
-                resetToOriginalImage();
-                imageView.setImageBitmap(modifiedImage);
+                task = new ImageProcessingTask() {
+                    @Override
+                    protected Void doInBackground(ImageProcessingActivity... params) {
+
+                        final int blurKernelSize = 15;
+                        blur(originalImage, modifiedImage, blurKernelSize);
+
+                        return null;
+                    }
+
+                    protected void onPostExecute(Void result) {
+                        resetToOriginalImage();
+                        imageView.setImageBitmap(modifiedImage);
+                    }
+                };
+                task.execute(this);
+
                 return true;
 
             case GRAYSCALE_ID:
-                toGrayScale(originalImage, modifiedImage);
-                imageView.setImageBitmap(modifiedImage);
+                task = new ImageProcessingTask() {
+                    @Override
+                    protected Void doInBackground(ImageProcessingActivity... params) {
+                        toGrayScale(originalImage, modifiedImage);
+                        return null;
+                    }
+
+                    protected void onPostExecute(Void result) {
+                        imageView.setImageBitmap(modifiedImage);
+                    }
+                };
+                task.execute(this);
+
                 return true;
 
             case EDGE_DETECTION_ID:
-                edgeDetection(originalImage, modifiedImage);
-                resetToOriginalImage();
-                imageView.setImageBitmap(modifiedImage);
+                task = new ImageProcessingTask() {
+                    @Override
+                    protected Void doInBackground(ImageProcessingActivity... params) {
+                        edgeDetection(originalImage, modifiedImage);
+                        return null;
+                    }
+
+                    protected void onPostExecute(Void result) {
+                        resetToOriginalImage();
+                        imageView.setImageBitmap(modifiedImage);
+                    }
+                };
+                task.execute(this);
+
                 return true;
 
             case EMBOSS_ID:
-                emboss(originalImage, modifiedImage);
-                imageView.setImageBitmap(modifiedImage);
+                task = new ImageProcessingTask() {
+                    @Override
+                    protected Void doInBackground(ImageProcessingActivity... params) {
+                        emboss(originalImage, modifiedImage);
+                        return null;
+                    }
+
+                    protected void onPostExecute(Void result) {
+                        resetToOriginalImage();
+                        imageView.setImageBitmap(modifiedImage);
+                    }
+                };
+                task.execute(this);
                 return true;
 
             case SHARPEN_ID:
-                sharpen(originalImage, modifiedImage);
-                imageView.setImageBitmap(modifiedImage);
+                task = new ImageProcessingTask() {
+                    @Override
+                    protected Void doInBackground(ImageProcessingActivity... params) {
+                        sharpen(originalImage, modifiedImage);
+                        return null;
+                    }
+
+                    protected void onPostExecute(Void result) {
+                        imageView.setImageBitmap(modifiedImage);
+                    }
+                };
+                task.execute(this);
                 return true;
 
             case NEGATIVE_ID:
-                toNegative(originalImage, modifiedImage);
-                imageView.setImageBitmap(modifiedImage);
+                task = new ImageProcessingTask() {
+                    @Override
+                    protected Void doInBackground(ImageProcessingActivity... params) {
+                        toNegative(originalImage, modifiedImage);
+                        return null;
+                    }
+
+                    protected void onPostExecute(Void result) {
+                        imageView.setImageBitmap(modifiedImage);
+                    }
+                };
+                task.execute(this);
+                return true;
+
+            case SEPIA_ID:
+                task = new ImageProcessingTask() {
+                    @Override
+                    protected Void doInBackground(ImageProcessingActivity... params) {
+                        toSepia(originalImage, modifiedImage);
+                        return null;
+                    }
+
+                    protected void onPostExecute(Void result) {
+                        imageView.setImageBitmap(modifiedImage);
+                    }
+                };
+                task.execute(this);
                 return true;
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private abstract class ImageProcessingTask extends AsyncTask<ImageProcessingActivity, Void, Void> {
+
+        protected Void doInBackground(ImageProcessingActivity activity) {
+            return null;
+        }
+
     }
 }
